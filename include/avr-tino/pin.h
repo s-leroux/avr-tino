@@ -22,10 +22,10 @@ inline int pinMode(pin_t pin, pinmode_t mode) {
 
     if(port != NOT_A_PORT) {
 	if (mode == INPUT) {
-	    *(uint8_t*)(pgm_read_word(port_to_mode_PGM[port])) &= ~pin_to_mask(pin);
+	    *(uint8_t*)(pgm_read_word(&port_to_mode_PGM[port])) &= ~pin_to_mask(pin);
 	}
 	else {
-	    *(uint8_t*)(pgm_read_word(port_to_mode_PGM[port])) |= pin_to_mask(pin);
+	    *(uint8_t*)(pgm_read_word(&port_to_mode_PGM[port])) |= pin_to_mask(pin);
 	}
     }
     /* else what? */
@@ -36,10 +36,10 @@ inline void digitalWrite(pin_t pin, pinstate_t state) {
 
     if(port != NOT_A_PORT) {
 	if (state == LOW) {
-	    *(uint8_t*)(pgm_read_word(port_to_output_PGM[port])) &= ~pin_to_mask(pin);
+	    *(uint8_t*)(pgm_read_word(&port_to_output_PGM[port])) &= ~pin_to_mask(pin);
 	}
 	else {
-	    *(uint8_t*)(pgm_read_word(port_to_output_PGM[port])) |= pin_to_mask(pin);
+	    *(uint8_t*)(pgm_read_word(&port_to_output_PGM[port])) |= pin_to_mask(pin);
 	}
     }
     /* else what? */

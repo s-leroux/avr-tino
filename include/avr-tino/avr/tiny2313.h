@@ -37,7 +37,7 @@ enum port_t {
 
 #define pin_to_mask(p) ( (p <= PIN_PA2) ? _BV(p) : \
                          (p <= PIN_PB7) ? _BV(p-PIN_PB0) : \
-                         p-PIN_PD0 )
+                         _BV(p-PIN_PD0) )
 
 // Some versions of gcc (like avr-g++ 4.3.5 / Debian Squeeze) issue a
 // warning here:
@@ -61,7 +61,6 @@ const uint16_t port_to_input_PGM[] PROGMEM = {
     (uint16_t)&PINB,
     (uint16_t)&PIND,
 };
-#pragma GCC diagnostic pop
 
 #endif
 
