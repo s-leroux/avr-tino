@@ -1,5 +1,6 @@
 CC=avr-gcc
 CXX=avr-gcc
+OBJCOPY=avr-objcopy
 
 #
 # Target
@@ -19,13 +20,17 @@ BINDIR=$(BUILDDIR)bin/
 DEMOBINDIR=$(BUILDDIR)bin/demo/
 DIRS=$(BUILDDIR) $(OBJDIR) $(BINDIR) $(DEMOBINDIR)
 
-all:	demo
+DEMOS=$(DEMOBINDIR)input $(DEMOBINDIR)blink
+
+all:	demo hex
 
 
 $(DIRS): 
 	mkdir $@
 
-demo:	$(DIRS) $(DEMOBINDIR)input $(DEMOBINDIR)blink
+demo:	$(DIRS) $(DEMOS)
+
+hex:	$(DIRS) $(DEMOS:=.hex)
 
 clean:
 	rm -rf $(DIRS) build-*
@@ -34,3 +39,5 @@ $(DEMOBINDIR)% : $(DEMOSRC)%.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@
 
 
+$(DEMOBINDIR)%.hex : $(DEMOBINDIR)%
+	$(OBJCOPY) -j .text -j .data -O ihex $^ $@
