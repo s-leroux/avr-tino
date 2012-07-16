@@ -1,0 +1,7 @@
+#if !defined AVR_TINO_TARGET_TINY2313_FACTORY_H
+#define AVR_TINO_TARGET_TINY2313_FACTORY_H
+
+#define F_CPU 1000000
+
+#endif
+
