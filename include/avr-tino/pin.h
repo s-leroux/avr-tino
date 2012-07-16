@@ -45,5 +45,17 @@ inline void digitalWrite(pin_t pin, pinstate_t state) {
     /* else what? */
 }
 
+inline pinstate_t digitalRead(pin_t pin) {
+    uint8_t port = pin_to_port(pin);
+
+    if(port != NOT_A_PORT) {
+	return ( *(uint8_t*)(pgm_read_word(&port_to_input_PGM[port])) & pin_to_mask(pin) ) ? HIGH : LOW;
+    }
+    /* else what? */
+
+    return LOW;
+}
+
+
 
 #endif

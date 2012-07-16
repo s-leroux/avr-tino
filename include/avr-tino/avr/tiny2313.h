@@ -26,7 +26,7 @@ enum pin_t {
 };
 
 enum port_t {
-    PORT_A,
+    PORT_A = 0,
     PORT_B,
     PORT_D,
 };
