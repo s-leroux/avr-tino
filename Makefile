@@ -17,8 +17,9 @@ DEMOSRC=./demo/
 BUILDDIR=build-$(MCU)-$(BOARD)/
 OBJDIR=$(BUILDDIR)obj/
 BINDIR=$(BUILDDIR)bin/
+DEPDIR=$(BUILDDIR)deps/
 DEMOBINDIR=$(BUILDDIR)bin/demo/
-DIRS=$(BUILDDIR) $(OBJDIR) $(BINDIR) $(DEMOBINDIR)
+DIRS=$(BUILDDIR) $(OBJDIR) $(BINDIR) $(DEPDIR) $(DEMOBINDIR)
 
 DEMOS=$(DEMOBINDIR)input $(DEMOBINDIR)blink
 
@@ -36,8 +37,11 @@ clean:
 	rm -rf $(DIRS) build-*
 
 $(DEMOBINDIR)% : $(DEMOSRC)%.cc
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< -MMD -MP -MF $(DEPDIR)$*.deps -o $@
 
 
 $(DEMOBINDIR)%.hex : $(DEMOBINDIR)%
-	$(OBJCOPY) -j .text -j .data -O ihex $^ $@
+	$(OBJCOPY) -j .text -j .data -O ihex $< $@
+
+-include $(DEPDIR)*.deps
+
