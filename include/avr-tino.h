@@ -7,11 +7,7 @@
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 
-#if !defined BOARD
-#  define BOARD "factory"
-#endif
-
-#if defined BOARD_Factory
+#if defined BOARD_factory
 #  include "avr-tino/target/factory.h"
 #else
 # error "Unknown target BOARD. Don't you forget '-DBOARD_...'?"
