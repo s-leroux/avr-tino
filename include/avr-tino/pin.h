@@ -56,6 +56,18 @@ inline pinstate_t digitalRead(pin_t pin) {
     return LOW;
 }
 
+enum bitorder_t {
+    LSBFIRST,
+    MSBFIRST
+};
 
+extern "C" {
+
+uint8_t shiftIn(pin_t dataPin, pin_t clockPin, 
+		bitorder_t bitOrder);
+void shiftOut(pin_t dataPin, pin_t clockPin, 
+		bitorder_t bitOrder, 
+		uint8_t val);
+}
 
 #endif
