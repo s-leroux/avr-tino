@@ -17,7 +17,7 @@ enum /* class */ pinstate_t {
     HIGH
 };
 
-inline int pinMode(pin_t pin, pinmode_t mode) {
+inline void pinMode(pin_t pin, pinmode_t mode) {
     uint8_t port = pin_to_port(pin);
 
     if(port != NOT_A_PORT) {
