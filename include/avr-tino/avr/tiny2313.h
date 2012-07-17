@@ -4,7 +4,7 @@
 /*
  List of pins for this mcu
 */
-enum pin_t {
+enum __attribute__ ((__packed__)) pin_t {
     PIN_PA0 = 0,
     PIN_PA1,
     PIN_PA2,
@@ -25,7 +25,7 @@ enum pin_t {
     PIN_PD6,
 };
 
-enum port_t {
+enum __attribute__ ((__packed__)) port_t {
     PORT_A = 0,
     PORT_B,
     PORT_D,
