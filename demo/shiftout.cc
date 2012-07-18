@@ -14,11 +14,11 @@ int main() {
 
     while(1) {
 	digitalWrite(clk_pin, LOW);
-	shiftOut(data_pin, clk_pin, MSBFIRST, 0xC6);
+	shiftOut(data_pin, clk_pin, MSBFIRST, "Hello", 5);
 	delay(50);
 
 	digitalWrite(clk_pin, LOW);
-	shiftOut(data_pin, clk_pin, LSBFIRST, 0xC6);
+	shiftOut(data_pin, clk_pin, LSBFIRST, "Hello", 5);
 	delay(500);
     }
     return 0;

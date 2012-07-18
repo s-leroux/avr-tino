@@ -17,7 +17,7 @@ enum __attribute__ ((__packed__)) pinstate_t {
     HIGH
 };
 
-extern "C" {
+//extern "C" {
 
 void pinMode(pin_t pin, pinmode_t mode);
 void digitalWrite(pin_t pin, pinstate_t state);
@@ -34,6 +34,10 @@ void shiftOut(pin_t dataPin, pin_t clockPin,
 		bitorder_t bitOrder, 
 		uint8_t val);
 
-} // extern "C"
+void shiftOut(pin_t dataPin, pin_t clockPin,
+                bitorder_t bitOrder,
+                const void *data, uint16_t size);
+
+//} // extern "C"
 
 #endif

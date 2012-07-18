@@ -79,3 +79,10 @@ void shiftOut(pin_t dataPin, pin_t clockPin,
     }
 }
 
+void shiftOut(pin_t dataPin, pin_t clockPin,
+                bitorder_t bitOrder,
+                const void *data, uint16_t len) {
+    for(uint16_t i = 0; i < len; ++i) {
+	shiftOut(dataPin, clockPin, bitOrder, ((const uint8_t*)data)[i]);
+    }
+}

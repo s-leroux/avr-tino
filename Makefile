@@ -6,7 +6,7 @@ CPP=$(PROGRAM_PREFIX)cpp$(PROGRAM_SUFFIX)
 CPPFLAGS=-I./include -DBOARD_$(BOARD)=1
 
 # C & C++
-C_CXX_COMMON_FLAGS= -mmcu=$(MCU) -Os \
+C_CXX_COMMON_FLAGS= -mmcu=$(MCU) -Os -mcall-prologues \
 	-ffunction-sections -fdata-sections
 
 CC=$(PROGRAM_PREFIX)gcc$(PROGRAM_SUFFIX)
@@ -21,7 +21,7 @@ CXXFLAGS= $(C_CXX_COMMON_FLAGS)
 # according to the target mcu
 #
 LD=$(PROGRAM_PREFIX)gcc$(PROGRAM_SUFFIX)
-LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections -mmcu=$(MCU)
+LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections -mmcu=$(MCU) -Wl,--relax
 
 # Object copy
 OBJCOPY=$(PROGRAM_PREFIX)objcopy$(PROGRAM_SUFFIX)

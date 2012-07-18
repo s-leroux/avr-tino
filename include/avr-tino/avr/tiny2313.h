@@ -44,19 +44,19 @@ enum __attribute__ ((__packed__)) port_t {
 //  "warning: only initialized variables can be placed into program memory area"
 // It should be safetly ignored.
 // I switched to gcc 4.7.1 and it vanished...
-const uint16_t port_to_mode_PGM[] PROGMEM = {
+static const uint16_t port_to_mode_PGM[] PROGMEM = {
     (uint16_t)&DDRA,
     (uint16_t)&DDRB,
     (uint16_t)&DDRD,
 };
 
-const uint16_t port_to_output_PGM[] PROGMEM = {
+static const uint16_t port_to_output_PGM[] PROGMEM = {
     (uint16_t)&PORTA,
     (uint16_t)&PORTB,
     (uint16_t)&PORTD,
 };
 
-const uint16_t port_to_input_PGM[] PROGMEM = {
+static const uint16_t port_to_input_PGM[] PROGMEM = {
     (uint16_t)&PINA,
     (uint16_t)&PINB,
     (uint16_t)&PIND,
