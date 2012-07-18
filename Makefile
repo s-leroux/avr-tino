@@ -6,7 +6,7 @@ CPP=$(PROGRAM_PREFIX)cpp$(PROGRAM_SUFFIX)
 CPPFLAGS=-I./include -DBOARD_$(BOARD)=1
 
 # C & C++
-C_CXX_COMMON_FLAGS= -mmcu=$(MCU) -O2 \
+C_CXX_COMMON_FLAGS= -mmcu=$(MCU) -Os \
 	-ffunction-sections -fdata-sections
 
 CC=$(PROGRAM_PREFIX)gcc$(PROGRAM_SUFFIX)
