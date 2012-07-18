@@ -1,36 +1,28 @@
-PROGRAM_PREFIX=avr-
-PROGRAM_SUFFIX=
-
-# C preprocessor
-CPP=$(PROGRAM_PREFIX)cpp$(PROGRAM_SUFFIX)
-CPPFLAGS=-I./include -DBOARD_$(BOARD)=1
-
-# C & C++
-C_CXX_COMMON_FLAGS= -mmcu=$(MCU) -Os -mcall-prologues \
-	-ffunction-sections -fdata-sections
-
-CC=$(PROGRAM_PREFIX)gcc$(PROGRAM_SUFFIX)
-CCFLAGS=-std=c99 $(C_CXX_COMMON_FLAGS)
-
-CXX=$(PROGRAM_PREFIX)g++$(PROGRAM_SUFFIX)
-CXXFLAGS= $(C_CXX_COMMON_FLAGS)
-
-# Linker
-#
-# I use 'gcc' here since it knowns which specific library to add
-# according to the target mcu
-#
-LD=$(PROGRAM_PREFIX)gcc$(PROGRAM_SUFFIX)
-LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections -mmcu=$(MCU) -Wl,--relax
-
-# Object copy
-OBJCOPY=$(PROGRAM_PREFIX)objcopy$(PROGRAM_SUFFIX)
-
 #
 # Target
 #
 MCU=attiny2313
 BOARD=factory
+
+PROGRAM_PREFIX=avr-
+PROGRAM_SUFFIX=
+
+# Tools
+OBJCOPY=$(PROGRAM_PREFIX)objcopy$(PROGRAM_SUFFIX)
+GCC=$(PROGRAM_PREFIX)gcc$(PROGRAM_SUFFIX)
+
+#
+# For better optimization, this makefile
+# will combine all source files in one that will
+# be compiled and linked by a single command-line
+# call to avr-gcc
+#
+CPPFLAGS=-I./include -DBOARD_$(BOARD)=1
+CXXFLAGS=-mmcu=$(MCU) \
+	-Os -mcall-prologues \
+	-ffunction-sections -fdata-sections
+LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections -Wl,--relax
+
 
 DEMOSRCDIR=./demo/
 SRCDIR=./src/avr-tino/
@@ -43,9 +35,10 @@ DEMOBINDIR=$(BUILDDIR)bin/demo/
 DIRS=$(BUILDDIR) $(OBJDIR) $(BINDIR) $(DEPDIR) $(DEMOBINDIR)
 
 DEMOS=$(DEMOBINDIR)input $(DEMOBINDIR)blink $(DEMOBINDIR)shiftout
-OBJS=$(OBJDIR)pin.o
 
-all:	objs demo hex
+SRCFILES=$(SRCDIR)pin.cc
+
+all:	demo hex
 
 
 $(DIRS): 
@@ -55,27 +48,26 @@ demo:	$(DIRS) $(DEMOS)
 
 hex:	$(DIRS) $(DEMOS:=.hex)
 
-objs:	$(DIRS) $(OBJS)
-
 clean:
 	rm -rf $(DIRS) build-*
 
-$(OBJDIR)%.o : $(SRCDIR)%.cc
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -MMD -MP -MF $(DEPDIR)$*.deps -o $@
+#
+# Combine all source file in one for better optimization
+#
+.PRECIOUS: $(OBJDIR)%.combined.cc
+$(OBJDIR)%.combined.cc : $(DEMOSRCDIR)%.cc $(SRCFILES)
+	cat $^ > $@
 
-$(OBJDIR)%.o : $(SRCDIR)%.c
-	$(CC) -c $(CPPFLAGS) $(CCFLAGS) $< -MMD -MP -MF $(DEPDIR)$*.deps -o $@
+#
+# Compile and link the combined file to produce executable
+#
+$(DEMOBINDIR)% : $(OBJDIR)%.combined.cc
+	$(GCC) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $< -fwhole-program \
+               -MMD -MP -MF $(DEPDIR)$*.deps 
 
-$(OBJDIR)%.o : $(DEMOSRCDIR)%.cc
-	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $< -MMD -MP -MF $(DEPDIR)$*.deps -o $@
-
-$(OBJDIR)%.o : $(DEMOSRCDIR)%.c
-	$(CC) -c $(CPPFLAGS) $(CCFLAGS) $< -MMD -MP -MF $(DEPDIR)$*.deps -o $@
-
-$(DEMOBINDIR)% : $(OBJDIR)%.o $(OBJS)
-	$(LD) $(LDFLAGS) -s -o $@ $^
-
-
+#
+# Intel Hex file to upload on target
+#
 $(DEMOBINDIR)%.hex : $(DEMOBINDIR)%
 	$(OBJCOPY) -j .text -j .data -O ihex $< $@
 
