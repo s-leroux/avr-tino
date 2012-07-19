@@ -25,6 +25,11 @@ enum __attribute__ ((__packed__)) pin_t {
     PIN_PD6,
 };
 
+/* SPI interface */
+static const pin_t MOSI = PIN_PB5;
+static const pin_t MISO = PIN_PB6;
+static const pin_t SCK	= PIN_PB7;
+
 enum __attribute__ ((__packed__)) port_t {
     PORT_A = 0,
     PORT_B,

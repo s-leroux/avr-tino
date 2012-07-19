@@ -34,9 +34,12 @@ DEPDIR=$(BUILDDIR)deps/
 DEMOBINDIR=$(BUILDDIR)bin/demo/
 DIRS=$(BUILDDIR) $(OBJDIR) $(BINDIR) $(DEPDIR) $(DEMOBINDIR)
 
-DEMOS=$(DEMOBINDIR)input $(DEMOBINDIR)blink $(DEMOBINDIR)shiftout
+DEMOS=	$(DEMOBINDIR)input  \
+	$(DEMOBINDIR)blink \
+	$(DEMOBINDIR)shiftout \
+	$(DEMOBINDIR)spiout
 
-SRCFILES=$(SRCDIR)pin.cc
+SRCFILES=$(SRCDIR)pin.cc $(SRCDIR)SPI.cc
 
 all:	demo hex
 
@@ -56,7 +59,10 @@ clean:
 #
 .PRECIOUS: $(OBJDIR)%.combined.cc
 $(OBJDIR)%.combined.cc : $(DEMOSRCDIR)%.cc $(SRCFILES)
-	cat $^ > $@
+	for i in $^; do \
+	    echo '#line 1 "'$$i'"' ; \
+	    cat $$i; \
+	done > $@
 
 #
 # Compile and link the combined file to produce executable
