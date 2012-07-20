@@ -19,6 +19,11 @@ enum __attribute__ ((__packed__)) pinstate_t {
 
 //extern "C" {
 
+inline void pinToHigh(pin_t pin) { pin_to_output(pin) |= pin_to_mask(pin); }
+inline void pinToLow(pin_t pin) { pin_to_output(pin) &= ~pin_to_mask(pin); }
+inline void pinToOutput(pin_t pin) { pin_to_mode(pin) |=~pin_to_mask(pin); }
+inline void pinToInput(pin_t pin) { pin_to_mode(pin) &= ~pin_to_mask(pin); }
+
 void pinMode(pin_t pin, pinmode_t mode);
 void digitalWrite(pin_t pin, pinstate_t state);
 pinstate_t digitalRead(pin_t pin);

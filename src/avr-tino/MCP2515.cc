@@ -6,14 +6,14 @@
 MCP2515::MCP2515(pin_t cs, uint8_t addr, pin_t reset) 
     : _cs(cs), _addr(addr), _reset(reset) 
 {
-    pinMode(_cs, OUTPUT);
-    digitalWrite(_cs, HIGH);
+    pinToOutput(_cs);
+    pinToHigh(_cs);
 } 
 
 void MCP2515::reset() const {
-    pinMode(_reset, OUTPUT);
-    digitalWrite(_reset, LOW);    
-    digitalWrite(_reset, HIGH);    
+    pinToOutput(_reset);
+    pinToLow(_reset);
+    pinToHigh(_reset);
 }
 
 void MCP2515::write(const SPIMaster& spi, uint8_t addr, uint8_t data) const {
