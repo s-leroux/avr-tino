@@ -10,6 +10,8 @@ PROGRAM_SUFFIX=
 # Tools
 OBJCOPY=$(PROGRAM_PREFIX)objcopy$(PROGRAM_SUFFIX)
 GCC=$(PROGRAM_PREFIX)gcc$(PROGRAM_SUFFIX)
+SIZE=$(PROGRAM_PREFIX)size$(PROGRAM_SUFFIX)
+
 
 #
 # For better optimization, this makefile
@@ -32,18 +34,23 @@ BUILDDIR=build-$(MCU)-$(BOARD)/
 OBJDIR=$(BUILDDIR)obj/
 BINDIR=$(BUILDDIR)bin/
 DEPDIR=$(BUILDDIR)deps/
-DEMOBINDIR=$(BUILDDIR)bin/demo/
-DIRS=$(BUILDDIR) $(OBJDIR) $(BINDIR) $(DEPDIR) $(DEMOBINDIR)
+DIRS=$(BUILDDIR) $(OBJDIR) $(BINDIR) $(DEPDIR) $(BINDIR)
 
-DEMOS=	$(DEMOBINDIR)input  \
-	$(DEMOBINDIR)blink \
-	$(DEMOBINDIR)shiftout \
-	$(DEMOBINDIR)spiout
+DEMOS=	$(BINDIR)input  \
+	$(BINDIR)blink \
+	$(BINDIR)shiftout \
+	$(BINDIR)spiout
+
+ifeq ($(BOARD),CANModule)
+DEMOS += build-$(MCU)-$(BOARD)/bin/canmodule
+endif
 
 SRCFILES=$(SRCDIR)pin.cc $(SRCDIR)SPI.cc
 
 all:	demo hex
 
+stat:	all
+	$(SIZE) $(BINDIR)/*
 
 $(DIRS): 
 	mkdir $@
@@ -68,14 +75,14 @@ $(OBJDIR)%.combined.cc : $(DEMOSRCDIR)%.cc $(SRCFILES)
 #
 # Compile and link the combined file to produce executable
 #
-$(DEMOBINDIR)% : $(OBJDIR)%.combined.cc
+$(BINDIR)% : $(OBJDIR)%.combined.cc
 	$(GCC) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $< -fwhole-program \
                -MMD -MP -MF $(DEPDIR)$*.deps 
 
 #
 # Intel Hex file to upload on target
 #
-$(DEMOBINDIR)%.hex : $(DEMOBINDIR)%
+$(BINDIR)%.hex : $(BINDIR)%
 	$(OBJCOPY) -j .text -j .data -O ihex $< $@
 
 -include $(DEPDIR)*.deps
