@@ -23,6 +23,7 @@ CPPFLAGS=-I./include -DBOARD_$(BOARD)=1
 CXXFLAGS=-mmcu=$(MCU) \
 	-Os -mcall-prologues \
 	-ffunction-sections -fdata-sections \
+	-fno-rtti \
 	-g
 LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections -Wl,--relax
 
@@ -34,7 +35,7 @@ BUILDDIR=build-$(MCU)-$(BOARD)/
 OBJDIR=$(BUILDDIR)obj/
 BINDIR=$(BUILDDIR)bin/
 DEPDIR=$(BUILDDIR)deps/
-DIRS=$(BUILDDIR) $(OBJDIR) $(BINDIR) $(DEPDIR) $(BINDIR)
+DIRS=$(BUILDDIR) $(OBJDIR) $(BINDIR) $(DEPDIR)
 
 DEMOS=	$(BINDIR)input  \
 	$(BINDIR)blink \
@@ -45,12 +46,12 @@ ifeq ($(BOARD),CANModule)
 DEMOS += build-$(MCU)-$(BOARD)/bin/canmodule
 endif
 
-SRCFILES=$(SRCDIR)pin.cc $(SRCDIR)SPI.cc
+SRCFILES=$(SRCDIR)pin.cc $(SRCDIR)SPI.cc $(SRCDIR)MCP2515.cc
 
 all:	demo hex
 
 stat:	all
-	$(SIZE) $(BINDIR)/*
+	$(SIZE) `find $(BINDIR) -executable -type f -print`
 
 $(DIRS): 
 	mkdir $@
