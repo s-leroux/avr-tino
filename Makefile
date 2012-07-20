@@ -20,7 +20,8 @@ GCC=$(PROGRAM_PREFIX)gcc$(PROGRAM_SUFFIX)
 CPPFLAGS=-I./include -DBOARD_$(BOARD)=1
 CXXFLAGS=-mmcu=$(MCU) \
 	-Os -mcall-prologues \
-	-ffunction-sections -fdata-sections
+	-ffunction-sections -fdata-sections \
+	-g
 LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections -Wl,--relax
 
 
