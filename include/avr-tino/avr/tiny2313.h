@@ -30,42 +30,22 @@ static const pin_t MOSI = PIN_PB5;
 static const pin_t MISO = PIN_PB6;
 static const pin_t SCK	= PIN_PB7;
 
-enum __attribute__ ((__packed__)) port_t {
-    PORT_A = 0,
-    PORT_B,
-    PORT_D,
-};
-
-#define pin_to_port(p) ( (p <= PIN_PA2) ? PORT_A : \
-                         (p <= PIN_PB7) ? PORT_B : \
-                         (p <= PIN_PD6) ? PORT_D : NOT_A_PORT )
-
+/*
+ I/O Port abstraction layer
+*/
 #define pin_to_mask(p) ( (p <= PIN_PA2) ? _BV(p) : \
                          (p <= PIN_PB7) ? _BV(p-PIN_PB0) : \
                          _BV(p-PIN_PD0) )
 
-// Some versions of gcc (like avr-g++ 4.3.5 / Debian Squeeze) issue a
-// warning here:
-//  "warning: only initialized variables can be placed into program memory area"
-// It should be safetly ignored.
-// I switched to gcc 4.7.1 and it vanished...
-static const uint16_t port_to_mode_PGM[] PROGMEM = {
-    (uint16_t)&DDRA,
-    (uint16_t)&DDRB,
-    (uint16_t)&DDRD,
-};
-
-static const uint16_t port_to_output_PGM[] PROGMEM = {
-    (uint16_t)&PORTA,
-    (uint16_t)&PORTB,
-    (uint16_t)&PORTD,
-};
-
-static const uint16_t port_to_input_PGM[] PROGMEM = {
-    (uint16_t)&PINA,
-    (uint16_t)&PINB,
-    (uint16_t)&PIND,
-};
+#define pin_to_mode(p)  ( (p <= PIN_PA2) ? DDRA : \
+                          (p <= PIN_PB7) ? DDRB : \
+                          DDRD )
+#define pin_to_output(p)( (p <= PIN_PA2) ? PORTA : \
+                          (p <= PIN_PB7) ? PORTB : \
+                          PORTD )
+#define pin_to_input(p)	( (p <= PIN_PA2) ? PINA : \
+                          (p <= PIN_PB7) ? PINB : \
+                          PIND )
 
 #endif
 
