@@ -17,10 +17,10 @@ void MCP2515::reset() const {
 }
 
 void MCP2515::write(const SPIMaster& spi, uint8_t addr, uint8_t data) const {
-    digitalWrite(_cs, LOW);
+    pinToLow(_cs);
     spi.transfert(WRITE);        
     spi.transfert(addr);        
     spi.transfert(data);        
-    digitalWrite(_cs, HIGH);
+    pinToHigh(_cs);
 }
 

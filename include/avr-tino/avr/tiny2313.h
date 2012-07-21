@@ -38,13 +38,9 @@ static const pin_t SCK	= PIN_PB7;
 /*
  I/O Port abstraction layer
 */
-/* Surprisely enougth the following macro if replaced by an inline function
-   waste 6 bytes per call...
-*/
 #define pin_to_mask(p) ( _BV(p & 0x0F) )
 
-
-/* ...but those are as efficient as their macro counterparts */
+/* Those functions are as efficient as their macro counterparts */
 volatile uint8_t& pin_to_mode(pin_t p) {
     return ( (p <= PIN_PA2) ? DDRA :
 	     (p <= PIN_PB7) ? DDRB :

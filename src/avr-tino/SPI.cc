@@ -2,9 +2,9 @@
 #include "avr-tino/SPI.h"
 
 SPIMaster::SPIMaster() {
-    pinMode(MISO, OUTPUT);
-    pinMode(SCK, OUTPUT);
-    pinMode(MOSI, INPUT);
+    pinToOutput(MISO);
+    pinToOutput(SCK);
+    pinToOutput(MOSI);
 }
 
 uint8_t SPIMaster::transfert(uint8_t byte) const {
