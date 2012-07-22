@@ -24,3 +24,16 @@ void MCP2515::write(const SPIMaster& spi, uint8_t addr, uint8_t data) const {
     pinToHigh(_cs);
 }
 
+void MCP2515::bitModify(const SPIMaster& spi, uint8_t addr, 
+			uint8_t mask, uint8_t data) const {
+    pinToLow(_cs);
+    spi.transfert(BIT_MODIFY);        
+    spi.transfert(addr);        
+    spi.transfert(mask);        
+    spi.transfert(data);        
+    pinToHigh(_cs);
+}
+
+void MCP2515::setPrescaler(const SPIMaster& spi, uint8_t prescaler) const {
+    bitModify(spi, CANCTRL, 0x03, prescaler);
+}

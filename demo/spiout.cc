@@ -11,7 +11,7 @@ int main() {
 
     while(1) {
 	spi.transfert(0x65);
-	delay(50);
+	delay(5);
     }
     return 0;
 }

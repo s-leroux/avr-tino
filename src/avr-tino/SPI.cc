@@ -2,7 +2,7 @@
 #include "avr-tino/SPI.h"
 
 SPIMaster::SPIMaster() {
-    pinToOutput(MISO);
+    pinToInput(MISO);
     pinToOutput(SCK);
     pinToOutput(MOSI);
 }
