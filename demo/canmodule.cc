@@ -12,12 +12,14 @@
 #include "avr-tino/target/CANModule.h"
 
 int main() {
-    /* MCP2515 reset */
-    const SPIMaster	spi;
-    const MCP2515	mcp2515(MCP2515_CS, 0, MCP2515_RESET);
+    typedef SPIMaster SPI;
 
+    /* MCP2515 reset */
+    const MCP2515<SPI>	mcp2515(MCP2515_CS, 0, MCP2515_RESET);
+
+    SPI::begin();
     mcp2515.reset();
-    mcp2515.setPrescaler(spi, 0);
+    mcp2515.setPrescaler(0);
 
     return 0;
 }

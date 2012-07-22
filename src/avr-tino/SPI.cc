@@ -1,13 +1,13 @@
 #include "avr-tino/pin.h"
 #include "avr-tino/SPI.h"
 
-SPIMaster::SPIMaster() {
+void SPIMaster::begin() {
     pinToInput(MISO);
     pinToOutput(SCK);
     pinToOutput(MOSI);
 }
 
-uint8_t SPIMaster::transfert(uint8_t byte) const {
+uint8_t SPIMaster::transfert(uint8_t byte) {
     USIDR = byte;
     USISR = _BV(USIOIF);
     do {

@@ -1,12 +1,10 @@
 #if !defined AVR_TINO_MCP2515_H
 #define AVR_TINO_MCP2515_H
 
-class SPIMaster;
-
 /*
  * Interface file for the MCP2515 Stand Alone CAN controller With SPI
  */
-class MCP2515 {
+template<class SPI> class MCP2515 {
     public:
     MCP2515(pin_t cs, uint8_t addr, pin_t reset);
 
@@ -14,13 +12,13 @@ class MCP2515 {
     void reset() const;
 
     /* Generic commands */
-    void write(const SPIMaster& spi, uint8_t addr, 
+    void write(uint8_t addr, 
 		uint8_t data) const;
-    void bitModify(const SPIMaster& spi, uint8_t addr, 
+    void bitModify(uint8_t addr, 
 		uint8_t masq, uint8_t data) const;
 
     /* Specific commands */
-    void setPrescaler(const SPIMaster& spi, uint8_t prescaler) const;
+    void setPrescaler(uint8_t prescaler) const;
 
     public:
     enum __attribute__ ((__packed__)) {

@@ -3,37 +3,42 @@
 #include "avr-tino/pin.h"
 #include "avr-tino/SPI.h"
 
-MCP2515::MCP2515(pin_t cs, uint8_t addr, pin_t reset) 
+template<class SPI>
+MCP2515<SPI>::MCP2515(pin_t cs, uint8_t addr, pin_t reset) 
     : _cs(cs), _addr(addr), _reset(reset) 
 {
     pinToOutput(_cs);
     pinToHigh(_cs);
 } 
 
-void MCP2515::reset() const {
+template<class SPI>
+void MCP2515<SPI>::reset() const {
     pinToOutput(_reset);
     pinToLow(_reset);
     pinToHigh(_reset);
 }
 
-void MCP2515::write(const SPIMaster& spi, uint8_t addr, uint8_t data) const {
+template<class SPI>
+void MCP2515<SPI>::write(uint8_t addr, uint8_t data) const {
     pinToLow(_cs);
-    spi.transfert(WRITE);        
-    spi.transfert(addr);        
-    spi.transfert(data);        
+    SPI::transfert(WRITE);        
+    SPI::transfert(addr);        
+    SPI::transfert(data);        
     pinToHigh(_cs);
 }
 
-void MCP2515::bitModify(const SPIMaster& spi, uint8_t addr, 
+template<class SPI>
+void MCP2515<SPI>::bitModify(uint8_t addr, 
 			uint8_t mask, uint8_t data) const {
     pinToLow(_cs);
-    spi.transfert(BIT_MODIFY);        
-    spi.transfert(addr);        
-    spi.transfert(mask);        
-    spi.transfert(data);        
+    SPI::transfert(BIT_MODIFY);        
+    SPI::transfert(addr);        
+    SPI::transfert(mask);        
+    SPI::transfert(data);        
     pinToHigh(_cs);
 }
 
-void MCP2515::setPrescaler(const SPIMaster& spi, uint8_t prescaler) const {
-    bitModify(spi, CANCTRL, 0x03, prescaler);
+template<class SPI>
+void MCP2515<SPI>::setPrescaler(uint8_t prescaler) const {
+    bitModify(CANCTRL, 0x03, prescaler);
 }

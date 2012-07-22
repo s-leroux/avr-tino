@@ -3,8 +3,8 @@
 
 class SPIMaster {
     public:
-    SPIMaster();
-    uint8_t transfert(uint8_t data) const;
+    static void begin();
+    static uint8_t transfert(uint8_t data);
 };
 
 #endif
