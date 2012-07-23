@@ -14,28 +14,29 @@ MCP2515<SPI>::MCP2515(pin_t cs, uint8_t addr, pin_t reset)
 template<class SPI>
 void MCP2515<SPI>::reset() const {
     pinToOutput(_reset);
+    
     pinToLow(_reset);
     pinToHigh(_reset);
 }
 
 template<class SPI>
 void MCP2515<SPI>::write(uint8_t addr, uint8_t data) const {
-    pinToLow(_cs);
+    GuardPinLow	    pin(_cs);
+
     SPI::transfert(WRITE);        
     SPI::transfert(addr);        
     SPI::transfert(data);        
-    pinToHigh(_cs);
 }
 
 template<class SPI>
 void MCP2515<SPI>::bitModify(uint8_t addr, 
 			uint8_t mask, uint8_t data) const {
-    pinToLow(_cs);
+    GuardPinLow	    pin(_cs);
+
     SPI::transfert(BIT_MODIFY);        
     SPI::transfert(addr);        
     SPI::transfert(mask);        
     SPI::transfert(data);        
-    pinToHigh(_cs);
 }
 
 template<class SPI>

@@ -24,6 +24,34 @@ enum __attribute__ ((__packed__)) pinstate_t {
 #define pinToOutput(pin) ( pin_to_mode(pin) |= pin_to_mask(pin) )
 #define pinToInput(pin) ( pin_to_mode(pin) &= ~pin_to_mask(pin) )
 
+class GuardPinLow {
+    public:
+    inline GuardPinLow(pin_t n) : _n(n) {
+	pinToLow(n);
+    }
+
+    inline ~GuardPinLow() {
+	pinToHigh(_n);
+    }
+
+    private:
+    const pin_t _n;
+};
+
+class GuardPinHigh {
+    public:
+    inline GuardPinHigh(pin_t n) : _n(n) {
+	pinToHigh(n);
+    }
+
+    inline ~GuardPinHigh() {
+	pinToLow(_n);
+    }
+
+    private:
+    const pin_t _n;
+};
+
 void pinMode(pin_t pin, pinmode_t mode);
 void digitalWrite(pin_t pin, pinstate_t state);
 pinstate_t digitalRead(pin_t pin);
