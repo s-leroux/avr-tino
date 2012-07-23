@@ -3,35 +3,34 @@
 #include "avr-tino/pin.h"
 #include "avr-tino/SPI.h"
 
-template<class SPI>
-MCP2515<SPI>::MCP2515(pin_t cs, uint8_t addr, pin_t reset) 
-    : _cs(cs), _addr(addr), _reset(reset) 
+template<class SPI, pin_t cs, pin_t resetp>
+MCP2515<SPI,cs,resetp>::MCP2515() 
 {
-    pinToOutput(_cs);
-    pinToHigh(_cs);
+    pinToOutput(cs);
+    pinToHigh(cs);
 } 
 
-template<class SPI>
-void MCP2515<SPI>::reset() const {
-    pinToOutput(_reset);
+template<class SPI, pin_t cs, pin_t resetp>
+void MCP2515<SPI,cs,resetp>::reset() const {
+    pinToOutput(resetp);
     
-    pinToLow(_reset);
-    pinToHigh(_reset);
+    pinToLow(resetp);
+    pinToHigh(resetp);
 }
 
-template<class SPI>
-void MCP2515<SPI>::write(uint8_t addr, uint8_t data) const {
-    GuardPinLow	    pin(_cs);
+template<class SPI, pin_t cs, pin_t resetp>
+void MCP2515<SPI,cs,resetp>::write(uint8_t addr, uint8_t data) const {
+    GuardPinLow<cs>	guard;
 
     SPI::transfert(WRITE);        
     SPI::transfert(addr);        
     SPI::transfert(data);        
 }
 
-template<class SPI>
-void MCP2515<SPI>::bitModify(uint8_t addr, 
+template<class SPI, pin_t cs, pin_t resetp>
+void MCP2515<SPI,cs,resetp>::bitModify(uint8_t addr, 
 			uint8_t mask, uint8_t data) const {
-    GuardPinLow	    pin(_cs);
+    GuardPinLow<cs>	guard;
 
     SPI::transfert(BIT_MODIFY);        
     SPI::transfert(addr);        
@@ -39,7 +38,16 @@ void MCP2515<SPI>::bitModify(uint8_t addr,
     SPI::transfert(data);        
 }
 
-template<class SPI>
-void MCP2515<SPI>::setPrescaler(uint8_t prescaler) const {
+template<class SPI, pin_t cs, pin_t resetp>
+uint8_t MCP2515<SPI,cs,resetp>::read(uint8_t addr) const {
+    GuardPinLow<cs>	guard;
+
+    SPI::transfert(READ);
+    SPI::transfert(addr);        
+    return SPI::transfert(0);
+}
+
+template<class SPI, pin_t cs, pin_t resetp>
+void MCP2515<SPI,cs,resetp>::setPrescaler(uint8_t prescaler) const {
     bitModify(CANCTRL, 0x03, prescaler);
 }
