@@ -6,13 +6,13 @@ class Serial {
     public:
     enum __attribute__ ((__packed__)) protocol_t {
 	// Asynchronous
-	A8N1	= 3 ,
-	A8E1	= _BV(UPM1) | 3 ,
-	A8O1	= _BV(UPM1) |_BV(UPM0) |  3 ,
+	A8N1	= 6 ,
+	A8E1	= _BV(UPM1) | 6 ,
+	A8O1	= _BV(UPM1) |_BV(UPM0) |  6 ,
 	// Synchronous
-	S8N1	= _BV(UMSEL) | 3 ,
-	S8E1	= _BV(UMSEL) | _BV(UPM1) | 3 ,
-	S8O1	= _BV(UMSEL) | _BV(UPM1) | _BV(UPM0) | 3 ,
+	S8N1	= _BV(UMSEL) | 6 ,
+	S8E1	= _BV(UMSEL) | _BV(UPM1) | 6 ,
+	S8O1	= _BV(UMSEL) | _BV(UPM1) | _BV(UPM0) | 6 ,
     };
 
     static void begin(uint32_t baud, protocol_t protocol = A8N1) {
@@ -30,6 +30,13 @@ class Serial {
 	    // do nothing
 	}
 	UDR = data;
+    }
+
+    static uint8_t receive() {
+	while ( ! (UCSRA & _BV(RXC) ) ) {
+	    // do nothing
+	}
+	return UDR;
     }
 };
 
