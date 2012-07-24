@@ -41,19 +41,19 @@ static const pin_t SCK	= PIN_PB7;
 #define pin_to_mask(p) ( _BV(p & 0x0F) )
 
 /* Those functions are as efficient as their macro counterparts */
-volatile uint8_t& pin_to_mode(pin_t p) {
+static volatile uint8_t& pin_to_mode(pin_t p) {
     return ( (p <= PIN_PA2) ? DDRA :
 	     (p <= PIN_PB7) ? DDRB :
 	     DDRD );
 }
 
-volatile uint8_t& pin_to_output(pin_t p) {
+static volatile uint8_t& pin_to_output(pin_t p) {
     return ( (p <= PIN_PA2) ? PORTA :
 	     (p <= PIN_PB7) ? PORTB :
 	     PORTD );
 }
 
-volatile uint8_t& pin_to_input(pin_t p) {
+static volatile uint8_t& pin_to_input(pin_t p) {
     return ( (p <= PIN_PA2) ? PINA :
 	     (p <= PIN_PB7) ? PINB :
 	     PIND );

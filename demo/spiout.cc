@@ -7,11 +7,12 @@
     the SPI interface to send a byte
 */
 int main() {
-    SPIMaster	spi;
+    typedef SPIMaster SPI;
+    SPI::begin();
 
     while(1) {
-	spi.transfert(0x65);
-	delay(50);
+	SPI::transfert(0x65);
+	delay(5);
     }
     return 0;
 }

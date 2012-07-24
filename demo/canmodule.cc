@@ -6,22 +6,22 @@
 // XXX Must be done otherwise
 #include "avr-tino.h"
 
+#include "avr-tino/delay.h"
 #include "avr-tino/MCP2515.h"
 #include "avr-tino/SPI.h"
 #include "avr-tino/target/CANModule.h"
 
+int main() __attribute__ ((OS_main));
 int main() {
+    typedef SPIMaster SPI;
+
     /* MCP2515 reset */
-    const SPIMaster	spi;
-    const MCP2515	mcp2515(MCP2515_CS, 0, MCP2515_RESET);
+    const MCP2515<SPI, MCP2515_CS, MCP2515_RESET>	mcp2515;
 
+    SPI::begin();
     mcp2515.reset();
-    mcp2515.write(spi, 0x01, 0x02);
-//    pinMode(MCP2515_RESET, OUTPUT);
-//    digitalWrite(MCP2515_RESET, LOW);
-//    digitalWrite(MCP2515_RESET, HIGH);
-
-    
+    mcp2515.setPrescaler(0);
+    volatile uint8_t r = mcp2515.read(12);
 
     return 0;
 }
