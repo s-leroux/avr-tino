@@ -19,7 +19,7 @@ SIZE=$(PROGRAM_PREFIX)size$(PROGRAM_SUFFIX)
 # be compiled and linked by a single command-line
 # call to avr-gcc
 #
-CPPFLAGS=-I./include -DBOARD_$(BOARD)=1
+CPPFLAGS=-I./include -include "avr-tino/target/$(BOARD).h"
 CXXFLAGS=-mmcu=$(MCU) \
 	-Os -mcall-prologues \
 	-ffunction-sections -fdata-sections \

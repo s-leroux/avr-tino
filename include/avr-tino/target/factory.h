@@ -3,5 +3,7 @@
 
 #define F_CPU 1000000
 
+#define BAORD_factory 1
+
 #endif
 
