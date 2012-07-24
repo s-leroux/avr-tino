@@ -15,11 +15,11 @@ class Serial {
 	S8O1	= _BV(UMSEL) | _BV(UPM1) | _BV(UPM0) | 3 ,
     };
 
-    static void begin(uint16_t baud, protocol_t protocol = A8N1) {
-	// XXX the baud-to-UBRR function is missing!
-        // see ATtiny2313 datasheet p113
-	UBRRH = (uint8_t)(baud >> 8);
-	UBRRL = (uint8_t)(baud);
+    static void begin(uint32_t baud, protocol_t protocol = A8N1) {
+	uint16_t UBRR = F_CPU / 16 / baud - 1;
+	
+	UBRRH = (uint8_t)(UBRR >> 8);
+	UBRRL = (uint8_t)(UBRR);
 	
 	UCSRB = _BV(RXEN) | _BV(TXEN);
 	UCSRC = protocol;
