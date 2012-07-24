@@ -23,18 +23,22 @@ template<class SPI, pin_t cs, pin_t resetp> class MCP2515 {
 
     public:
     enum __attribute__ ((__packed__)) {
-	RESET	    = 0xC0,
-	WRITE	    = 0x02,
-	BIT_MODIFY  = 0x05,
-	READ	    = 0x03,
+	RESET	    = 0xC0, /* Reset                    - 1100 0000 */
+	WRITE	    = 0x02, /* Write Date               - 0000 0010 */
+	BIT_MODIFY  = 0x05, /* Bit Modify               - 0000 0101 */
+	READ	    = 0x03, /* Read data                - 0000 0011 */
+	RTS	    = 0x80, /* Request To Send          - 1000 0nnn */
     };
 
-    enum __attribute__ ((__packed__)) {
-	CANCTRL = 0x0F, // CAN control register
+    enum __attribute__ ((__packed__)) regs {
+	CANCTRL	    = 0x0F, /* CAN control register     - ?Fh */
+	CANSTAT	    = 0x0E, /* CAN status register      - ?Eh */
+	TEC	    = 0x1C, /* Transmit error counter   - 1Ch */
+	REC	    = 0x1D, /* reveiver error counter   - 1Dh */
     };
 
     enum __attribute__ ((__packed__)) canctrl_bits {
-	CLKPRE0	= 0,
+	CLKPRE0	    = 0,
 	CLKPRE1,
 	CLKEN,
 	OSM,
@@ -42,6 +46,15 @@ template<class SPI, pin_t cs, pin_t resetp> class MCP2515 {
 	REQOP0,
 	REQOP1,
 	REQOP2,
+    };
+
+    enum __attribute__ ((__packed__)) canctrl_bits {
+	ICOD0	    = 1,
+	ICOD1,
+	ICOD2,
+	OPMOD0	    = 5,
+	OPMOD1,
+	OPMOD2,
     };
 };
 

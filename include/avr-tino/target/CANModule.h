@@ -7,6 +7,8 @@
 #  define F_CPU 1000000
 #endif
 
+#define BOARD_CANModule 1
+
 static const pin_t MCP2515_RESET = PIN_PB3;
 static const pin_t MCP2515_CS = PIN_PB4;
 

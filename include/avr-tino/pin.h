@@ -23,6 +23,7 @@ enum __attribute__ ((__packed__)) pinstate_t {
 #define pinToLow(pin) ( pin_to_output(pin) &= ~pin_to_mask(pin) )
 #define pinToOutput(pin) ( pin_to_mode(pin) |= pin_to_mask(pin) )
 #define pinToInput(pin) ( pin_to_mode(pin) &= ~pin_to_mask(pin) )
+
 template<pin_t pin>
 class GuardPinLow {
     public:

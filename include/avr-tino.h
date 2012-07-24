@@ -14,11 +14,6 @@
 # error "Unknown target AVR. Don't you forget '-mmcu'?"
 #endif
 
-#if defined BOARD_factory
-#  include "avr-tino/target/factory.h"
-#endif
-
-
 #include "avr-tino/pin.h"
 
 #endif

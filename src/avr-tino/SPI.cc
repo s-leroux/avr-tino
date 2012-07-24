@@ -2,9 +2,9 @@
 #include "avr-tino/SPI.h"
 
 void SPIMaster::begin() {
-    pinToInput(MISO);
+    pinToOutput(MISO); // Stupid naming scheme for attn2313 where miSO is *always* output...
     pinToOutput(SCK);
-    pinToOutput(MOSI);
+    pinToInput(MOSI);  // Stupid naming scheme for attn2313 where moSI is *always* input...
 }
 
 uint8_t SPIMaster::transfert(uint8_t byte) {
