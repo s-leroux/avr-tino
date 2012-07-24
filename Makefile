@@ -38,15 +38,18 @@ DEPDIR=$(BUILDDIR)deps/
 DIRS=$(BUILDDIR) $(OBJDIR) $(BINDIR) $(DEPDIR)
 
 DEMOS=	$(BINDIR)input  \
-	$(BINDIR)blink \
 	$(BINDIR)shiftout \
-	$(BINDIR)spiout
+	$(BINDIR)spiout \
+	$(BINDIR)usart \
+	$(BINDIR)blink
 
+SRCFILES=$(SRCDIR)pin.cc \
+	$(SRCDIR)SPI.cc \
+	$(SRCDIR)serial.cc \
+	$(SRCDIR)MCP2515.cc 
 ifeq ($(BOARD),CANModule)
 DEMOS += build-$(MCU)-$(BOARD)/bin/canmodule
 endif
-
-SRCFILES=$(SRCDIR)pin.cc $(SRCDIR)SPI.cc $(SRCDIR)MCP2515.cc
 
 all:	demo hex
 
