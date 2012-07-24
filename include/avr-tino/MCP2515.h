@@ -48,7 +48,7 @@ template<class SPI, pin_t cs, pin_t resetp> class MCP2515 {
 	REQOP2,
     };
 
-    enum __attribute__ ((__packed__)) canctrl_bits {
+    enum __attribute__ ((__packed__)) canstat_bits {
 	ICOD0	    = 1,
 	ICOD1,
 	ICOD2,

@@ -48,22 +48,22 @@ class GuardPinHigh {
     }
 };
 
-void pinMode(pin_t pin, pinmode_t mode);
-void digitalWrite(pin_t pin, pinstate_t state);
-pinstate_t digitalRead(pin_t pin);
+static void pinMode(pin_t pin, pinmode_t mode);
+static void digitalWrite(pin_t pin, pinstate_t state);
+static pinstate_t digitalRead(pin_t pin);
 
 enum __attribute__ ((__packed__)) bitorder_t {
     LSBFIRST,
     MSBFIRST
 };
 
-uint8_t shiftIn(pin_t dataPin, pin_t clockPin, 
+static uint8_t shiftIn(pin_t dataPin, pin_t clockPin, 
 		bitorder_t bitOrder);
-void shiftOut(pin_t dataPin, pin_t clockPin, 
+static void shiftOut(pin_t dataPin, pin_t clockPin, 
 		bitorder_t bitOrder, 
 		uint8_t val);
 
-void shiftOut(pin_t dataPin, pin_t clockPin,
+static void shiftOut(pin_t dataPin, pin_t clockPin,
                 bitorder_t bitOrder,
                 const void *data, uint16_t size);
 

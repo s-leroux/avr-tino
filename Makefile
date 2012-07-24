@@ -42,11 +42,12 @@ DEMOS=	$(BINDIR)input  \
 	$(BINDIR)shiftout \
 	$(BINDIR)spiout
 
+SRCFILES=$(SRCDIR)pin.cc $(SRCDIR)SPI.cc $(SRCDIR)MCP2515.cc
+
 ifeq ($(BOARD),CANModule)
 DEMOS += build-$(MCU)-$(BOARD)/bin/canmodule
+SRCFILES += $(SRCDIR)/target/CANModule.cc
 endif
-
-SRCFILES=$(SRCDIR)pin.cc $(SRCDIR)SPI.cc $(SRCDIR)MCP2515.cc
 
 all:	demo hex
 
@@ -77,7 +78,7 @@ $(OBJDIR)%.combined.cc : $(DEMOSRCDIR)%.cc $(SRCFILES)
 # Compile and link the combined file to produce executable
 #
 $(BINDIR)% : $(OBJDIR)%.combined.cc
-	$(GCC) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $< -fwhole-program \
+	$(GCC) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@ $< \
                -MMD -MP -MF $(DEPDIR)$*.deps 
 
 #
