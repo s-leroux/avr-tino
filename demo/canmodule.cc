@@ -22,6 +22,7 @@ int main() {
     mcp2515.reset();
     mcp2515.setPrescaler(0);
     volatile uint8_t r = mcp2515.read(12);
+    mcp2515.write(0x11, r);
 
     return 0;
 }

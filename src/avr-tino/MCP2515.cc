@@ -19,12 +19,17 @@ void MCP2515<SPI,cs,pin_reset>::reset() const {
 }
 
 template<class SPI, pin_t cs, pin_t pin_reset>
-void MCP2515<SPI,cs,pin_reset>::write(uint8_t addr, uint8_t data) const {
+void MCP2515<SPI,cs,pin_reset>::write(uint8_t addr, uint8_t len, const uint8_t *data) const {
     GuardPinLow<cs>	guard;
 
     SPI::transfert(WRITE);        
-    SPI::transfert(addr);        
-    SPI::transfert(data);        
+    SPI::transfert(addr);
+    while(len--) SPI::transfert(*data++);
+}
+
+template<class SPI, pin_t cs, pin_t pin_reset>
+void MCP2515<SPI,cs,pin_reset>::write(uint8_t addr, uint8_t data) const {
+    write(addr, 1, &data);
 }
 
 template<class SPI, pin_t cs, pin_t pin_reset>

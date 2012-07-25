@@ -13,6 +13,9 @@ template<class SPI, pin_t cs, pin_t resetp> class MCP2515 {
 
     /* Generic commands */
     void write(uint8_t addr, 
+		uint8_t len,
+		const uint8_t *data) const;
+    void write(uint8_t addr, 
 		uint8_t data) const;
     void bitModify(uint8_t addr, 
 		uint8_t masq, uint8_t data) const;
