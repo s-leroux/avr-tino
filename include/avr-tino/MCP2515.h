@@ -22,7 +22,7 @@
 /*
  * Interface file for the MCP2515 Stand Alone CAN controller With SPI
  */
-template<class SPI, pin_t cs, pin_t resetp> class MCP2515 {
+template<class SPI, pin_t cs> class MCP2515 {
     public:
     MCP2515();
 

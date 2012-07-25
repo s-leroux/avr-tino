@@ -34,7 +34,7 @@ int main() {
     typedef SPIMaster SPI;
 
     /* MCP2515 reset */
-    const MCP2515<SPI, MCP2515_CS, MCP2515_RESET>	mcp2515;
+    const MCP2515<SPI, MCP2515_CS>	mcp2515;
 
     SPI::begin();
     mcp2515.reset();
