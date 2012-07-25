@@ -14,7 +14,7 @@ template<class SPI, pin_t cs, pin_t resetp> class MCP2515 {
     /* Generic commands */
     void write(uint8_t addr, 
 		uint8_t len,
-		const uint8_t *data) const;
+		const void *data) const;
     void write(uint8_t addr, 
 		uint8_t data) const;
     void bitModify(uint8_t addr, 
@@ -33,8 +33,21 @@ template<class SPI, pin_t cs, pin_t resetp> class MCP2515 {
     };
     void setMode(mode_t mode) const;
 
+    enum __attribute__ ((__packed__)) txb_t {
+	TXB0	= 0x30,		/* Transmit buffer 0  0011 xxxx */
+	TXB1	= 0x40,		/* Transmit buffer 0  0100 xxxx */
+	TXB2	= 0x50,		/* Transmit buffer 0  0101 xxxx */
+	TXB3	= 0x60,		/* Transmit buffer 0  0110 xxxx */
+    };
+    void setTransmitBuffer(txb_t buffer,
+			    uint16_t sid,
+			    uint16_t eid,
+			    uint8_t len,
+			    const void *data) const;
+			    
+
     public:
-    enum __attribute__ ((__packed__)) {
+    enum __attribute__ ((__packed__)) instr {
 	RESET	    = 0xC0, /* Reset                    - 1100 0000 */
 	WRITE	    = 0x02, /* Write Date               - 0000 0010 */
 	BIT_MODIFY  = 0x05, /* Bit Modify               - 0000 0101 */
@@ -92,6 +105,28 @@ template<class SPI, pin_t cs, pin_t resetp> class MCP2515 {
 	OPMOD0	    = 5,
 	OPMOD1,
 	OPMOD2,
+    };
+
+    private:
+    class Command : GuardPinLow<cs> {
+	public:
+	Command(instr c) {
+	    SPI::transfert(c);
+	}
+
+	void write(uint8_t byte) const {
+	    SPI::transfert(byte);
+	}
+
+	uint8_t read() const {
+	    return SPI::transfert(0);
+	}
+
+	void write(uint8_t n, const void *data) const {
+	    for(int i = 0; i < n; ++i) { 
+		SPI::transfert(((uint8_t*)data)[i]); 
+	    }
+	}
     };
 };
 

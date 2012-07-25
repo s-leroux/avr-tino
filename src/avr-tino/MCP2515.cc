@@ -19,12 +19,11 @@ void MCP2515<SPI,cs,pin_reset>::reset() const {
 }
 
 template<class SPI, pin_t cs, pin_t pin_reset>
-void MCP2515<SPI,cs,pin_reset>::write(uint8_t addr, uint8_t len, const uint8_t *data) const {
-    GuardPinLow<cs>	guard;
+void MCP2515<SPI,cs,pin_reset>::write(uint8_t addr, uint8_t len, const void *data) const {
+    Command	cmd(WRITE);
 
-    SPI::transfert(WRITE);        
-    SPI::transfert(addr);
-    while(len--) SPI::transfert(*data++);
+    cmd.write(addr);
+    cmd.write(len, data);
 }
 
 template<class SPI, pin_t cs, pin_t pin_reset>
@@ -35,21 +34,19 @@ void MCP2515<SPI,cs,pin_reset>::write(uint8_t addr, uint8_t data) const {
 template<class SPI, pin_t cs, pin_t pin_reset>
 void MCP2515<SPI,cs,pin_reset>::bitModify(uint8_t addr, 
 			uint8_t mask, uint8_t data) const {
-    GuardPinLow<cs>	guard;
+    Command cmd(BIT_MODIFY);
 
-    SPI::transfert(BIT_MODIFY);        
-    SPI::transfert(addr);        
-    SPI::transfert(mask);        
-    SPI::transfert(data);        
+    cmd.write(addr);        
+    cmd.write(mask);        
+    cmd.write(data);        
 }
 
 template<class SPI, pin_t cs, pin_t pin_reset>
 uint8_t MCP2515<SPI,cs,pin_reset>::read(uint8_t addr) const {
-    GuardPinLow<cs>	guard;
+    Command cmd(READ);
 
-    SPI::transfert(READ);
-    SPI::transfert(addr);        
-    return SPI::transfert(0);
+    cmd.write(addr);        
+    return cmd.read();
 }
 
 template<class SPI, pin_t cs, pin_t pin_reset>
@@ -64,3 +61,23 @@ void MCP2515<SPI,cs,pin_reset>::setMode(mode_t mode) const {
 		mode << REQOP0);
 }
 
+template<class SPI, pin_t cs, pin_t pin_reset>
+void  MCP2515<SPI,cs,pin_reset>::setTransmitBuffer(txb_t buffer,
+                            uint16_t sid,
+                            uint16_t eid,
+                            uint8_t len,
+                            const void *data) const
+{
+    // adjust len
+    if (len > 8) len = 8;
+
+    Command	cmd(WRITE);
+
+    cmd.write(buffer+1);
+    cmd.write((uint8_t)(sid >> 8));
+    cmd.write((uint8_t)(sid));
+    cmd.write((uint8_t)(eid >> 8));
+    cmd.write((uint8_t)(eid));
+    cmd.write((uint8_t)(len));
+    cmd.write(len, data);
+}
