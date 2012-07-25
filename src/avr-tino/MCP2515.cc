@@ -80,7 +80,7 @@ void MCP2515<SPI,cs,pin_reset>::setMode(mode_t mode) const {
 }
 
 template<class SPI, pin_t cs, pin_t pin_reset>
-void  MCP2515<SPI,cs,pin_reset>::setTransmitBuffer(txb_t buffer,
+void  MCP2515<SPI,cs,pin_reset>::setTransmitBuffer(txb_t tx_base,
                             uint16_t sid,
                             uint16_t eid,
                             uint8_t len,
@@ -91,7 +91,8 @@ void  MCP2515<SPI,cs,pin_reset>::setTransmitBuffer(txb_t buffer,
 
     Command	cmd(WRITE);
 
-    cmd.write(buffer+1);
+    cmd.write(tx_base & 0xF0);
+    cmd.write(0); // reset TXBnCTRL
     cmd.write((uint8_t)(sid >> 8));
     cmd.write((uint8_t)(sid));
     cmd.write((uint8_t)(eid >> 8));
@@ -99,3 +100,9 @@ void  MCP2515<SPI,cs,pin_reset>::setTransmitBuffer(txb_t buffer,
     cmd.write((uint8_t)(len));
     cmd.write(len, data);
 }
+
+template<class SPI, pin_t cs, pin_t pin_reset>
+void MCP2515<SPI,cs,pin_reset>::doTransmitBuffer(uint8_t buffer_set) const {
+    Command	cmd(RTS | (buffer_set & 0x0F));
+}
+

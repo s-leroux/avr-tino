@@ -51,18 +51,30 @@ template<class SPI, pin_t cs, pin_t resetp> class MCP2515 {
     };
     void setMode(mode_t mode) const;
 
+    /**
+	Transmit buffer selector.
+
+	High order 4-bits maps to the correspondig TX buffer
+	base addr. Low order 4-bits maps to the corresponding
+	bit for 'Request To Send' command'.
+
+	Ugly but efficient (mostly)...
+    */
     enum __attribute__ ((__packed__)) txb_t {
-	TXB0	= 0x30,		/* Transmit buffer 0  0011 xxxx */
-	TXB1	= 0x40,		/* Transmit buffer 0  0100 xxxx */
-	TXB2	= 0x50,		/* Transmit buffer 0  0101 xxxx */
-	TXB3	= 0x60,		/* Transmit buffer 0  0110 xxxx */
+                                /*                    TXB  RTS  */
+                                /*                    ---- ---- */
+	TXB0	= 0x31,		/* Transmit buffer 0  0011 0001 */
+	TXB1	= 0x42,		/* Transmit buffer 1  0100 0010 */
+	TXB2	= 0x54,		/* Transmit buffer 2  0101 0100 */
     };
-    void setTransmitBuffer(txb_t buffer,
+    void setTransmitBuffer(txb_t tx_base,
 			    uint16_t sid,
 			    uint16_t eid,
 			    uint8_t len,
 			    const void *data) const;
-			    
+
+    void doTransmitBuffer(uint8_t buffer_set) const;
+
 
     public:
     enum __attribute__ ((__packed__)) instr {
