@@ -21,19 +21,19 @@
 #include "avr-tino/pin.h"
 
 template<pin_t DataBase, pin_t RS, pin_t E>
-Interface4Bits<DataBase, RS, E>::Message::Message(bool isData) {
+void Interface4Bits<DataBase, RS, E>::begin(message_t type) {
     const uint8_t dataMask = 0x0F << pin_to_bit(DataBase);
     pin_to_mode(DataBase) |= dataMask;
     pin_to_output(DataBase) &= (0xFF ^ dataMask);
 
     pinToOutput(RS);
-    digitalWrite(RS, (isData) ? HIGH: LOW);
+    digitalWrite(RS, (type == DATA_MESSAGE) ? HIGH: LOW);
     pinToOutput(E);
     pinToLow(E);
 }
 
 template<pin_t DataBase, pin_t RS, pin_t E>
-void Interface4Bits<DataBase, RS, E>::Message::write(uint8_t data, bool highOnly) {
+void Interface4Bits<DataBase, RS, E>::write(uint8_t data, bool highOnly) {
     const uint8_t dataMask = 0x0F << pin_to_bit(DataBase);
     const uint8_t hDataVal = (data >> 4) << pin_to_bit(DataBase);
     const uint8_t lDataVal = (data & 0x0F) << pin_to_bit(DataBase);
@@ -57,32 +57,48 @@ void Interface4Bits<DataBase, RS, E>::Message::write(uint8_t data, bool highOnly
 template<pin_t DataBase, pin_t RS, pin_t E>
 void Interface4Bits<DataBase, RS, E>::init() {
     // Set driver to 4bits mode
-    Message msg(false); 
-    msg.write(0x20, true);
+    write(0x20, true);
 
-    msg.write(0x20);
-    msg.write(0x0E);
-    msg.write(0x07);
+    write(0x20);
+    write(0x0E);
+    write(0x07);
 }
 
 template<class Interface>
 HD44780<Interface>::HD44780() 
 {
-    Interface::init();
-    move(0,0);
+    Message msg(INSTRUCTION_MESSAGE);
+
+    msg.init();
+    msg.move(0,0);
 } 
 
 template<class Interface>
 void HD44780<Interface>::move(uint8_t x, uint8_t y) const {
-    typename Interface::Message msg(false); 
-    
-    msg.write(0x80 | ( (x + 40*y) & 0x3F));
+    Message msg(INSTRUCTION_MESSAGE);
+
+    msg.move(x,y);
 }
 
 template<class Interface>
 void HD44780<Interface>::print(char c) const { 
-    typename Interface::Message msg(true); 
-    
-    msg.write((uint8_t)c);
+    Message msg(DATA_MESSAGE);
+
+    msg.write(c);
+}
+
+template<class Interface>
+void HD44780<Interface>::Message::init() const {
+    Interface::init();
+}
+
+template<class Interface>
+void HD44780<Interface>::Message::move(uint8_t x, uint8_t y) const {
+    Interface::write(0x80 | ( (x + 40*y) & 0x3F));
+}
+
+template<class Interface>
+void HD44780<Interface>::Message::write(char c) const {
+    Interface::write((uint8_t) c );
 }
 

@@ -19,27 +19,29 @@
 #if !defined AVR_TINO_HD44780_H
 #define AVR_TINO_HD44780_H
 
-/*
- * Interface file for LCD displays that are compatible with
- * the Hitachi HD44780 driver. This includes many LCD displays
- * like the low-cost 1602.
- */
+enum __attribute__((__packed__)) message_t {
+    DATA_MESSAGE,
+    INSTRUCTION_MESSAGE,
+};
 
 /* Abstract out access to the pin interface */
 template<pin_t DataBase, pin_t RS, pin_t E>
 class Interface4Bits {
     public:
-    static void init();
-    static void writeData(uint8_t data);
-    static void writeInstruction(uint8_t data);
+    static void begin(message_t type);
 
-    class Message {
-	public:
-	Message(bool isData);
-	void write(uint8_t data, bool highHalf = false);
-    };
+    static void init(void);
+    static inline void write(uint8_t data) { write(data, false); }
+
+    private:
+    static void write(uint8_t data, bool highHalf);
 };
 
+/*
+ * Interface file for LCD displays that are compatible with
+ * the Hitachi HD44780 driver. This includes many LCD displays
+ * like the low-cost 1602.
+ */
 template <class Interface>
 class HD44780 {
     public:
@@ -55,12 +57,21 @@ class HD44780 {
     */
     void print(char c) const;
 
-    enum __attribute__ ((__packed__)) mode_t {
-	NORMAL	        = 0,  /* Normal mode         000 */
-	SLEEP	        = 1,  /* Sleep mode          001 */
-        LOOPBACK        = 2,  /* Loopback mode       010 */
-        LISTEN          = 3,  /* Listen only mode    011 */
-        CONFIGURATION	= 4,  /* Configuration mode  100 */
+    private:
+    class Message {
+	public:
+	Message(message_t type) {
+	    Interface::begin(type);
+	}
+
+	/** Initialisation sequence for the device */
+	void init() const;
+
+	/** Move the cursor */
+	void move(uint8_t x, uint8_t y) const;
+
+	/** Write one character on the device */
+	void write(char c) const; 
     };
 };
 
