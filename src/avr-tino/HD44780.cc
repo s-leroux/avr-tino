@@ -57,11 +57,9 @@ void Interface4Bits<DataBase, RS, E>::write(uint8_t data, bool highOnly) {
 template<pin_t DataBase, pin_t RS, pin_t E>
 void Interface4Bits<DataBase, RS, E>::init() {
     // Set driver to 4bits mode
-    write(0x20, true);
+    write(0x20, true); // XXX should be a constant !
 
     write(0x20);
-    write(0x0E);
-    write(0x07);
 }
 
 template<class Interface>
@@ -81,6 +79,20 @@ void HD44780<Interface>::move(uint8_t x, uint8_t y) const {
 }
 
 template<class Interface>
+void HD44780<Interface>::setEntryMode(entry_mode_t mode) const {
+    Instruction msg;
+
+    msg.setEntryMode(mode);
+}
+
+template<class Interface>
+void HD44780<Interface>::setDisplayControl(display_control_t dc) const {
+    Instruction msg;
+
+    msg.setDisplayControl(dc);
+}
+
+template<class Interface>
 void HD44780<Interface>::print(char c) const { 
     DataMessage msg;
 
@@ -90,11 +102,24 @@ void HD44780<Interface>::print(char c) const {
 template<class Interface>
 void HD44780<Interface>::Instruction::init() const {
     Interface::init();
+
+    setDisplayControl(DISPLAY_ON | CURSOR_ON);
+    setEntryMode(DISPLAY_SHIFT_LEFT);
+}
+
+template<class Interface>
+void HD44780<Interface>::Instruction::setEntryMode(entry_mode_t mode) const {
+    Interface::write(ENTRY_MODE_SET | mode);
+}
+
+template<class Interface>
+void HD44780<Interface>::Instruction::setDisplayControl(display_control_t dc) const {
+    Interface::write(DISPLAY_CONTROL | dc);
 }
 
 template<class Interface>
 void HD44780<Interface>::Instruction::move(uint8_t x, uint8_t y) const {
-    Interface::write(0x80 | ( (x + 40*y) & 0x3F));
+    Interface::write(SET_DDRAM_ADDR | ( (x + 40*y) & 0x3F));
 }
 
 template<class Interface>

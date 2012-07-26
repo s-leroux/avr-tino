@@ -57,6 +57,28 @@ class HD44780 {
     */
     void print(char c) const;
 
+    enum __attribute__((__packed__)) entry_mode_t {
+	CURSOR_MOVE_LEFT    =	0x00,
+	CURSOR_MOVE_RIGHT   =	0x02,
+	DISPLAY_SHIFT_LEFT  =	0x03,
+	DISPLAY_SHIFT_RIGHT  =	0x01,
+    };
+
+    void setEntryMode(entry_mode_t mode) const;
+
+    enum __attribute__((__packed__)) display_control_mask {
+	DISPLAY_ON	= 0x04,
+	CURSOR_ON	= 0x02,
+	CURSOR_BLINK	= 0x01,
+    };
+
+    /* Combination of the above
+	XXX should I use bitfield instead?
+    */
+    typedef uint8_t display_control_t;
+
+    void setDisplayControl(display_control_t mode) const;
+
     private:
     class Instruction {
 	public:
@@ -69,6 +91,21 @@ class HD44780 {
 
 	/** Move the cursor */
 	void move(uint8_t x, uint8_t y) const;
+
+	void setEntryMode(entry_mode_t mode) const;
+
+	void setDisplayControl(display_control_t mode) const;
+
+	enum __attribute__((__packed__)) instruction_t {
+	    CLEAR_DISPLAY   = 0x01,
+	    RETURN_HOME	    = 0x02, // kind o'reset
+	    ENTRY_MODE_SET  = 0x04,
+	    DISPLAY_CONTROL = 0x08,
+	    CURSOR_SHIFT    = 0x10,
+	    FUNCTION_SET    = 0x20,
+	    SET_CGRAM_ADDR  = 0x40,
+	    SET_DDRAM_ADDR  = 0x80,
+	};
     };
 
     class DataMessage {
