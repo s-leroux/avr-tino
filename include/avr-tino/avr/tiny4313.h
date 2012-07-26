@@ -16,24 +16,14 @@
   You should have received a copy of the GNU General Public License
   along with avr-tino.  If not, see <http://www.gnu.org/licenses/>.
 */
-#if !defined avr_tino_h
-#define avr_tino_h
+#if !defined AVR_TINO_TINY4313_H
+#define AVR_TINO_TINY4313_H
 
-//
-// Core includes
-
-#include <avr/io.h>
-#include <avr/pgmspace.h>
-
-// Borrowed from /usr/lib/avr/include/avr/io.h 
-#if defined (__AVR_ATtiny2313__)
-#  include "avr-tino/avr/tiny2313.h"
-#elif defined (__AVR_ATtiny4313__)
-#  include "avr-tino/avr/tiny4313.h"
-#else
-#  error "Unknown target AVR. Don't you forget '-mmcu'?"
-#endif
-
-#include "avr-tino/pin.h"
+/*
+  The ATtiny4313 is basicly the same chip as ATtiny2313 with twice
+  more memory (flash/eeprom/ram)
+*/
+#include "avr-tino/avr/tiny2313.h"
 
 #endif
+
