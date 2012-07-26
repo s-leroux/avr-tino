@@ -67,7 +67,7 @@ void Interface4Bits<DataBase, RS, E>::init() {
 template<class Interface>
 HD44780<Interface>::HD44780() 
 {
-    Message msg(INSTRUCTION_MESSAGE);
+    Instruction msg;
 
     msg.init();
     msg.move(0,0);
@@ -75,30 +75,30 @@ HD44780<Interface>::HD44780()
 
 template<class Interface>
 void HD44780<Interface>::move(uint8_t x, uint8_t y) const {
-    Message msg(INSTRUCTION_MESSAGE);
+    Instruction msg;
 
     msg.move(x,y);
 }
 
 template<class Interface>
 void HD44780<Interface>::print(char c) const { 
-    Message msg(DATA_MESSAGE);
+    DataMessage msg;
 
     msg.write(c);
 }
 
 template<class Interface>
-void HD44780<Interface>::Message::init() const {
+void HD44780<Interface>::Instruction::init() const {
     Interface::init();
 }
 
 template<class Interface>
-void HD44780<Interface>::Message::move(uint8_t x, uint8_t y) const {
+void HD44780<Interface>::Instruction::move(uint8_t x, uint8_t y) const {
     Interface::write(0x80 | ( (x + 40*y) & 0x3F));
 }
 
 template<class Interface>
-void HD44780<Interface>::Message::write(char c) const {
+void HD44780<Interface>::DataMessage::write(char c) const {
     Interface::write((uint8_t) c );
 }
 

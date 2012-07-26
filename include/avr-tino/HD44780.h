@@ -58,10 +58,10 @@ class HD44780 {
     void print(char c) const;
 
     private:
-    class Message {
+    class Instruction {
 	public:
-	Message(message_t type) {
-	    Interface::begin(type);
+	Instruction() {
+	    Interface::begin(INSTRUCTION_MESSAGE);
 	}
 
 	/** Initialisation sequence for the device */
@@ -69,6 +69,13 @@ class HD44780 {
 
 	/** Move the cursor */
 	void move(uint8_t x, uint8_t y) const;
+    };
+
+    class DataMessage {
+	public:
+	DataMessage() {
+	    Interface::begin(DATA_MESSAGE);
+	}
 
 	/** Write one character on the device */
 	void write(char c) const; 
