@@ -48,6 +48,13 @@ class HD44780 {
     /* Init the LCD display - reset cursor to initial position */
     void init() const;
 
+    void move(uint8_t x, uint8_t y) const;
+
+    /**
+	Print a character on the display
+    */
+    void print(char c) const;
+
     enum __attribute__ ((__packed__)) mode_t {
 	NORMAL	        = 0,  /* Normal mode         000 */
 	SLEEP	        = 1,  /* Sleep mode          001 */

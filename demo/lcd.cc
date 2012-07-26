@@ -32,43 +32,12 @@ static const pin_t LCD_DB4 = PIN_PB0;
 int main() {
     HD44780<Interface4Bits<LCD_DB4, LCD_RS, LCD_E> >	lcd;
 
-
-    // increase address
-    PORTB = 0x00;
-    pinToHigh(LCD_E);
-    delay(10);
-    pinToLow(LCD_E);
-    delay(40);
-
-    PORTB = 0x07;
-    pinToHigh(LCD_E);
-    delay(10);
-    pinToLow(LCD_E);
-    delay(40);
-
-    delay(1000);
-    // write "W"
+    lcd.move(10, 0);
 
     while(1) {
 	const char* message = "Hello world      ";
 	for(uint8_t i = 0; i < strlen(message); ++i) {
-	    pinToHigh(LCD_RS);
-	    delay(10);
-
-	    PORTB = 0x30 | (message[i] >> 4);
-	    pinToHigh(LCD_E);
-	    delay(10);
-	    pinToLow(LCD_E);
-	    delay(40);
-
-	    PORTB = 0x30 | (message[i] & 0x0F);
-	    pinToHigh(LCD_E);
-	    delay(10);
-	    pinToLow(LCD_E);
-	    delay(40);
-
-	    pinToLow(LCD_RS);
-	    delay(10);
+	    lcd.print(message[i]);
 	    delay(500);
 	}
     }

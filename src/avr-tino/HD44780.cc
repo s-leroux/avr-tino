@@ -62,15 +62,27 @@ void Interface4Bits<DataBase, RS, E>::init() {
 
     msg.write(0x20);
     msg.write(0x0E);
-    msg.write(0x8A);
+    msg.write(0x07);
 }
 
 template<class Interface>
 HD44780<Interface>::HD44780() 
 {
     Interface::init();
-
-
+    move(0,0);
 } 
 
+template<class Interface>
+void HD44780<Interface>::move(uint8_t x, uint8_t y) const {
+    typename Interface::Message msg(false); 
+    
+    msg.write(0x80 | ( (x + 40*y) & 0x3F));
+}
+
+template<class Interface>
+void HD44780<Interface>::print(char c) const { 
+    typename Interface::Message msg(true); 
+    
+    msg.write((uint8_t)c);
+}
 
