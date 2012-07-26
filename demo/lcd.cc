@@ -18,6 +18,7 @@
 */
 #include "avr-tino.h"
 #include "avr-tino/delay.h"
+#include "avr-tino/HD44780.h"
 
 #include <string.h>
 
@@ -29,61 +30,8 @@ static const pin_t LCD_DB5 = PIN_PB1;
 static const pin_t LCD_DB4 = PIN_PB0;
 
 int main() {
-    DDRB = 0x3F;
+    HD44780<Interface4Bits<LCD_DB4, LCD_RS, LCD_E> >	lcd;
 
-    // set to 4bit mode
-    PORTB = 0x02;
-    pinToHigh(LCD_E);
-    delay(10);
-    pinToLow(LCD_E);
-    delay(40);
-
-    delay(1000);
-
-    // 4bit mode + 1 line
-    PORTB = 0x02;
-    pinToHigh(LCD_E);
-    delay(10);
-    pinToLow(LCD_E);
-    delay(40);
-
-    PORTB = 0x00;
-    pinToHigh(LCD_E);
-    delay(10);
-    pinToLow(LCD_E);
-    delay(40);
-
-    delay(1000);
-
-    // display on
-    PORTB = 0x00;
-    pinToHigh(LCD_E);
-    delay(10);
-    pinToLow(LCD_E);
-    delay(40);
-
-    PORTB = 0x0E;
-    pinToHigh(LCD_E);
-    delay(10);
-    pinToLow(LCD_E);
-    delay(40);
-
-    delay(1000);
-
-    // move to pos 10
-    PORTB = 0x08;
-    pinToHigh(LCD_E);
-    delay(10);
-    pinToLow(LCD_E);
-    delay(40);
-
-    PORTB = 0x0A;
-    pinToHigh(LCD_E);
-    delay(10);
-    pinToLow(LCD_E);
-    delay(40);
-
-    delay(1000);
 
     // increase address
     PORTB = 0x00;

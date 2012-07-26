@@ -65,6 +65,7 @@ DEMOS=	$(BINDIR)input  \
 SRCFILES=$(SRCDIR)pin.cc \
 	$(SRCDIR)SPI.cc \
 	$(SRCDIR)serial.cc \
+	$(SRCDIR)HD44780.cc \
 	$(SRCDIR)MCP2515.cc 
 
 ifeq ($(BOARD),CANModule)
