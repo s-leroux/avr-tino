@@ -16,8 +16,8 @@
   You should have received a copy of the GNU General Public License
   along with avr-tino.  If not, see <http://www.gnu.org/licenses/>.
 */
-#if !defined AVRTINO_SERIAL_H
-#define AVRTINO_SERIAL_H
+#if !defined AVR_TINO_SERIAL_H
+#define AVR_TINO_SERIAL_H
 
 // XXX should use namespace instead ?
 class Serial {
