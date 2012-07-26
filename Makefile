@@ -43,7 +43,7 @@ CXXFLAGS=-mmcu=$(MCU) \
 	-ffunction-sections -fdata-sections \
 	-fno-rtti \
 	-g
-LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections -Wl,--relax
+LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections 
 
 
 DEMOSRCDIR=./demo/
