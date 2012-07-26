@@ -59,6 +59,7 @@ DEMOS=	$(BINDIR)input  \
 	$(BINDIR)shiftout \
 	$(BINDIR)spiout \
 	$(BINDIR)usart \
+	$(BINDIR)lcd \
 	$(BINDIR)blink
 
 SRCFILES=$(SRCDIR)pin.cc \
