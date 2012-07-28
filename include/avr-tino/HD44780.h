@@ -52,6 +52,15 @@ class HD44780 {
 
     void move(uint8_t x, uint8_t y) const;
 
+    /* Clear the display */
+    void clear() const;
+
+    /* Set display on */
+    inline void display() const { setDisplayControl(DISPLAY_ON); };
+
+    /* Set display off */
+    inline void noDisplay() const { setDisplayControl(0); };
+
     /**
 	Print a character on the display
     */
@@ -105,6 +114,9 @@ class HD44780 {
 
 	/** Move the cursor */
 	void move(uint8_t x, uint8_t y) const;
+
+	/** Clear the display */
+	void clear() const;
 
 	void setEntryMode(entry_mode_t mode) const;
 

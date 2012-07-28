@@ -32,11 +32,14 @@ static const pin_t LCD_DB4 = PIN_PB0;
 int main() {
     HD44780<Interface4Bits<LCD_DB4, LCD_RS, LCD_E> >	lcd;
 
-    lcd.move(10, 1);
+    lcd.display();
+    lcd.move(4, 1);
     lcd.print("LCD DEMO");
 
-    lcd.move(10, 0);
     while(1) {
+	lcd.move(0, 0);
+	lcd.print(            "*****************");
+	lcd.move(0, 0);
 	const char* message = "Hello world      ";
 	for(uint8_t i = 0; i < strlen(message); ++i) {
 	    lcd.print(message[i]);

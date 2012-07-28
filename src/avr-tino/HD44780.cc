@@ -62,13 +62,9 @@ void Interface4Bits<DataBase, RS, E>::init(uint8_t function_set) {
     write(0x20 /* | function_set */); // XXX BUG That does not accept
 				    // anything but 0x20 !!
 #else
-    write(0x33,true);
-    delay(4);
-    write(0x33,true);
-    write(0x32,true);
-    write(0x20,true);
-    write(0x28); // XXX ???
-    write(0x0E);
+    write(0x33); // XXX This should use constants ?!?
+    write(0x32);
+    write(0x20 | function_set);
 #endif
 }
 
@@ -78,9 +74,8 @@ HD44780<Interface>::HD44780()
     Instruction msg;
 
     msg.init(TWO_LINES);
-    msg.setDisplayControl(DISPLAY_ON | CURSOR_ON);
-    msg.setEntryMode(CURSOR_MOVE_RIGHT);
-    msg.move(0,0);
+    msg.setDisplayControl(0);
+    msg.clear();
 } 
 
 template<class Interface>
@@ -88,6 +83,13 @@ void HD44780<Interface>::move(uint8_t x, uint8_t y) const {
     Instruction msg;
 
     msg.move(x,y);
+}
+
+template<class Interface>
+void HD44780<Interface>::clear() const {
+    Instruction msg;
+
+    msg.clear();
 }
 
 template<class Interface>
@@ -138,6 +140,11 @@ void HD44780<Interface>::Instruction::setDisplayControl(display_control_t dc) co
 template<class Interface>
 void HD44780<Interface>::Instruction::move(uint8_t x, uint8_t y) const {
     Interface::write(SET_DDRAM_ADDR | ( (x + 0x40*y) & 0xEF));
+}
+
+template<class Interface>
+void HD44780<Interface>::Instruction::clear() const {
+    Interface::write(CLEAR_DISPLAY);
 }
 
 template<class Interface>
