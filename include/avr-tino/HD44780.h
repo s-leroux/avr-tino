@@ -19,6 +19,8 @@
 #if !defined AVR_TINO_HD44780_H
 #define AVR_TINO_HD44780_H
 
+#include "avr-tino/printer.h"
+
 enum __attribute__((__packed__)) message_t {
     DATA_MESSAGE,
     INSTRUCTION_MESSAGE,
@@ -43,7 +45,7 @@ class Interface4Bits {
  * like the low-cost 1602.
  */
 template <class Interface>
-class HD44780 {
+class HD44780 : public Printer {
     public:
     HD44780();
 
@@ -61,13 +63,7 @@ class HD44780 {
     /* Set display off */
     inline void noDisplay() const { setDisplayControl(0); };
 
-    /**
-	Print a character on the display
-    */
-    void print(char c) const;
-
-    /* print C-string */
-    void print(const char* str) const;
+    void write(const char* str) const;
 
     enum __attribute__((__packed__)) entry_mode_t {
 	CURSOR_MOVE_LEFT    =	0x00,

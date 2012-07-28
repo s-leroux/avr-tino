@@ -16,26 +16,37 @@
   You should have received a copy of the GNU General Public License
   along with avr-tino.  If not, see <http://www.gnu.org/licenses/>.
 */
-#if !defined avr_tino_h
-#define avr_tino_h
+#include "avr-tino/printer.h"
 
-extern "C" void __cxa_pure_virtual(void) { /* do nothing */ }
+void Printer::print(int n) const {
+    static const int LEN = 7;
+    char	buffer[LEN]; // int goes up to 32767 -- that is 5 digits
+    char	*ptr = &buffer[LEN-1];
 
-//
-// Core includes
+    *ptr = 0;
+    if (n == 0) {
+	*--ptr = '0';
+    }
+    else {
+	bool	positive;
+	if (n >= 0) {
+	    positive = true;
+	    n = -n;
+	}
+	else {
+	    positive = false;
+	}
 
-#include <avr/io.h>
-#include <avr/pgmspace.h>
+	while(n) {
+	    int8_t remainder = n % 10;
+	    n /= 10;
 
-// Borrowed from /usr/lib/avr/include/avr/io.h 
-#if defined (__AVR_ATtiny2313__)
-#  include "avr-tino/avr/tiny2313.h"
-#elif defined (__AVR_ATtiny4313__)
-#  include "avr-tino/avr/tiny4313.h"
-#else
-#  error "Unknown target AVR. Don't you forget '-mmcu'?"
-#endif
+	    *--ptr = '0' - remainder;
+	}
+	if (!positive) {
+	    *--ptr = '0';
+	}
+    }
+    print(ptr);
+}
 
-#include "avr-tino/pin.h"
-
-#endif

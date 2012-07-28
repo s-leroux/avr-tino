@@ -16,26 +16,37 @@
   You should have received a copy of the GNU General Public License
   along with avr-tino.  If not, see <http://www.gnu.org/licenses/>.
 */
-#if !defined avr_tino_h
-#define avr_tino_h
+#if !defined AVR_TINO_PRINTER_H
+#define AVR_TINO_PRINTER_H
 
-extern "C" void __cxa_pure_virtual(void) { /* do nothing */ }
+#include <string.h>
+/*
+    Printer object to display formated data.
+*/
+class Printer {
+    public:
+    /* virtual ~Printer(void) {} */
 
-//
-// Core includes
+    /**
+	Print a row sequence of bytes
 
-#include <avr/io.h>
-#include <avr/pgmspace.h>
+	All 'print(...)' methors are implemented in terms of write().
+    */
+    virtual void write(const char* data) const = 0;
 
-// Borrowed from /usr/lib/avr/include/avr/io.h 
-#if defined (__AVR_ATtiny2313__)
-#  include "avr-tino/avr/tiny2313.h"
-#elif defined (__AVR_ATtiny4313__)
-#  include "avr-tino/avr/tiny4313.h"
-#else
-#  error "Unknown target AVR. Don't you forget '-mmcu'?"
+    /**
+	Print one char
+    */
+    void print(char c) const { char s[2] = { c, 0 }; write(s); }
+
+    void print(int i) const;
+   
+    /**
+	Print a C-string
+    */
+    void print(const char* str) const { write(str); }
+
+};
+
 #endif
 
-#include "avr-tino/pin.h"
-
-#endif

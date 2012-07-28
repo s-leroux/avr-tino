@@ -33,10 +33,15 @@ int main() {
     HD44780<Interface4Bits<LCD_DB4, LCD_RS, LCD_E> >	lcd;
 
     lcd.display();
-    lcd.move(4, 1);
+    lcd.move(3,1);
     lcd.print("LCD DEMO");
+    // lcd.at(4,1).print("LCD DEMO");
 
     while(1) {
+	static int n = 0;
+	lcd.move(12,1);
+	lcd.print(n++);
+
 	lcd.move(0, 0);
 	lcd.print(            "*****************");
 	lcd.move(0, 0);

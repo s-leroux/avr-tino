@@ -39,11 +39,11 @@ SIZE=$(PROGRAM_PREFIX)size$(PROGRAM_SUFFIX)
 #
 CPPFLAGS=-I./include -include "avr-tino/target/$(BOARD).h"
 CXXFLAGS=-mmcu=$(MCU) \
-	-Os -mcall-prologues \
+	-Os \
 	-ffunction-sections -fdata-sections \
 	-fno-rtti \
 	-g
-LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections 
+LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections
 
 
 DEMOSRCDIR=./demo/
@@ -63,6 +63,7 @@ DEMOS=	$(BINDIR)input  \
 	$(BINDIR)blink
 
 SRCFILES=$(SRCDIR)pin.cc \
+	$(SRCDIR)printer.cc \
 	$(SRCDIR)SPI.cc \
 	$(SRCDIR)serial.cc \
 	$(SRCDIR)HD44780.cc \

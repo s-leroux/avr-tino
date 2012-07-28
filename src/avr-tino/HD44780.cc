@@ -18,6 +18,7 @@
 */
 #include "avr-tino/HD44780.h"
 
+#include "avr-tino/delay.h"
 #include "avr-tino/pin.h"
 
 template<pin_t DataBase, pin_t RS, pin_t E>
@@ -107,19 +108,13 @@ void HD44780<Interface>::setDisplayControl(display_control_t dc) const {
 }
 
 template<class Interface>
-void HD44780<Interface>::print(char c) const { 
+void HD44780<Interface>::write(const char* str) const { 
     DataMessage msg;
-
-    msg.write(c);
-}
-
-template<class Interface>
-void HD44780<Interface>::print(const char* str) const { 
-    DataMessage msg;
-   
+    
     char c;
-    while((c = *str++) != 0)
+    while((c = *str++) != 0) {
 	msg.write(c);
+    }
 }
 
 template<class Interface>
