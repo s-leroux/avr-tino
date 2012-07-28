@@ -41,16 +41,16 @@ void Interface4Bits<DataBase, RS, E>::write(uint8_t data, bool highOnly) {
     const uint8_t actualValue = pin_to_output(DataBase);
     pin_to_output(DataBase) = (actualValue & ~dataMask) | hDataVal;
     pinToHigh(E);
-    delay(1); // excessive !
+    delayMicroseconds(1);
     pinToLow(E);
-    delay(1); // excessive !
+    delayMicroseconds(1);
 
     if (!highOnly) {
 	pin_to_output(DataBase) = (actualValue & ~dataMask) | lDataVal;
 	pinToHigh(E);
-	delay(1); // excessive !
+	delayMicroseconds(1);
 	pinToLow(E);
-	delay(1); // excessive !
+	delayMicroseconds(1);
     }
 }
 
@@ -125,30 +125,36 @@ void HD44780<Interface>::print(const char* str) const {
 template<class Interface>
 void HD44780<Interface>::Instruction::init(uint8_t function_set) const {
     Interface::init(function_set);
+    // delayMicroseconds(50); XXX some delay here?
 }
 
 template<class Interface>
 void HD44780<Interface>::Instruction::setEntryMode(entry_mode_t mode) const {
     Interface::write(ENTRY_MODE_SET | mode);
+    delayMicroseconds(50);
 }
 
 template<class Interface>
 void HD44780<Interface>::Instruction::setDisplayControl(display_control_t dc) const {
     Interface::write(DISPLAY_CONTROL | dc);
+    delayMicroseconds(50);
 }
 
 template<class Interface>
 void HD44780<Interface>::Instruction::move(uint8_t x, uint8_t y) const {
     Interface::write(SET_DDRAM_ADDR | ( (x + 0x40*y) & 0xEF));
+    delayMicroseconds(50);
 }
 
 template<class Interface>
 void HD44780<Interface>::Instruction::clear() const {
     Interface::write(CLEAR_DISPLAY);
+    delayMicroseconds(1600);
 }
 
 template<class Interface>
 void HD44780<Interface>::DataMessage::write(char c) const {
     Interface::write((uint8_t) c );
+    delayMicroseconds(50);
 }
 
