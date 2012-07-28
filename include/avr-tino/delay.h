@@ -24,5 +24,7 @@
 // XXX Shouldn't this be defined as an inline fuction instead?
 #define delay _delay_ms
 
+#define delayMicroseconds _delay_us
+
 #endif
 
