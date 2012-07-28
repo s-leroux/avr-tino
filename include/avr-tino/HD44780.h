@@ -30,7 +30,7 @@ class Interface4Bits {
     public:
     static void begin(message_t type);
 
-    static void init(void);
+    static void init(uint8_t function_set);
     static inline void write(uint8_t data) { write(data, false); }
 
     private:
@@ -57,6 +57,9 @@ class HD44780 {
     */
     void print(char c) const;
 
+    /* print C-string */
+    void print(const char* str) const;
+
     enum __attribute__((__packed__)) entry_mode_t {
 	CURSOR_MOVE_LEFT    =	0x00,
 	CURSOR_MOVE_RIGHT   =	0x02,
@@ -79,6 +82,17 @@ class HD44780 {
 
     void setDisplayControl(display_control_t mode) const;
 
+    enum __attribute__((__packed__)) function_set_mask {
+	EIGHT_BITS	= 0x10,
+	TWO_LINES	= 0x08,
+	FONT_5X10	= 0x04,
+    };
+
+    /* Combination of the above
+	XXX should I use bitfield instead?
+    */
+    typedef uint8_t function_set_t;
+
     private:
     class Instruction {
 	public:
@@ -87,7 +101,7 @@ class HD44780 {
 	}
 
 	/** Initialisation sequence for the device */
-	void init() const;
+	void init(uint8_t function_set) const;
 
 	/** Move the cursor */
 	void move(uint8_t x, uint8_t y) const;

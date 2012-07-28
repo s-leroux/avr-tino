@@ -41,25 +41,35 @@ void Interface4Bits<DataBase, RS, E>::write(uint8_t data, bool highOnly) {
     const uint8_t actualValue = pin_to_output(DataBase);
     pin_to_output(DataBase) = (actualValue & ~dataMask) | hDataVal;
     pinToHigh(E);
-    delay(40); // excessive !
+    delay(1); // excessive !
     pinToLow(E);
-    delay(10);
+    delay(1); // excessive !
 
     if (!highOnly) {
 	pin_to_output(DataBase) = (actualValue & ~dataMask) | lDataVal;
 	pinToHigh(E);
-	delay(40); // excessive !
+	delay(1); // excessive !
 	pinToLow(E);
-	delay(10);
+	delay(1); // excessive !
     }
 }
 
 template<pin_t DataBase, pin_t RS, pin_t E>
-void Interface4Bits<DataBase, RS, E>::init() {
+void Interface4Bits<DataBase, RS, E>::init(uint8_t function_set) {
+#if 0
     // Set driver to 4bits mode
     write(0x20, true); // XXX should be a constant !
-
-    write(0x20);
+    write(0x20 /* | function_set */); // XXX BUG That does not accept
+				    // anything but 0x20 !!
+#else
+    write(0x33,true);
+    delay(4);
+    write(0x33,true);
+    write(0x32,true);
+    write(0x20,true);
+    write(0x28); // XXX ???
+    write(0x0E);
+#endif
 }
 
 template<class Interface>
@@ -67,7 +77,9 @@ HD44780<Interface>::HD44780()
 {
     Instruction msg;
 
-    msg.init();
+    msg.init(TWO_LINES);
+    msg.setDisplayControl(DISPLAY_ON | CURSOR_ON);
+    msg.setEntryMode(CURSOR_MOVE_RIGHT);
     msg.move(0,0);
 } 
 
@@ -100,11 +112,17 @@ void HD44780<Interface>::print(char c) const {
 }
 
 template<class Interface>
-void HD44780<Interface>::Instruction::init() const {
-    Interface::init();
+void HD44780<Interface>::print(const char* str) const { 
+    DataMessage msg;
+   
+    char c;
+    while((c = *str++) != 0)
+	msg.write(c);
+}
 
-    setDisplayControl(DISPLAY_ON | CURSOR_ON);
-    setEntryMode(DISPLAY_SHIFT_LEFT);
+template<class Interface>
+void HD44780<Interface>::Instruction::init(uint8_t function_set) const {
+    Interface::init(function_set);
 }
 
 template<class Interface>
@@ -119,7 +137,7 @@ void HD44780<Interface>::Instruction::setDisplayControl(display_control_t dc) co
 
 template<class Interface>
 void HD44780<Interface>::Instruction::move(uint8_t x, uint8_t y) const {
-    Interface::write(SET_DDRAM_ADDR | ( (x + 40*y) & 0x3F));
+    Interface::write(SET_DDRAM_ADDR | ( (x + 0x40*y) & 0xEF));
 }
 
 template<class Interface>
