@@ -63,8 +63,13 @@ void Interface4Bits<DataBase, RS, E>::init(uint8_t function_set) {
     write(0x20 /* | function_set */); // XXX BUG That does not accept
 				    // anything but 0x20 !!
 #else
-    write(0x33); // XXX This should use constants ?!?
-    write(0x32);
+    write(0x30,true); // XXX This should use constants ?!?
+    delay(5);
+    write(0x30,true);
+    delay(1);
+    write(0x30);
+    delay(1);
+    write(0x20);
     write(0x20 | function_set);
 #endif
 }
