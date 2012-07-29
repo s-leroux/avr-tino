@@ -61,7 +61,7 @@ class HD44780 {
     /* Set display off */
     inline void noDisplay() const { setDisplayControl(0); };
 
-    void write(const char* str) const;
+    void print(const char* str) const;
 
     enum __attribute__((__packed__)) entry_mode_t {
 	CURSOR_MOVE_LEFT    =	0x00,

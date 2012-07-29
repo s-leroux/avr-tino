@@ -25,17 +25,18 @@
 
 #include "avr-tino/serial.h"
 #include "avr-tino/delay.h"
+#include "avr-tino/printer.h"
 
 int main() {
-    char    message[] = "Hello X\n";
+    char    message[] = "\r\nHello ";
 
-    Serial::begin(9600);
+    Serial  serial;
+    serial.begin(9600);
     uint8_t n = 0;
     while(1) {
-	message[6] = (n++) % 10 + '0';
-	for(uint8_t i = 0; i < strlen(message); ++i) {
-	    Serial::send(message[i]);
-	}
+	print(serial, message);
+	print(serial, n++);
+
 	delay(100);
     }
 

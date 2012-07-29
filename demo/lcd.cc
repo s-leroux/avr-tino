@@ -36,21 +36,20 @@ int main() {
     lcd.display();
     lcd.move(3,1);
 
-    Printer<HD44780<Interface4Bits<LCD_DB4, LCD_RS, LCD_E> > > p(lcd);
-    p.print("LCD DEMO");
+    print(lcd, "LCD DEMO");
     // lcd.at(4,1).print("LCD DEMO");
 
     while(1) {
 	static int n = 0;
 	lcd.move(12,1);
-	p.print(n++);
+	print(lcd, n++);
 
 	lcd.move(0, 0);
-	p.print(            "*****************");
+	print(lcd,        "*****************");
 	lcd.move(0, 0);
 	const char* message = "Hello world      ";
 	for(uint8_t i = 0; i < strlen(message); ++i) {
-	    p.print(message[i]);
+	    print(lcd,message[i]);
 	    delay(500);
 	}
     }
