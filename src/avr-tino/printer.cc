@@ -28,21 +28,26 @@ void Printer::print(int n) const {
 	*--ptr = '0';
     }
     else {
-	bool	positive;
+	bool	    positive;
+	unsigned    u;
+
 	if (n >= 0) {
 	    positive = true;
-	    n = -n;
+	    u = (unsigned)n;
 	}
 	else {
 	    positive = false;
+	    u = (unsigned)-n;
 	}
 
-	while(n) {
-	    int8_t remainder = n % 10;
-	    n /= 10;
+	while(u) {
+            unsigned int nn = u/10;
+            unsigned char remainder = u - 10*nn;
 
-	    *--ptr = '0' - remainder;
-	}
+            *--ptr = '0' + remainder;
+            u = nn;
+        }
+
 	if (!positive) {
 	    *--ptr = '0';
 	}
