@@ -18,40 +18,13 @@
 */
 #include "avr-tino/printer.h"
 
+#include <stdlib.h>
+
 void Printer::print(int n) const {
     static const int LEN = 7;
     char	buffer[LEN]; // int goes up to 32767 -- that is 5 digits
-    char	*ptr = &buffer[LEN-1];
 
-    *ptr = 0;
-    if (n == 0) {
-	*--ptr = '0';
-    }
-    else {
-	bool	    positive;
-	unsigned    u;
-
-	if (n >= 0) {
-	    positive = true;
-	    u = (unsigned)n;
-	}
-	else {
-	    positive = false;
-	    u = (unsigned)-n;
-	}
-
-	while(u) {
-            unsigned int nn = u/10;
-            unsigned char remainder = u - 10*nn;
-
-            *--ptr = '0' + remainder;
-            u = nn;
-        }
-
-	if (!positive) {
-	    *--ptr = '0';
-	}
-    }
-    print(ptr);
+    itoa(n, buffer, 10);
+    print(buffer);
 }
 
