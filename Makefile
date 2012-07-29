@@ -87,7 +87,10 @@ demo:	$(DIRS) $(DEMOS)
 hex:	$(DIRS) $(DEMOS:=.hex)
 
 clean:
-	rm -rf $(DIRS) build-*
+	rm -rf -- $(DIRS) build-*
+
+git-clean: clean
+	rm -f -- `git status -unormal --porcelain | awk '$$1=="??" { print $$2 }'`
 
 #
 # Combine all source file in one for better optimization
