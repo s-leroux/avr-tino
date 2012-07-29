@@ -19,6 +19,7 @@
 #include "avr-tino.h"
 #include "avr-tino/delay.h"
 #include "avr-tino/HD44780.h"
+#include "avr-tino/printer.h"
 
 #include <string.h>
 
@@ -34,20 +35,22 @@ int main() {
 
     lcd.display();
     lcd.move(3,1);
-    lcd.print("LCD DEMO");
+
+    Printer<HD44780<Interface4Bits<LCD_DB4, LCD_RS, LCD_E> > > p(lcd);
+    p.print("LCD DEMO");
     // lcd.at(4,1).print("LCD DEMO");
 
     while(1) {
 	static int n = 0;
 	lcd.move(12,1);
-	lcd.print(n++);
+	p.print(n++);
 
 	lcd.move(0, 0);
-	lcd.print(            "*****************");
+	p.print(            "*****************");
 	lcd.move(0, 0);
 	const char* message = "Hello world      ";
 	for(uint8_t i = 0; i < strlen(message); ++i) {
-	    lcd.print(message[i]);
+	    p.print(message[i]);
 	    delay(500);
 	}
     }

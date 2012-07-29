@@ -20,7 +20,8 @@
 
 #include <stdlib.h>
 
-void Printer::print(int n) const {
+template<class T>
+void Printer<T>::print(int n) const {
     static const int LEN = 7;
     char	buffer[LEN]; // int goes up to 32767 -- that is 5 digits
 

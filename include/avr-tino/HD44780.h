@@ -19,8 +19,6 @@
 #if !defined AVR_TINO_HD44780_H
 #define AVR_TINO_HD44780_H
 
-#include "avr-tino/printer.h"
-
 enum __attribute__((__packed__)) message_t {
     DATA_MESSAGE,
     INSTRUCTION_MESSAGE,
@@ -45,7 +43,7 @@ class Interface4Bits {
  * like the low-cost 1602.
  */
 template <class Interface>
-class HD44780 : public Printer {
+class HD44780 {
     public:
     HD44780();
 

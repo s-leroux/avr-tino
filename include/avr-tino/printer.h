@@ -23,8 +23,11 @@
 /*
     Printer object to display formated data.
 */
+template<class T>
 class Printer {
     public:
+    Printer(const T& dest) : _dest(dest) { }
+
     /* virtual ~Printer(void) {} */
 
     /**
@@ -32,7 +35,9 @@ class Printer {
 
 	All 'print(...)' methors are implemented in terms of write().
     */
-    virtual void write(const char* data) const = 0;
+    void write(const char* data) const {
+	_dest.write(data);
+    }
 
     /**
 	Print one char
@@ -46,6 +51,8 @@ class Printer {
     */
     void print(const char* str) const { write(str); }
 
+    private:
+    const T&	_dest;
 };
 
 #endif
