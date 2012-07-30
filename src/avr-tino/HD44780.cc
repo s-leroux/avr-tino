@@ -113,7 +113,7 @@ void HD44780<Interface>::setDisplayControl(display_control_t dc) const {
 }
 
 template<class Interface>
-void HD44780<Interface>::write(const char* str) const { 
+void HD44780<Interface>::print(const char* str) const { 
     DataMessage msg;
     
     char c;

@@ -21,32 +21,25 @@
 
 #include <string.h>
 /*
-    Printer object to display formated data.
+    Text printing functions
+
+    All default implementations delegate to the destination
+    print(const char*) method.
 */
-class Printer {
-    public:
-    /* virtual ~Printer(void) {} */
+template<class T>
+void print(const T& dest, const char* str) {
+    dest.print(str);
+}
 
-    /**
-	Print a row sequence of bytes
+template<class T>
+void print(const T& dest, char c) {
+    char s[2] = { c, 0 }; 
 
-	All 'print(...)' methors are implemented in terms of write().
-    */
-    virtual void write(const char* data) const = 0;
+    print(dest, s); 
+}
 
-    /**
-	Print one char
-    */
-    void print(char c) const { char s[2] = { c, 0 }; write(s); }
-
-    void print(int i) const;
-   
-    /**
-	Print a C-string
-    */
-    void print(const char* str) const { write(str); }
-
-};
+template<class T>
+void print(const T& dest, int i);
 
 #endif
 

@@ -20,11 +20,12 @@
 
 #include <stdlib.h>
 
-void Printer::print(int n) const {
+template<class T>
+void print(const T& dest, int n) {
     static const int LEN = 7;
     char	buffer[LEN]; // int goes up to 32767 -- that is 5 digits
 
     itoa(n, buffer, 10);
-    print(buffer);
+    print(dest, buffer);
 }
 
