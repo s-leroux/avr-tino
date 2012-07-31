@@ -60,6 +60,7 @@ DEMOS=	$(BINDIR)input  \
 	$(BINDIR)spiout \
 	$(BINDIR)usart \
 	$(BINDIR)lcd \
+	$(BINDIR)ioexpander \
 	$(BINDIR)blink
 
 SRCFILES=$(SRCDIR)pin.cc \
@@ -67,6 +68,7 @@ SRCFILES=$(SRCDIR)pin.cc \
 	$(SRCDIR)SPI.cc \
 	$(SRCDIR)serial.cc \
 	$(SRCDIR)HD44780.cc \
+	$(SRCDIR)MCP23Sxx.cc \
 	$(SRCDIR)MCP2515.cc 
 
 ifeq ($(BOARD),CANModule)
