@@ -21,12 +21,12 @@
 */
 
 
-// XXX Must be done otherwise
 #include "avr-tino.h"
 
 #include "avr-tino/delay.h"
 #include "avr-tino/MCP2515.h"
 #include "avr-tino/SPI.h"
+// XXX Must be done otherwise
 #include "avr-tino/target/CANModule.h"
 
 int main() __attribute__ ((OS_main));
