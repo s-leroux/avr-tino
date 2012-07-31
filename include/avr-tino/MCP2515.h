@@ -26,7 +26,6 @@ template<class SPI, pin_t cs> class MCP2515 {
     public:
     MCP2515();
 
-    /* Reset by lowering the correspondig pin on the mcu */
     void reset() const;
 
     /* Generic commands */
