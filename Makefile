@@ -59,6 +59,7 @@ DEMOS=	$(BINDIR)input  \
 	$(BINDIR)port \
 	$(BINDIR)shiftout \
 	$(BINDIR)spiout \
+	$(BINDIR)1-wire \
 	$(BINDIR)usart \
 	$(BINDIR)lcd \
 	$(BINDIR)ioexpander \
@@ -66,6 +67,7 @@ DEMOS=	$(BINDIR)input  \
 
 SRCFILES=$(SRCDIR)pin.cc \
 	$(SRCDIR)printer.cc \
+	$(SRCDIR)1-wire.cc \
 	$(SRCDIR)SPI.cc \
 	$(SRCDIR)serial.cc \
 	$(SRCDIR)HD44780.cc \

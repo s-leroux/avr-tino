@@ -96,6 +96,10 @@ class Port {
 	_SFR_IO8(DDR) |= mask;
     }
 
+    static uint8_t get(uint8_t mask) {
+	return _SFR_IO8(PIN) & mask;
+    }
+
     static void set(uint8_t mask) {
 	_SFR_IO8(POUT) |= mask;
     }
