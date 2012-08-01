@@ -36,16 +36,44 @@ template<class SPI, pin_t cs> class MCP23Sxx {
     };
 
     /**
-	Get a register value
+	Read a register value
     */
-    uint8_t get(regs r, uint8_t addr = 0x00) const;
+    uint8_t read(regs r, uint8_t addr = 0x00) const;
 
     /**
-	Set a register value
+	Write a value into a register
     */
-    void set(regs r, uint8_t addr, uint8_t value) const;
-    inline void set(regs r, uint8_t value) const {
-	set(r, 0x00, value);
+    void write(regs r, uint8_t addr, uint8_t value) const;
+    inline void write(regs r, uint8_t value) const {
+	write(r, 0x00, value);
+    }
+
+    /**
+	Set some bits of a register
+
+	Only the bits set to 1 in the mask are set 
+	in the destination register.
+    */
+    inline void set(regs r, uint8_t mask) const {
+	update(r, 0x00, mask, mask);
+    }
+
+    inline void set(regs r, uint8_t addr, uint8_t value) const {
+	update(r, addr, value, value);
+    }
+
+    /**
+	Clear some bits of a register
+
+	Only the bits to 1 in the mask are cleared (set to 0)
+	in the destiantion register.
+    */
+    inline void clear(regs r, uint8_t mask) const {
+	update(r, 0x00, mask, 0x00);
+    }
+
+    inline void clear(regs r, uint8_t addr, uint8_t mask) const {
+	update(r, addr, mask, 0x00);
     }
 
     /**
