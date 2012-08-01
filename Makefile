@@ -56,6 +56,7 @@ DEPDIR=$(BUILDDIR)deps/
 DIRS=$(BUILDDIR) $(OBJDIR) $(BINDIR) $(DEPDIR)
 
 DEMOS=	$(BINDIR)input  \
+	$(BINDIR)port \
 	$(BINDIR)shiftout \
 	$(BINDIR)spiout \
 	$(BINDIR)usart \

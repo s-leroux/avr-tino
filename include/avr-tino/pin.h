@@ -85,6 +85,26 @@ static void shiftOut(pin_t dataPin, pin_t clockPin,
                 bitorder_t bitOrder,
                 const void *data, uint16_t size);
 
+template<uint8_t DDR, uint8_t PIN, uint8_t POUT>
+class Port {
+    public:
+    static void toInput(uint8_t mask) {
+	_SFR_IO8(DDR) &= ~mask;
+    }
+
+    static void toOutput(uint8_t mask) {
+	_SFR_IO8(DDR) |= mask;
+    }
+
+    static void set(uint8_t mask) {
+	_SFR_IO8(POUT) |= mask;
+    }
+
+    static void clear(uint8_t mask) {
+	_SFR_IO8(POUT) &= ~mask;
+    }
+};
+
 //} // extern "C"
 
 #endif
