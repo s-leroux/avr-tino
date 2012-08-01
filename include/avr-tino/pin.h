@@ -16,8 +16,8 @@
   You should have received a copy of the GNU General Public License
   along with avr-tino.  If not, see <http://www.gnu.org/licenses/>.
 */
-#if !defined avr_tino_pin_h
-#define avr_tino_pin_h
+#if !defined AVR_TINO_PIN_H
+#define AVR_TINO_PIN_H
 
 #if !defined NOT_A_PORT
 #  define NOT_A_PORT uint8_t(-1)
