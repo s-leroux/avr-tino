@@ -28,6 +28,35 @@ template<class SPI, pin_t cs> class MCP23Sxx {
 
     void reset() const;
 
+    /* Common interface */
+    enum __attribute__ ((__packed__)) regs {
+	IODIR	    = 0x00, /* I/O direction register */
+	IOCON	    = 0x05, /* I/O expander configuration register */
+	GPIO	    = 0x09, /* general purpose I/O port register */
+    };
+
+    /**
+	Get a register value
+    */
+    uint8_t get(regs r, uint8_t addr = 0x00) const;
+
+    /**
+	Set a register value
+    */
+    void set(regs r, uint8_t addr, uint8_t value) const;
+    inline void set(regs r, uint8_t value) const {
+	set(r, 0x00, value);
+    }
+
+    /**
+	Set and/or clear some bits of a register
+    */
+    void update(regs r, uint8_t addr, uint8_t mask, uint8_t value) const;
+    inline void update(regs r, uint8_t mask, uint8_t value) const {
+	update(r, 0x00, mask, value);
+    }
+
+
     /**
 	Set the direction of the I/O pins
 
@@ -48,12 +77,6 @@ template<class SPI, pin_t cs> class MCP23Sxx {
     void enableHardwareAddress(uint8_t addr) const;
 
     public:
-    enum __attribute__ ((__packed__)) regs {
-	IODIR	    = 0x00, /* I/O direction register */
-	IOCON	    = 0x05, /* I/O expander configuration register */
-	GPIO	    = 0x09, /* general purpose I/O port register */
-    };
-
     enum __attribute__ ((__packed__)) opcode {
 	WRITE	= 0x40,
 	READ	= 0x41,
@@ -68,8 +91,6 @@ template<class SPI, pin_t cs> class MCP23Sxx {
     };
 
     private:
-    void update(regs r, uint8_t addr, uint8_t mask, uint8_t value) const;
-
     class Command : GuardPinLow<cs> {
 	public:
 	Command(uint8_t c) {

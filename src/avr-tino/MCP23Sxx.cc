@@ -57,6 +57,22 @@ void MCP23Sxx<SPI,cs>::enableHardwareAddress(uint8_t addr) const {
 }
 
 template<class SPI, pin_t cs>
+void MCP23Sxx<SPI,cs>::set(regs r, uint8_t addr, 
+		    uint8_t value) const {
+    Command cmd(WRITE | ((addr & 0x3) << 1) );
+    cmd.write(r);
+    cmd.write(value);
+}
+
+template<class SPI, pin_t cs>
+uint8_t MCP23Sxx<SPI,cs>::get(regs r, uint8_t addr) const {
+    Command cmd(READ | ((addr & 0x3) << 1) );
+    cmd.write(r);
+
+    return cmd.read();
+}
+
+template<class SPI, pin_t cs>
 void MCP23Sxx<SPI,cs>::update(regs r, 
 		    uint8_t addr, 
 		    uint8_t mask, uint8_t value) const {
