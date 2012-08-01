@@ -28,15 +28,63 @@ template<class SPI, pin_t cs> class MCP2515 {
 
     void reset() const;
 
-    /* Generic commands */
-    void write(uint8_t addr, 
+    enum __attribute__ ((__packed__)) regs {
+	CANCTRL	    = 0x0F, /* CAN control register     - ?Fh */
+	CANSTAT	    = 0x0E, /* CAN status register      - ?Eh */
+	TEC	    = 0x1C, /* Transmit error counter   - 1Ch */
+	REC	    = 0x1D, /* reveiver error counter   - 1Dh */
+
+	/* Transmit buffer 0 */
+	TXB0CTRL    = 0x30, /* Transmit buffer control */
+	TXB0SIDH    = 0x31, /* Transmit buffer std id high */
+	TXB0SIDL    = 0x32, /* Transmit buffer std id low */
+	TXB0EID8    = 0x33, /* Transmit buffer ext id high*/
+	TXB0EID0    = 0x34, /* Transmit buffer ext id low */
+	TXB0DLC     = 0x35, /* Transmit buffer data length */
+	TXB0D0      = 0x36, /* Transmit buffer data byte 1 */
+	TXB0D1      = 0x37, /* Transmit buffer data byte 1 */
+	TXB0D2      = 0x38, /* Transmit buffer data byte 2 */
+	TXB0D3      = 0x39, /* Transmit buffer data byte 3 */
+	TXB0D4      = 0x3A, /* Transmit buffer data byte 4 */
+	TXB0D5      = 0x3B, /* Transmit buffer data byte 5 */
+	TXB0D6      = 0x3C, /* Transmit buffer data byte 6 */
+	TXB0D7      = 0x3D, /* Transmit buffer data byte 7 */
+    };
+
+    /* Common interface */
+    /**
+	Read a register value
+    */
+    uint8_t read(regs r) const;
+
+    /**
+	Write a value into a register
+    */
+    void write(regs r, uint8_t data) const;
+
+    void write(regs r, 
 		uint8_t len,
 		const void *data) const;
-    void write(uint8_t addr, 
-		uint8_t data) const;
-    void bitModify(uint8_t addr, 
-		uint8_t masq, uint8_t data) const;
-    uint8_t read(uint8_t addr) const;
+
+    /**
+	Set and/or clear some bits of a register
+    */
+    void update(regs r, uint8_t masq, uint8_t value) const;
+
+    /**
+	Clear some bits of a register
+    */
+    void clear(regs r, uint8_t mask) const {
+	update(r, mask, 0x00);
+    }
+
+
+    /**
+	Set some bits of a register
+    */
+    void set(regs r, uint8_t mask) const {
+	update(r, mask, mask);
+    }
 
     /* Specific commands */
     void setPrescaler(uint8_t prescaler) const;
@@ -82,29 +130,6 @@ template<class SPI, pin_t cs> class MCP2515 {
 	BIT_MODIFY  = 0x05, /* Bit Modify               - 0000 0101 */
 	READ	    = 0x03, /* Read data                - 0000 0011 */
 	RTS	    = 0x80, /* Request To Send          - 1000 0nnn */
-    };
-
-    enum __attribute__ ((__packed__)) regs {
-	CANCTRL	    = 0x0F, /* CAN control register     - ?Fh */
-	CANSTAT	    = 0x0E, /* CAN status register      - ?Eh */
-	TEC	    = 0x1C, /* Transmit error counter   - 1Ch */
-	REC	    = 0x1D, /* reveiver error counter   - 1Dh */
-
-	/* Transmit buffer 0 */
-	TXB0CTRL    = 0x30, /* Transmit buffer control */
-	TXB0SIDH    = 0x31, /* Transmit buffer std id high */
-	TXB0SIDL    = 0x32, /* Transmit buffer std id low */
-	TXB0EID8    = 0x33, /* Transmit buffer ext id high*/
-	TXB0EID0    = 0x34, /* Transmit buffer ext id low */
-	TXB0DLC     = 0x35, /* Transmit buffer data length */
-	TXB0D0      = 0x36, /* Transmit buffer data byte 1 */
-	TXB0D1      = 0x37, /* Transmit buffer data byte 1 */
-	TXB0D2      = 0x38, /* Transmit buffer data byte 2 */
-	TXB0D3      = 0x39, /* Transmit buffer data byte 3 */
-	TXB0D4      = 0x3A, /* Transmit buffer data byte 4 */
-	TXB0D5      = 0x3B, /* Transmit buffer data byte 5 */
-	TXB0D6      = 0x3C, /* Transmit buffer data byte 6 */
-	TXB0D7      = 0x3D, /* Transmit buffer data byte 7 */
     };
 
     enum __attribute__ ((__packed__)) canctrl_bits {
