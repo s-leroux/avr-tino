@@ -39,11 +39,11 @@ SIZE=$(PROGRAM_PREFIX)size$(PROGRAM_SUFFIX)
 #
 CPPFLAGS=-I./include -include "avr-tino/target/$(BOARD).h"
 CXXFLAGS=-mmcu=$(MCU) \
-	-Os -mcall-prologues \
+	-Os \
 	-ffunction-sections -fdata-sections \
 	-fno-rtti \
 	-g
-LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections -Wl,--relax
+LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections
 
 
 DEMOSRCDIR=./demo/
@@ -59,11 +59,16 @@ DEMOS=	$(BINDIR)input  \
 	$(BINDIR)shiftout \
 	$(BINDIR)spiout \
 	$(BINDIR)usart \
+	$(BINDIR)lcd \
+	$(BINDIR)ioexpander \
 	$(BINDIR)blink
 
 SRCFILES=$(SRCDIR)pin.cc \
+	$(SRCDIR)printer.cc \
 	$(SRCDIR)SPI.cc \
 	$(SRCDIR)serial.cc \
+	$(SRCDIR)HD44780.cc \
+	$(SRCDIR)MCP23Sxx.cc \
 	$(SRCDIR)MCP2515.cc 
 
 ifeq ($(BOARD),CANModule)
@@ -84,7 +89,10 @@ demo:	$(DIRS) $(DEMOS)
 hex:	$(DIRS) $(DEMOS:=.hex)
 
 clean:
-	rm -rf $(DIRS) build-*
+	rm -rf -- $(DIRS) build-*
+
+git-clean: clean
+	rm -rf -- `git status -unormal --porcelain | awk '$$1=="??" { print $$2 }'`
 
 #
 # Combine all source file in one for better optimization

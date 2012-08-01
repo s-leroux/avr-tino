@@ -16,26 +16,31 @@
   You should have received a copy of the GNU General Public License
   along with avr-tino.  If not, see <http://www.gnu.org/licenses/>.
 */
-#if !defined avr_tino_h
-#define avr_tino_h
 
-extern "C" void __cxa_pure_virtual(void) { /* do nothing */ }
+#include "avr-tino.h"
 
-//
-// Core includes
+#include "avr-tino/delay.h"
+#include "avr-tino/MCP23Sxx.h"
+#include "avr-tino/SPI.h"
 
-#include <avr/io.h>
-#include <avr/pgmspace.h>
+int main() __attribute__ ((OS_main));
+int main() {
+    typedef SPIMaster SPI;
 
-// Borrowed from /usr/lib/avr/include/avr/io.h 
-#if defined (__AVR_ATtiny2313__)
-#  include "avr-tino/avr/tiny2313.h"
-#elif defined (__AVR_ATtiny4313__)
-#  include "avr-tino/avr/tiny4313.h"
-#else
-#  error "Unknown target AVR. Don't you forget '-mmcu'?"
-#endif
+    /* MCP2515 reset */
+    const MCP23Sxx<SPI, PIN_PB0>	mcp23S08;
 
-#include "avr-tino/pin.h"
+    SPI::begin();
+    mcp23S08.reset();
+    mcp23S08.enableHardwareAddress(0x00);
+    mcp23S08.setDirection(0x00, 0xFF, 0x00);
 
-#endif
+    while(1) {
+	mcp23S08.setGPIO(0x00, 0xFF, 0x0F);
+	delay(1500);
+	mcp23S08.setGPIO(0x00, 0xFF, 0xF0);
+	delay(500);
+    }
+
+    return 0;
+}

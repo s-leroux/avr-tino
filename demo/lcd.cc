@@ -16,29 +16,42 @@
   You should have received a copy of the GNU General Public License
   along with avr-tino.  If not, see <http://www.gnu.org/licenses/>.
 */
-/*
-    Test program to use with my MCP2515 based CANModule
-*/
-#include <string.h>
-
 #include "avr-tino.h"
-
-#include "avr-tino/serial.h"
 #include "avr-tino/delay.h"
+#include "avr-tino/HD44780.h"
 #include "avr-tino/printer.h"
 
+#include <string.h>
+
+static const pin_t LCD_E = PIN_PB5;
+static const pin_t LCD_RS = PIN_PB4;
+static const pin_t LCD_DB7 = PIN_PB3;
+static const pin_t LCD_DB6 = PIN_PB2;
+static const pin_t LCD_DB5 = PIN_PB1;
+static const pin_t LCD_DB4 = PIN_PB0;
+
 int main() {
-    char    message[] = "\r\nHello ";
+    HD44780<Interface4Bits<LCD_DB4, LCD_RS, LCD_E> >	lcd;
 
-    Serial  serial;
-    serial.begin(9600);
-    uint8_t n = 0;
+    lcd.display();
+    lcd.move(3,1);
+
+    print(lcd, "LCD DEMO");
+    // lcd.at(4,1).print("LCD DEMO");
+
     while(1) {
-	print(serial, message);
-	print(serial, n++);
+	static int n = 0;
+	lcd.move(12,1);
+	print(lcd, n++);
 
-	delay(100);
+	lcd.move(0, 0);
+	print(lcd,        "*****************");
+	lcd.move(0, 0);
+	const char* message = "Hello world      ";
+	for(uint8_t i = 0; i < strlen(message); ++i) {
+	    print(lcd,message[i]);
+	    delay(500);
+	}
     }
-
     return 0;
 }

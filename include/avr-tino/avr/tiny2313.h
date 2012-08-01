@@ -56,6 +56,7 @@ static const pin_t SCK	= PIN_PB7;
 /*
  I/O Port abstraction layer
 */
+#define pin_to_bit(p) ( p & 0x0F )
 #define pin_to_mask(p) ( _BV(p & 0x0F) )
 
 /* Those functions are as efficient as their macro counterparts */

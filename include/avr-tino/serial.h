@@ -16,8 +16,8 @@
   You should have received a copy of the GNU General Public License
   along with avr-tino.  If not, see <http://www.gnu.org/licenses/>.
 */
-#if !defined AVRTINO_SERIAL_H
-#define AVRTINO_SERIAL_H
+#if !defined AVR_TINO_SERIAL_H
+#define AVR_TINO_SERIAL_H
 
 // XXX should use namespace instead ?
 class Serial {
@@ -33,7 +33,7 @@ class Serial {
 	S8O1	= _BV(UMSEL) | _BV(UPM1) | _BV(UPM0) | 6 ,
     };
 
-    static void begin(uint32_t baud, protocol_t protocol = A8N1) {
+    void begin(uint32_t baud, protocol_t protocol = A8N1) const {
 	uint16_t UBRR = F_CPU / 16 / baud - 1;
 	
 	UBRRH = (uint8_t)(UBRR >> 8);
@@ -43,14 +43,18 @@ class Serial {
 	UCSRC = protocol;
     }
 
-    static void send(uint8_t data) {
+    void print(const char* str) const {
+	while(*str) { send(*str++); }
+    }
+
+    void send(uint8_t data) const {
 	while ( ! (UCSRA & _BV(UDRE)) ) {
 	    // do nothing
 	}
 	UDR = data;
     }
 
-    static uint8_t receive() {
+    uint8_t receive() const {
 	while ( ! (UCSRA & _BV(RXC) ) ) {
 	    // do nothing
 	}
