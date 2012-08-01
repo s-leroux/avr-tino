@@ -51,3 +51,29 @@ void MCP23Sxx<SPI,cs>::setGPIO(uint8_t addr,
     cmd.write(state); // XXX mask is not used
 }
 
+template<class SPI, pin_t cs>
+void MCP23Sxx<SPI,cs>::enableHardwareAddress(uint8_t addr) const {
+    update(IOCON, addr, _BV(HAEN), _BV(HAEN));
+}
+
+template<class SPI, pin_t cs>
+void MCP23Sxx<SPI,cs>::update(regs r, 
+		    uint8_t addr, 
+		    uint8_t mask, uint8_t value) const {
+    if (mask != 0xFF) {
+	Command cmd(READ | ((addr & 0x3) << 1) );
+
+	cmd.write(r);
+	uint8_t prev = cmd.read();
+	value = prev ^ ((prev ^ value) & mask);
+
+	if (prev == value)
+	    mask = 0x00; // Don't change anything
+    }
+   
+    if (mask != 0x00) {
+	Command cmd(WRITE | ((addr & 0x3) << 1) );
+	cmd.write(r);
+	cmd.write(value);
+    }
+}

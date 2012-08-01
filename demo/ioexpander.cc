@@ -32,6 +32,7 @@ int main() {
 
     SPI::begin();
     mcp23S08.reset();
+    mcp23S08.enableHardwareAddress(0x00);
     mcp23S08.setDirection(0x00, 0xFF, 0x00);
 
     while(1) {

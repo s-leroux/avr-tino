@@ -45,10 +45,13 @@ template<class SPI, pin_t cs> class MCP23Sxx {
 	Only bits with a corresponding 1 in the mask are affected.
     */
     void setGPIO(uint8_t addr, uint8_t mask, uint8_t state) const;
+    
+    void enableHardwareAddress(uint8_t addr) const;
 
     public:
     enum __attribute__ ((__packed__)) regs {
 	IODIR	    = 0x00, /* I/O direction register */
+	IOCON	    = 0x05, /* I/O expander configuration register */
 	GPIO	    = 0x09, /* general purpose I/O port register */
     };
 
@@ -57,7 +60,17 @@ template<class SPI, pin_t cs> class MCP23Sxx {
 	READ	= 0x41,
     };
 
+    enum __attribute__ ((__packed__)) iocon_bits {
+	INPOL	= 1,
+	ODR,
+	HAEN,
+	DISSLW,
+	SEQOP,
+    };
+
     private:
+    void update(regs r, uint8_t addr, uint8_t mask, uint8_t value) const;
+
     class Command : GuardPinLow<cs> {
 	public:
 	Command(uint8_t c) {
@@ -66,6 +79,10 @@ template<class SPI, pin_t cs> class MCP23Sxx {
 
 	void write(uint8_t byte) const {
 	    SPI::transfert(byte);
+	}
+
+	uint8_t read() const {
+	    return SPI::transfert(0xFF);
 	}
     };
 };
