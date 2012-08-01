@@ -26,7 +26,6 @@ template<class SPI, pin_t cs> class MCP23Sxx {
     public:
     MCP23Sxx();
 
-    /* Reset by lowering the correspondig pin on the mcu */
     void reset() const;
 
     /**
