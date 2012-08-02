@@ -98,6 +98,23 @@ void Software1Wire<Port>::write(uint8_t mask, uint8_t len, const void* data) {
 }
 
 template<class Port>
+uint8_t Software1Wire<Port>::touch(uint8_t mask, uint8_t data) {
+    uint8_t result = 0;
+    for(uint8_t i = 0; i < 8; ++i) {
+	result >>= 1;
+	if (data & 0x01) {
+	    if (readBit(mask) == mask) // XXX assume '1' when /all/ busses
+		result |= 0x80;	    // are set to 1, or when /any/ bus
+	}			    // line does not force 0?
+	else {
+	    writeBit0(mask);
+	}
+	data >>= 1;
+    }
+    return result;
+}
+
+template<class Port>
 void Software1Wire<Port>::read(uint8_t mask, uint8_t len, void* data) {
     for(uint8_t i = 0; i < len; ++i) {
 	((uint8_t*)data)[i] = read(mask);
@@ -110,7 +127,7 @@ uint8_t Software1Wire<Port>::read(uint8_t mask) {
     for(uint8_t i = 0; i < 8; ++i) {
 	result >>= 1;
 
-	if (readBit(mask) != 0)
+	if (readBit(mask) == mask)
 	    result |= 0x80;
     }
     return result;

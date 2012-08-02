@@ -37,6 +37,8 @@ class Software1Wire {
     static uint8_t read(uint8_t mask);
     static void read(uint8_t mask, uint8_t len, void* data);
 
+    static uint8_t touch(uint8_t mask, uint8_t data);
+
     // timing delays (in µs) as per Dallas Semiconductors AN126
     static const uint16_t DELAY_A   = 6;
     static const uint16_t DELAY_B   = 64;
