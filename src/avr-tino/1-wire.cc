@@ -133,3 +133,76 @@ uint8_t Software1Wire<Port>::read(uint8_t mask) {
     return result;
 }
 
+template<class Port>
+void Software1Wire<Port>::readROM(uint8_t *pattern, uint8_t mask) {
+    write(mask, ROM_READ);
+
+    for(uint8_t i = 0; i < 8; ++i) {
+	pattern[i] = read(mask);
+    }
+}
+
+template<class Port>
+void Software1Wire<Port>::skipROM(uint8_t mask) {
+    write(mask, ROM_SKIP);
+}
+
+template<class Port>
+uint8_t Software1Wire<Port>::search(uint8_t *pattern, 
+				    uint8_t mask, 
+				    uint8_t lastDeviation) {
+    write(mask, ROM_SEARCH);
+
+    uint8_t newDeviation    = 0x00;
+    uint8_t bitMask	    = 0x01;
+
+    for(uint8_t currentBit = 1; currentBit <= 64; ++currentBit) {
+	uint8_t bitA = readBit(mask);
+	uint8_t bitB = readBit(mask);
+
+	if (bitA && bitB) { // both set
+	    return 0; // no device on the bus line
+	}
+	else if (bitA ^ bitB) { // complementatry bits
+	    if (bitA) {
+		*pattern |= bitMask;
+	    }
+	    else {
+		*pattern &= ~bitMask;
+	    }
+	}
+	else { // both bit to 0 -- conflicting device IDs
+	    if (currentBit == lastDeviation) {
+		// Already tried '0' in a previous pass -- try '1' now
+		*pattern |= bitMask;
+	    }
+	    else if (currentBit > lastDeviation) {
+		// First pass: try '0'
+		*pattern &= ~bitMask;
+		newDeviation = currentBit;
+	    }
+	    else if ( !(*pattern & bitMask) ) {
+		// In the previous pass we take the '0' option
+		// maybe this is the last deviation?
+		newDeviation = currentBit;
+	    }
+	    else {
+		// do noting
+	    }
+	}
+
+	if (*pattern & bitMask) {
+	    writeBit1(mask);
+	}
+	else {
+	    writeBit0(mask);
+	}
+
+	bitMask <<= 1;
+	if (!bitMask) {
+	    ++pattern;
+	    bitMask = 0x01;
+	}
+    }
+    return newDeviation;
+}
