@@ -95,6 +95,7 @@ template<class Interface>
 void HD44780<Interface>::clear() const {
     Instruction msg;
 
+    msg.move(0,0);
     msg.clear();
 }
 
