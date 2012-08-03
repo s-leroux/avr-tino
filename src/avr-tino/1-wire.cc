@@ -33,10 +33,10 @@ void Software1Wire<Port>::writeBit0(uint8_t mask) {
 
     Port::toOutput(mask);
     Port::clear(mask);
-    delayMicroseconds(DELAY_A);
+    delayMicroseconds(DELAY_C);
     Port::toInput(mask);
     Port::set(mask);
-    delayMicroseconds(DELAY_B);
+    delayMicroseconds(DELAY_D);
 }
 
 template<class Port>
@@ -45,10 +45,10 @@ void Software1Wire<Port>::writeBit1(uint8_t mask) {
 
     Port::toOutput(mask);
     Port::clear(mask);
-    delayMicroseconds(DELAY_C);
+    delayMicroseconds(DELAY_A);
     Port::toInput(mask);
     Port::set(mask);
-    delayMicroseconds(DELAY_D);
+    delayMicroseconds(DELAY_B);
 }
 
 template<class Port>

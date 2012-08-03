@@ -46,7 +46,7 @@ int main() {
 	uint8_t deviation = 0;
 
 	Interface::detectPresence(_BV(0));
-	Interface::skipROM(_BV(0));
+	//Interface::skipROM(_BV(0));
 	Interface::readROM(id, _BV(0)); {
 	//while( (deviation = Interface::search(id, _BV(0), deviation)) != 0) {
 	//    lcd.move(1,1);
