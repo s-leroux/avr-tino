@@ -25,7 +25,7 @@
 #include "avr-tino/delay.h"
 
 #include "avr-tino/1-wire.h"
-#include "avr-tino/DS18B20.h"
+#include "avr-tino/DS18S20.h"
 
 static const pin_t LCD_E = PIN_PB5;
 static const pin_t LCD_RS = PIN_PB4;
@@ -36,7 +36,7 @@ static const pin_t LCD_DB4 = PIN_PB0;
 
 int main() {
     typedef Software1Wire<PortD>    Bus;
-    typedef DS18B20<Bus>	    Sensor;
+    typedef DS18S20<Bus>	    Sensor;
 
     Bus::init(_BV(0));
 
