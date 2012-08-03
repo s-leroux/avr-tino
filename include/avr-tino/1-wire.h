@@ -65,7 +65,7 @@ class Software1Wire {
 	ROM_SKIP	= 0xCC,
     };
 
-    private:
+    public:
     /* bit level functions */
     static void writeBit1(uint8_t mask);
     static void writeBit0(uint8_t mask);

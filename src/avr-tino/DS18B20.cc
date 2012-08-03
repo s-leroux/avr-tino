@@ -22,12 +22,14 @@
 template<class OW>
 void DS18B20<OW>::convert(uint8_t pins) {
     OW::write(pins, CONVERT_T);
+
+//    while(OW::readBit(pins) == 0) {}
 }
 
 template<class OW>
 void DS18B20<OW>::readScratchpad(uint8_t pin, Scratchpad* scratchpad) {
     OW::write(pin, READ_SCRATCHPAD);
-    OW::read(pin, sizeof(scratchpad), &scratchpad);
+    OW::read(pin, sizeof(Scratchpad), scratchpad);
 }
 
 template<class OW>
@@ -37,8 +39,6 @@ int16_t DS18B20<OW>::readTemperature(uint8_t pin) {
     readScratchpad(pin, &scratchpad);
 
     return scratchpad.temperature;
-    OW::write(pin, READ_SCRATCHPAD);
-    OW::read(pin, sizeof(scratchpad), &scratchpad);
 }
 
 

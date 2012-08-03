@@ -38,21 +38,42 @@ int main() {
     typedef Software1Wire<PortD>    Bus;
     typedef DS18B20<Bus>	    Sensor;
 
+    Bus::init(_BV(0));
+
 //    Interface::init(0x01);
 
     HD44780<Interface4Bits<LCD_DB4, LCD_RS, LCD_E> >    lcd;
     lcd.display();
 
     while(1) {
+	Sensor::Scratchpad  scratchpad;
+
 	Bus::detectPresence(_BV(0));
 	Bus::skipROM(_BV(0));
-	int16_t temp = Sensor::readTemperature(_BV(0));
 
-	char buffer[10] { '0','0','0','0',' ',' ',' ',' ',' ',0};
-	itoa(temp / 16, buffer+4, 10);
-	lcd.move(6,0);
-	print(lcd, buffer+strlen(buffer+4));
+	Sensor::convert(_BV(0));
 	delay(1000);
+
+	Bus::detectPresence(_BV(0));
+	Bus::skipROM(_BV(0));
+	memset(&scratchpad, 0x77, sizeof(scratchpad));
+	Sensor::readScratchpad(_BV(0), &scratchpad);
+
+	for(uint8_t byte = 0; byte < sizeof(scratchpad); ++byte) {
+	    char    buffer[] = { '#', 'X', 'X', 0};
+	    itoa(((uint8_t*)&scratchpad)[byte], buffer+1, 16);
+
+	    lcd.move(2*(byte % 8), byte / 8);
+	    print(lcd, buffer + ((buffer[2] == 0) ? 0 : 1));
+	}
+	int16_t temp = scratchpad.temperature;
+
+	char buffer[10] = { '0','0','0','0',' ',' ',' ',' ',' ',0};
+	itoa(temp / 16, buffer+4, 10);
+	lcd.move(6,1);
+	print(lcd, buffer+strlen(buffer+4));
+
+	delay(500);
     }
     return 0;
 }
