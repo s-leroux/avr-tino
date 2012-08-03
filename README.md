@@ -9,4 +9,5 @@ overhead.
 
 The library is written in C++ using template for agressive optimization.
 
-The target compiler is avr-gcc. Build and tested against avr-gcc-4.7.1
+The target compiler is avr-gcc. Build and tested against avr-gcc-4.4.8 (avr-gcc 4.7.1
+appears to produce bad code)
