@@ -60,7 +60,7 @@ DEMOS=	$(BINDIR)input  \
 	$(BINDIR)shiftout \
 	$(BINDIR)spiout \
 	$(BINDIR)1-wire \
-	$(BINDIR)ds18b20 \
+	$(BINDIR)ds18s20 \
 	$(BINDIR)usart \
 	$(BINDIR)lcd \
 	$(BINDIR)ioexpander \
@@ -72,7 +72,7 @@ SRCFILES=$(SRCDIR)pin.cc \
 	$(SRCDIR)SPI.cc \
 	$(SRCDIR)serial.cc \
 	$(SRCDIR)HD44780.cc \
-	$(SRCDIR)DS18B20.cc \
+	$(SRCDIR)DS18S20.cc \
 	$(SRCDIR)MCP23Sxx.cc \
 	$(SRCDIR)MCP2515.cc 
 

@@ -16,24 +16,24 @@
   You should have received a copy of the GNU General Public License
   along with avr-tino.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "avr-tino/DS18B20.h"
+#include "avr-tino/DS18S20.h"
 
 
 template<class OW>
-void DS18B20<OW>::convert(uint8_t pins) {
+void DS18S20<OW>::convert(uint8_t pins) {
     OW::write(pins, CONVERT_T);
 
 //    while(OW::readBit(pins) == 0) {}
 }
 
 template<class OW>
-void DS18B20<OW>::readScratchpad(uint8_t pin, Scratchpad* scratchpad) {
+void DS18S20<OW>::readScratchpad(uint8_t pin, Scratchpad* scratchpad) {
     OW::write(pin, READ_SCRATCHPAD);
     OW::read(pin, sizeof(Scratchpad), scratchpad);
 }
 
 template<class OW>
-int16_t DS18B20<OW>::readTemperature(uint8_t pin) {
+int16_t DS18S20<OW>::readTemperature(uint8_t pin) {
     convert(pin);
     Scratchpad	scratchpad;
     readScratchpad(pin, &scratchpad);

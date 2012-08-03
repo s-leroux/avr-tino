@@ -16,15 +16,15 @@
   You should have received a copy of the GNU General Public License
   along with avr-tino.  If not, see <http://www.gnu.org/licenses/>.
 */
-#if !defined AVR_TINO_DS18B20_H
-#define AVR_TINO_DS18B20_H
+#if !defined AVR_TINO_DS18S20_H
+#define AVR_TINO_DS18S20_H
 
 /*
-    Support for Maxim DS18B20 -- Programmable Resolution 1-Wire Digital Thermometer
+    Support for Maxim DS18S20 -- Programmable Resolution 1-Wire Digital Thermometer
 */
 
 template<class OW>
-class DS18B20 {
+class DS18S20 {
     public:
     struct __attribute__ ((__packed__)) Scratchpad {
 	int16_t	temperature;
