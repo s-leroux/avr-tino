@@ -134,12 +134,9 @@ uint8_t Software1Wire<Port>::read(uint8_t mask) {
 }
 
 template<class Port>
-void Software1Wire<Port>::readROM(uint8_t *pattern, uint8_t mask) {
+void Software1Wire<Port>::readROM(uint8_t mask, uint8_t* pattern) {
     write(mask, ROM_READ);
-
-    for(uint8_t i = 0; i < 8; ++i) {
-	pattern[i] = read(mask);
-    }
+    read(mask, 8, pattern);
 }
 
 template<class Port>

@@ -32,7 +32,7 @@ class Software1Wire {
 
     /* high level functions */
     static uint8_t search(uint8_t *pattern, uint8_t mask, uint8_t lastDeviation = 0);
-    static void readROM(uint8_t *pattern, uint8_t mask);
+    static void readROM(uint8_t mask, uint8_t *pattern);
     static void skipROM(uint8_t mask);
 
     /* Byte level functions */
