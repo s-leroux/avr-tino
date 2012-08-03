@@ -26,8 +26,64 @@ template<class SPI, pin_t cs> class MCP23Sxx {
     public:
     MCP23Sxx();
 
-    /* Reset by lowering the correspondig pin on the mcu */
     void reset() const;
+
+    enum __attribute__ ((__packed__)) regs {
+	IODIR	    = 0x00, /* I/O direction register */
+	IOCON	    = 0x05, /* I/O expander configuration register */
+	GPIO	    = 0x09, /* general purpose I/O port register */
+    };
+
+    /* Common interface */
+    /**
+	Read a register value
+    */
+    uint8_t read(regs r, uint8_t addr = 0x00) const;
+
+    /**
+	Write a value into a register
+    */
+    void write(regs r, uint8_t addr, uint8_t value) const;
+    inline void write(regs r, uint8_t value) const {
+	write(r, 0x00, value);
+    }
+
+    /**
+	Set some bits of a register
+
+	Only the bits set to 1 in the mask are set 
+	in the destination register.
+    */
+    inline void set(regs r, uint8_t mask) const {
+	update(r, 0x00, mask, mask);
+    }
+
+    inline void set(regs r, uint8_t addr, uint8_t value) const {
+	update(r, addr, value, value);
+    }
+
+    /**
+	Clear some bits of a register
+
+	Only the bits to 1 in the mask are cleared (set to 0)
+	in the destiantion register.
+    */
+    inline void clear(regs r, uint8_t mask) const {
+	update(r, 0x00, mask, 0x00);
+    }
+
+    inline void clear(regs r, uint8_t addr, uint8_t mask) const {
+	update(r, addr, mask, 0x00);
+    }
+
+    /**
+	Set and/or clear some bits of a register
+    */
+    void update(regs r, uint8_t addr, uint8_t mask, uint8_t value) const;
+    inline void update(regs r, uint8_t mask, uint8_t value) const {
+	update(r, 0x00, mask, value);
+    }
+
 
     /**
 	Set the direction of the I/O pins
@@ -49,12 +105,6 @@ template<class SPI, pin_t cs> class MCP23Sxx {
     void enableHardwareAddress(uint8_t addr) const;
 
     public:
-    enum __attribute__ ((__packed__)) regs {
-	IODIR	    = 0x00, /* I/O direction register */
-	IOCON	    = 0x05, /* I/O expander configuration register */
-	GPIO	    = 0x09, /* general purpose I/O port register */
-    };
-
     enum __attribute__ ((__packed__)) opcode {
 	WRITE	= 0x40,
 	READ	= 0x41,
@@ -69,8 +119,6 @@ template<class SPI, pin_t cs> class MCP23Sxx {
     };
 
     private:
-    void update(regs r, uint8_t addr, uint8_t mask, uint8_t value) const;
-
     class Command : GuardPinLow<cs> {
 	public:
 	Command(uint8_t c) {
