@@ -78,6 +78,11 @@ static volatile uint8_t& pin_to_input(pin_t p) {
 	     PIND );
 }
 
+#include "avr-tino/pin.h"
+
+typedef Port<0x1A, 0x19, 0x1B>	    PortA;
+typedef Port<0x17, 0x16, 0x18>	    PortB;
+typedef Port<0x11, 0x10, 0x12>	    PortD;
 
 #endif
 

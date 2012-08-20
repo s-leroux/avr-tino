@@ -28,13 +28,13 @@ template<class SPI, pin_t cs> class MCP23Sxx {
 
     void reset() const;
 
-    /* Common interface */
     enum __attribute__ ((__packed__)) regs {
 	IODIR	    = 0x00, /* I/O direction register */
 	IOCON	    = 0x05, /* I/O expander configuration register */
 	GPIO	    = 0x09, /* general purpose I/O port register */
     };
 
+    /* Common interface */
     /**
 	Read a register value
     */

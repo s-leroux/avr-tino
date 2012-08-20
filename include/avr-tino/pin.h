@@ -16,8 +16,8 @@
   You should have received a copy of the GNU General Public License
   along with avr-tino.  If not, see <http://www.gnu.org/licenses/>.
 */
-#if !defined avr_tino_pin_h
-#define avr_tino_pin_h
+#if !defined AVR_TINO_PIN_H
+#define AVR_TINO_PIN_H
 
 #if !defined NOT_A_PORT
 #  define NOT_A_PORT uint8_t(-1)
@@ -84,6 +84,30 @@ static void shiftOut(pin_t dataPin, pin_t clockPin,
 static void shiftOut(pin_t dataPin, pin_t clockPin,
                 bitorder_t bitOrder,
                 const void *data, uint16_t size);
+
+template<uint8_t DDR, uint8_t PIN, uint8_t POUT>
+class Port {
+    public:
+    static void toInput(uint8_t mask) {
+	_SFR_IO8(DDR) &= ~mask;
+    }
+
+    static void toOutput(uint8_t mask) {
+	_SFR_IO8(DDR) |= mask;
+    }
+
+    static uint8_t get(uint8_t mask) {
+	return _SFR_IO8(PIN) & mask;
+    }
+
+    static void set(uint8_t mask) {
+	_SFR_IO8(POUT) |= mask;
+    }
+
+    static void clear(uint8_t mask) {
+	_SFR_IO8(POUT) &= ~mask;
+    }
+};
 
 //} // extern "C"
 
