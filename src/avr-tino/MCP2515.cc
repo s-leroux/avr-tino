@@ -54,7 +54,7 @@ void MCP2515<SPI,cs>::write(regs r, uint8_t data) const {
 }
 
 template<class SPI, pin_t cs>
-void MCP2515<SPI,cs>::update(regs r, uint8_t mask, uint8_t data) const {
+void MCP2515<SPI,cs>::update(regs r, uint8_t mask, uint8_t data) {
     Command cmd(BIT_MODIFY);
 
     cmd.write(r);        

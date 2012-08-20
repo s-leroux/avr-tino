@@ -19,11 +19,40 @@
 #if !defined AVR_TINO_MCP2515_H
 #define AVR_TINO_MCP2515_H
 
+
+template<class DEV, uint8_t ADDR>
+struct _REG {
+    typedef DEV	DEVICE;
+    static const uint8_t    addr = ADDR;
+};
+
+template<class REG, uint8_t VAL> 
+struct _RV {
+    typedef typename REG::DEVICE DEVICE;
+    static const uint8_t	addr = REG::addr;
+    static const uint8_t	val = VAL;
+
+    template<uint8_t V2>
+    _RV<REG, VAL|V2> operator|(_RV<REG,V2>) {};
+};
+
+template<class REG>
+struct _RG : public REG {
+    typedef typename REG::DEVICE DEVICE;
+    static const uint8_t	addr = REG::addr;
+
+    void operator=(uint8_t value) {
+	DEVICE::set((typename DEVICE::regs)this->addr, value);
+    }
+};
+
 /*
  * Interface file for the MCP2515 Stand Alone CAN controller With SPI
  */
 template<class SPI, pin_t cs> class MCP2515 {
     public:
+    typedef MCP2515<SPI,cs>  DEVICE;
+
     MCP2515();
 
     /**
@@ -91,7 +120,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     /**
 	Set and/or clear some bits of a register
     */
-    void update(regs r, uint8_t masq, uint8_t value) const;
+    static void update(regs r, uint8_t masq, uint8_t value);
 
     /**
 	Clear some bits of a register
@@ -104,7 +133,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     /**
 	Set some bits of a register
     */
-    void set(regs r, uint8_t mask) const {
+    static void set(regs r, uint8_t mask) {
 	update(r, mask, mask);
     }
 
@@ -207,23 +236,25 @@ template<class SPI, pin_t cs> class MCP2515 {
     };
     static const _RXB0CTRL RXB0CTRL;
 #endif
-
-    template<uint8_t REG, uint8_t VAL> 
-    struct _RV {
-	static const uint8_t	reg = REG;
-	static const uint8_t	val = VAL;
-
-	template<uint8_t V2>
-	_RV<REG, VAL|V2> operator|(_RV<REG,V2>) {};
+#if 0
+    template<uint8_t ADDR> 
+    struct _REG {
+	static const uint8_t addr   = ADDR;
     };
 
-    static const uint8_t    RXB0CTRL	= 0x60;
-    _RV<RXB0CTRL, b01100000>	RXM_ALL;
-    _RV<RXB0CTRL, b01000000>	RXM_EID;
+    template<uint8_t addr, uint8_t value>
+    struct RV : public _RV<DEVICE, addr, value>	{};
+#endif
 
-    template<uint8_t REG, uint8_t VAL>
+    struct RXB0CTRL : public _REG<DEVICE, 0x60> {
+	_RV<RXB0CTRL, b01100000>    RXM_ALL;
+	_RV<RXB0CTRL, b01000000>    RXM_EID;
+    };
+    _RG<RXB0CTRL>   RXB0CTRL;
+
+    template<class REG, uint8_t VAL>
     inline void set(_RV<REG,VAL>) {
-	set(REG, VAL);
+	set(REG::addr, VAL);
     }
     /* -------------------------------------- */
 
