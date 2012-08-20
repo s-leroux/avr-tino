@@ -26,14 +26,37 @@ struct _REG {
     static const uint8_t    addr = ADDR;
 };
 
-template<class REG, uint8_t VAL> 
-struct _RV {
-    typedef typename REG::DEVICE DEVICE;
-    static const uint8_t	addr = REG::addr;
-    static const uint8_t	val = VAL;
+template<class REG, uint8_t MASK> struct _RF;
 
-    template<uint8_t V2>
-    _RV<REG, VAL|V2> operator|(_RV<REG,V2>) {};
+template<class FLD, uint8_t VAL> 
+struct _RV {
+    typedef typename FLD::DEVICE    DEVICE;
+    typedef typename FLD::REGISTER  REGISTER;
+    typedef FLD			    FIELD;
+
+    static const uint8_t	addr	= REGISTER::addr;
+    static const uint8_t	val	= VAL;
+    static const uint8_t	mask	= FIELD::mask;
+
+    template<uint8_t M2, uint8_t V2>
+    _RV<_RF<REGISTER,mask|M2>, VAL|V2> operator|(_RV<_RF<REGISTER,M2>,V2>) {};
+};
+
+template<class REG, uint8_t MASK>
+struct _RF {
+    typedef  REG		    REGISTER;
+    typedef typename REG::DEVICE    DEVICE;
+    static const uint8_t        mask    = MASK;
+    static const uint8_t	addr	= REGISTER::addr;
+
+    void operator=(uint8_t value) {
+	DEVICE::set((typename DEVICE::regs)this->addr, value);
+    }
+
+    template<uint8_t VAL>
+    void operator=(_RV<_RF<REG,MASK>, VAL>) {
+	DEVICE::set((typename DEVICE::regs)this->addr, VAL);
+    }
 };
 
 template<class REG>
@@ -78,7 +101,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     void setOperationMode(reqop_t mode) const;
 
     enum __attribute__ ((__packed__)) regs {
-	CANCTRL	    = 0x0F, /* CAN control register     - ?Fh */
+	//CANCTRL	    = 0x0F, /* CAN control register     - ?Fh */
 	CANSTAT	    = 0x0E, /* CAN status register      - ?Eh */
 	TEC	    = 0x1C, /* Transmit error counter   - 1Ch */
 	REC	    = 0x1D, /* reveiver error counter   - 1Dh */
@@ -121,6 +144,9 @@ template<class SPI, pin_t cs> class MCP2515 {
 	Set and/or clear some bits of a register
     */
     static void update(regs r, uint8_t masq, uint8_t value);
+
+    template<class FLD, uint8_t VAL>
+    static void update(_RV<FLD,VAL>);
 
     /**
 	Clear some bits of a register
@@ -213,45 +239,45 @@ template<class SPI, pin_t cs> class MCP2515 {
 	OPMOD2,
     };
 
-    /* -------------------------------------- */
-    template<uint8_t _addr>
-    struct Register {
-	static const uint8_t	addr = _addr;
+    /* ---------------------------------------- */
+    /* CAN control register (?Fh)		*/
+    /* ---------------------------------------- */
+    struct CANCTRL : public _REG<DEVICE, 0x0F> {
+	static _RF<CANCTRL, b11100000>	REQOP_M;
+	static _RF<CANCTRL, b00010000>	ABAT_M;
+	static _RF<CANCTRL, b00001000>	OSM_M;
+	static _RF<CANCTRL, b00000100>	CLKEN_M;
+	static _RF<CANCTRL, b00000011>	CLKPRE_M;
 
-	void operator=(uint8_t) const;
+	static _RV<typeof(REQOP_M), b00000000>    NORMAL_MODE; /* Normal operation mode */
+	static _RV<typeof(REQOP_M), b00100000>    SLEEP_MODE; /* Sleep mode */
+	static _RV<typeof(REQOP_M), b01000000>    LOOPBACK_MODE; /* Loopback mode */
+	static _RV<typeof(REQOP_M), b01100000>    LISTEN_ONLY; /* Listen only mode */
+	static _RV<typeof(REQOP_M), b10000000>    CONFIGURATION_MODE;
+
+	static _RV<typeof(ABAT_M), b00010000>    ABAT;	/* Abort all pending transmissions */
+	static _RV<typeof(OSM_M), b00001000>	OSM;	/* One shot mode */
+	static _RV<typeof(CLKEN_M), b00000100>	CLKEN;	/* CLKOUT pin enabled */
+
+	static _RV<typeof(CLKPRE_M), b00000000>   DIV_1; /* CLKOUT prescaler /1 */
+	static _RV<typeof(CLKPRE_M), b00000001>   DIV_2; /* CLKOUT prescaler /2 */
+	static _RV<typeof(CLKPRE_M), b00000010>   DIV_4; /* CLKOUT prescaler /4 */
+	static _RV<typeof(CLKPRE_M), b00000011>   DIV_8; /* CLKOUT prescaler /8 */
     };
-#if 0
-    struct _RXB0CTRL : public Register<0x60> {
-	enum {
-	    RXM_ALL	= b01100000, /* receive any message */
-	    RXM_EID	= b01000000, /* receive only valid message matching eid */
-	    RXM_SID	= b00100000, /* receive only valid message matching sid */
-	    //RXM_BOTH	= b00000000, /* receive only valid message matching both */
+    _RG<CANCTRL>   CANCTRL;
 
-	    RXRTR	= b00001000, /* remote transfert request received */
-	    BUKT	= b00000100, /* rollover */
-	    BUKT1	= b00000010, /* read-only copy of BUKT */
-	    FILHIT	= b00000001, /* Filter hit (if set RXF1 else RXF0) */
-	};
-    };
-    static const _RXB0CTRL RXB0CTRL;
-#endif
-#if 0
-    template<uint8_t ADDR> 
-    struct _REG {
-	static const uint8_t addr   = ADDR;
-    };
-
-    template<uint8_t addr, uint8_t value>
-    struct RV : public _RV<DEVICE, addr, value>	{};
-#endif
-
+    /* ---------------------------------------- */
+    /* Receive buffer 0 control register	*/
+    /* ---------------------------------------- */
     struct RXB0CTRL : public _REG<DEVICE, 0x60> {
-	_RV<RXB0CTRL, b01100000>    RXM_ALL;
-	_RV<RXB0CTRL, b01000000>    RXM_EID;
-    };
-    _RG<RXB0CTRL>   RXB0CTRL;
+	static _RF<RXB0CTRL, b01100000>	RXM_M;
 
+	static _RV<typeof(RXM_M), b01100000>    RXM_ALL;
+	static _RV<typeof(RXM_M), b01000000>    RXM_EID;
+    };
+    static _RG<RXB0CTRL>   RXB0CTRL;
+
+    /* ---------------------------------------- */
     template<class REG, uint8_t VAL>
     inline void set(_RV<REG,VAL>) {
 	set(REG::addr, VAL);

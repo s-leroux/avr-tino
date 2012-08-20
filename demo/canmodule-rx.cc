@@ -34,9 +34,12 @@ int main() {
 //    DDRA = b01100000+b01000000;
     typedef SPIMaster SPI;
     MCP2515<SPI, MCP2515_CS>	mcp2515;
-    DDRA = (mcp2515.RXB0CTRL.RXM_ALL|mcp2515.RXB0CTRL.RXM_EID).val;
+//    DDRA = (mcp2515.RXB0CTRL.RXM_ALL|mcp2515.RXB0CTRL.RXM_EID).val;
 
+    mcp2515.RXB0CTRL.RXM_M = 10;
     mcp2515.RXB0CTRL = 10;
+    mcp2515.RXB0CTRL.RXM_M = 1;
+    mcp2515.CANCTRL.REQOP_M = mcp2515.CANCTRL.NORMAL_MODE;
 #if 0
     typedef SPIMaster SPI;
 
