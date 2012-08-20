@@ -69,6 +69,8 @@ template<class SPI, pin_t cs> class MCP2515 {
 	TXB0D5      = 0x3B, /* Transmit buffer data byte 5 */
 	TXB0D6      = 0x3C, /* Transmit buffer data byte 6 */
 	TXB0D7      = 0x3D, /* Transmit buffer data byte 7 */
+
+	//RXB0CTRL    = 0x60, /* Receive buffer 0 control */
     };
 
     /* Common interface */
@@ -181,6 +183,49 @@ template<class SPI, pin_t cs> class MCP2515 {
 	OPMOD1,
 	OPMOD2,
     };
+
+    /* -------------------------------------- */
+    template<uint8_t _addr>
+    struct Register {
+	static const uint8_t	addr = _addr;
+
+	void operator=(uint8_t) const;
+    };
+#if 0
+    struct _RXB0CTRL : public Register<0x60> {
+	enum {
+	    RXM_ALL	= b01100000, /* receive any message */
+	    RXM_EID	= b01000000, /* receive only valid message matching eid */
+	    RXM_SID	= b00100000, /* receive only valid message matching sid */
+	    //RXM_BOTH	= b00000000, /* receive only valid message matching both */
+
+	    RXRTR	= b00001000, /* remote transfert request received */
+	    BUKT	= b00000100, /* rollover */
+	    BUKT1	= b00000010, /* read-only copy of BUKT */
+	    FILHIT	= b00000001, /* Filter hit (if set RXF1 else RXF0) */
+	};
+    };
+    static const _RXB0CTRL RXB0CTRL;
+#endif
+
+    template<uint8_t REG, uint8_t VAL> 
+    struct _RV {
+	static const uint8_t	reg = REG;
+	static const uint8_t	val = VAL;
+
+	template<uint8_t V2>
+	_RV<REG, VAL|V2> operator|(_RV<REG,V2>) {};
+    };
+
+    static const uint8_t    RXB0CTRL	= 0x60;
+    _RV<RXB0CTRL, b01100000>	RXM_ALL;
+    _RV<RXB0CTRL, b01000000>	RXM_EID;
+
+    template<uint8_t REG, uint8_t VAL>
+    inline void set(_RV<REG,VAL>) {
+	set(REG, VAL);
+    }
+    /* -------------------------------------- */
 
     private:
     class Command : GuardPinLow<cs> {
