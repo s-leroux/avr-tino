@@ -34,6 +34,13 @@ void MCP2515<SPI,cs>::reset() const {
 }
 
 template<class SPI, pin_t cs>
+void MCP2515<SPI,cs>::setOperationMode(reqop_t mode) const {
+    update(CANCTRL,
+		_BV(REQOP2) | _BV(REQOP1) | _BV(REQOP0),
+		mode);
+}
+
+template<class SPI, pin_t cs>
 void MCP2515<SPI,cs>::write(regs r, uint8_t len, const void *data) const {
     Command	cmd(WRITE);
 
@@ -69,13 +76,6 @@ void MCP2515<SPI,cs>::setPrescaler(uint8_t prescaler) const {
 }
 
 template<class SPI, pin_t cs>
-void MCP2515<SPI,cs>::setMode(mode_t mode) const {
-    update(CANCTRL,
-		_BV(REQOP2) | _BV(REQOP1) | _BV(REQOP0),
-		mode << REQOP0);
-}
-
-template<class SPI, pin_t cs>
 void  MCP2515<SPI,cs>::setTransmitBuffer(txb_t tx_base,
                             uint16_t sid,
                             uint16_t eid,
@@ -98,7 +98,7 @@ void  MCP2515<SPI,cs>::setTransmitBuffer(txb_t tx_base,
 }
 
 template<class SPI, pin_t cs>
-void MCP2515<SPI,cs>::doTransmitBuffer(uint8_t buffer_set) const {
-    Command	cmd(RTS | (buffer_set & 0x0F));
+void MCP2515<SPI,cs>::doTransmitBuffer(txb_t buffer_set) const {
+    Command	cmd((instr)(RTS | (buffer_set & 0x0F)));
 }
 

@@ -37,5 +37,6 @@ extern "C" void __cxa_pure_virtual(void) { /* do nothing */ }
 #endif
 
 #include "avr-tino/pin.h"
+#include "avr-tino/bits.h"
 
 #endif

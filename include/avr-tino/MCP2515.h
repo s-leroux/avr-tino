@@ -26,7 +26,27 @@ template<class SPI, pin_t cs> class MCP2515 {
     public:
     MCP2515();
 
+    /**
+	Issue a RESET command throught SPI
+
+	According to the datasheet, the MCP2515 is set
+	to configuration mode after a reset.
+
+	You must use setOperationMode to change that.
+    */
     void reset() const;
+
+    enum __attribute__ ((__packed__)) reqop_t {
+	NORMAL		= b00000000,
+	SLEEP		= b00100000,
+	LOOPBACK	= b01000000,
+	LISTEN_ONLY	= b01100000,
+	CONFIGURATION	= b10000000,
+    };
+    /**
+	Change the operation mode of the device
+    */
+    void setOperationMode(reqop_t mode) const;
 
     enum __attribute__ ((__packed__)) regs {
 	CANCTRL	    = 0x0F, /* CAN control register     - ?Fh */
@@ -89,14 +109,15 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* Specific commands */
     void setPrescaler(uint8_t prescaler) const;
 
-    enum __attribute__ ((__packed__)) mode_t {
-	NORMAL	        = 0,  /* Normal mode         000 */
-	SLEEP	        = 1,  /* Sleep mode          001 */
-        LOOPBACK        = 2,  /* Loopback mode       010 */
-        LISTEN          = 3,  /* Listen only mode    011 */
-        CONFIGURATION	= 4,  /* Configuration mode  100 */
-    };
-    void setMode(mode_t mode) const;
+    template<class INT>
+    inline void setBaud(INT baud) const {
+	setPrescaler(F_CPU/baud/2-1);
+    }
+
+    /**
+	Prescaler values for common baud based of F_CPU.
+    */
+    static const uint8_t BAUD9600 = F_CPU/9600/2-1;
 
     /**
 	Transmit buffer selector.
@@ -120,7 +141,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 			    uint8_t len,
 			    const void *data) const;
 
-    void doTransmitBuffer(uint8_t buffer_set) const;
+    void doTransmitBuffer(txb_t buffer_set) const;
 
 
     public:
