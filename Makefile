@@ -77,7 +77,7 @@ SRCFILES=$(SRCDIR)pin.cc \
 	$(SRCDIR)MCP2515.cc 
 
 ifeq ($(BOARD),CANModule)
-DEMOS += build-$(MCU)-$(BOARD)/bin/canmodule \
+DEMOS += build-$(MCU)-$(BOARD)/bin/canmodule-tx \
 	build-$(MCU)-$(BOARD)/bin/canmodule-rx
 SRCFILES += $(SRCDIR)/target/CANModule.cc
 endif
