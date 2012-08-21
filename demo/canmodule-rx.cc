@@ -47,8 +47,9 @@ int main() {
     CAN_CTRL::RXStatus	status;
     while(1) {
 	status = mcp2515.readRXStatus();
-	if (status.hasMessageInRX0()) {
-	    DDRA = 0x11;
+	if (status.hasMessageInRXB0()) {
+	    uint8_t buffer[6];
+	    mcp2515.RXB0.readData(sizeof(buffer), buffer);
 	}
     }
 

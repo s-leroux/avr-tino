@@ -83,6 +83,11 @@ template<class SPI, pin_t cs> class MCP2515 {
     static uint8_t read(regs r);
 
     /**
+	Sequencial read registers
+    */
+    static void read(regs r, uint8_t len, void * buffer);
+
+    /**
 	Write a value into a register
     */
     void write(regs r, uint8_t data) const;
@@ -197,7 +202,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 	}
 
 	static void readData(uint8_t len, void * buffer) {
-	    *(uint8_t*)buffer = read(RXBDATA::reg);
+	    read(RXBDATA::reg, len, buffer);
 	}
     } RXB0;
 
@@ -210,7 +215,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 	}
 
 	static void readData(uint8_t len, void * buffer) {
-	    *(uint8_t*)buffer = read(RXBDATA::reg);
+	    read(RXBDATA::reg, len, buffer);
 	}
     } RXB1;
 
@@ -222,20 +227,20 @@ template<class SPI, pin_t cs> class MCP2515 {
 	inline RXStatus(uint8_t s) : status(s) {}
 
 	enum {
-	    MESSAGE_IN_RX0  = b10000000,
-	    MESSAGE_IN_RX1  = b01000000,
+	    MESSAGE_IN_RXB0 = b10000000,
+	    MESSAGE_IN_RXB1 = b01000000,
 	    /* bit 5 is unused */
 	    EXTENDED_FRAME  = b00010000,
 	    REMOTE_FRAME    = b00001000,
 	    FILTER_MATCH    = b00000111, /* Filter match mask */
 	};
 
-	inline bool hasMessageInRX0() const {
-	    return status & MESSAGE_IN_RX0;
+	inline bool hasMessageInRXB0() const {
+	    return status & MESSAGE_IN_RXB0;
 	}
 
-	inline bool hasMessageInRX1() const {
-	    return status & MESSAGE_IN_RX1;
+	inline bool hasMessageInRXB1() const {
+	    return status & MESSAGE_IN_RXB1;
 	}
     };
 
@@ -300,6 +305,12 @@ template<class SPI, pin_t cs> class MCP2515 {
 	void write(uint8_t n, const void *data) const {
 	    for(int i = 0; i < n; ++i) { 
 		SPI::transfert(((uint8_t*)data)[i]); 
+	    }
+	}
+
+	void read(uint8_t n, const void *data) const {
+	    for(int i = 0; i < n; ++i) { 
+		((uint8_t*)data)[i] = SPI::transfert(0); 
 	    }
 	}
     };
