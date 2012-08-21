@@ -69,6 +69,9 @@ template<class SPI, pin_t cs> class MCP2515 {
 	TXB0D5      = 0x3B, /* Transmit buffer data byte 5 */
 	TXB0D6      = 0x3C, /* Transmit buffer data byte 6 */
 	TXB0D7      = 0x3D, /* Transmit buffer data byte 7 */
+
+	/* Receive buffer 0 */
+	RXB0CTRL    = 0x60, /* Receive buffer control */
     };
 
     /* Common interface */
@@ -143,6 +146,36 @@ template<class SPI, pin_t cs> class MCP2515 {
 
     void doTransmitBuffer(txb_t buffer_set) const;
 
+    /* ------------------------------------------------ */
+    /* Receive buffer			                */
+    /* ------------------------------------------------ */
+    struct RXB0CTRL {
+	enum __attribute__((__packed__)) mask {
+	    RXM		= b01100000,
+	    RXRTR	= b00001000,
+	    BUKT	= b00000100,
+	    BUKT1	= b00000010,
+	    FILHIT	= b00000001,
+	};
+    };
+
+    struct RXB1CTRL {
+	enum __attribute__((__packed__)) mask {
+	    RXM		= b01100000,
+	    RXRTR	= b00001000,
+	    FILHIT	= b00000111,
+	};
+    };
+
+    enum __attribute__ ((__packed__)) receive_mode_t {
+	RXM_ANY	    = b01100000, /* Receive any message */
+	RXM_EID	    = b01000000, /* Receive valid message based on EID */
+	RXM_SID	    = b00100000, /* Receive valid message based on SID */
+	RXM_BOTH    = b00000000, /* Receive valid message based on SID or EID*/
+    };
+
+
+    /* ------------------------------------------------ */
 
     public:
     enum __attribute__ ((__packed__)) instr {
