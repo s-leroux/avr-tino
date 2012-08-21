@@ -24,6 +24,8 @@
  */
 template<class SPI, pin_t cs> class MCP2515 {
     public:
+    typedef MCP2515<SPI,cs>	DEVICE;
+
     MCP2515();
 
     /**
@@ -71,7 +73,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 	TXB0D7      = 0x3D, /* Transmit buffer data byte 7 */
 
 	/* Receive buffer 0 */
-	RXB0CTRL    = 0x60, /* Receive buffer control */
+//	RXB0CTRL    = 0x60, /* Receive buffer control */
     };
 
     /* Common interface */
@@ -92,7 +94,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     /**
 	Set and/or clear some bits of a register
     */
-    void update(regs r, uint8_t masq, uint8_t value) const;
+    static void update(regs r, uint8_t masq, uint8_t value);
 
     /**
 	Clear some bits of a register
@@ -149,7 +151,15 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* ------------------------------------------------ */
     /* Receive buffer			                */
     /* ------------------------------------------------ */
+    template<class DEVICE, uint8_t REG, uint8_t MASK>
+    struct _M {
+	static const uint8_t	mask = MASK;
+
+	inline operator uint8_t() const { return mask; }
+    };
     struct RXB0CTRL {
+	static const regs	reg = (regs)0x60;
+
 	enum __attribute__((__packed__)) mask {
 	    RXM		= b01100000,
 	    RXRTR	= b00001000,
@@ -160,6 +170,8 @@ template<class SPI, pin_t cs> class MCP2515 {
     };
 
     struct RXB1CTRL {
+	static const regs	reg = (regs)0x70;
+
 	enum __attribute__((__packed__)) mask {
 	    RXM		= b01100000,
 	    RXRTR	= b00001000,
@@ -174,6 +186,21 @@ template<class SPI, pin_t cs> class MCP2515 {
 	RXM_BOTH    = b00000000, /* Receive valid message based on SID or EID*/
     };
 
+    static struct {
+	typedef RXB0CTRL RXBCTRL;
+
+	void setMode(receive_mode_t mode) {
+	    update(RXBCTRL::reg, RXBCTRL::RXM, mode);
+	}
+    } RXB0;
+
+    static struct {
+	typedef RXB1CTRL RXBCTRL;
+
+	void setMode(receive_mode_t mode) {
+	    update(RXBCTRL::reg, RXBCTRL::RXM, mode);
+	}
+    } RXB1;
 
     /* ------------------------------------------------ */
 

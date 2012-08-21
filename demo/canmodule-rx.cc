@@ -34,21 +34,25 @@ int main() {
     typedef SPIMaster SPI;
 
     /* MCP2515 reset */
+    typedef MCP2515<SPI, MCP2515_CS>	CAN_CTRL;
     const MCP2515<SPI, MCP2515_CS>	mcp2515;
 
     SPI::begin();
     mcp2515.reset();
     mcp2515.setBaud(100000);
     mcp2515.setOperationMode(mcp2515.NORMAL);
+
+    mcp2515.RXB0.setMode(mcp2515.RXM_ANY);
+    mcp2515.RXB1.setMode(mcp2515.RXM_ANY);
 //    volatile uint8_t r = mcp2515.read(mcp2515.CANCTRL);
 //    mcp2515.write(mcp2515.CANCTRL, r);
 
     // mcp2515.setTransmitBuffer(mcp2515.TXB0, 0x1234, 0x5678, 6, "Hello");
-    mcp2515.setTransmitBuffer(mcp2515.TXB0, 0x1234, 0x5678, 0, "");
+//    mcp2515.setTransmitBuffer(mcp2515.TXB0, 0x1234, 0x5678, 0, "");
 
     while(1) {
-	mcp2515.doTransmitBuffer(mcp2515.TXB0);
-	delay(5000);
+//	mcp2515.doTransmitBuffer(mcp2515.TXB0);
+//	delay(5000);
     }
 
     return 0;
