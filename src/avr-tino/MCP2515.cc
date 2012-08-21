@@ -87,7 +87,7 @@ void  MCP2515<SPI,cs>::setTransmitBuffer(txb_t tx_base,
                             uint16_t sid,
                             uint16_t eid,
                             uint8_t len,
-                            const void *data) const
+                            const void *data)
 {
     // adjust len
     if (len > 8) len = 8;

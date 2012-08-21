@@ -43,6 +43,7 @@ int main() {
     mcp2515.setOperationMode(mcp2515.NORMAL);
 
     mcp2515.RXB0.setMode(mcp2515.RXM_ANY);
+    mcp2515.RXB1.setMode(mcp2515.RXM_ANY);
 
     CAN_CTRL::RXStatus	status;
     while(1) {

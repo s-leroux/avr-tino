@@ -57,13 +57,13 @@ template<class SPI, pin_t cs> class MCP2515 {
 	REC	    = 0x1D, /* reveiver error counter   - 1Dh */
 
 	/* Transmit buffer 0 */
-	TXB0CTRL    = 0x30, /* Transmit buffer control */
+//	TXB0CTRL    = 0x30, /* Transmit buffer control */
 	TXB0SIDH    = 0x31, /* Transmit buffer std id high */
 	TXB0SIDL    = 0x32, /* Transmit buffer std id low */
 	TXB0EID8    = 0x33, /* Transmit buffer ext id high*/
 	TXB0EID0    = 0x34, /* Transmit buffer ext id low */
 	TXB0DLC     = 0x35, /* Transmit buffer data length */
-	TXB0D0      = 0x36, /* Transmit buffer data byte 1 */
+//	TXB0D0      = 0x36, /* Transmit buffer data byte 1 */
 	TXB0D1      = 0x37, /* Transmit buffer data byte 1 */
 	TXB0D2      = 0x38, /* Transmit buffer data byte 2 */
 	TXB0D3      = 0x39, /* Transmit buffer data byte 3 */
@@ -141,17 +141,82 @@ template<class SPI, pin_t cs> class MCP2515 {
     enum __attribute__ ((__packed__)) txb_t {
                                 /*                    TXB  RTS  */
                                 /*                    ---- ---- */
-	TXB0	= 0x31,		/* Transmit buffer 0  0011 0001 */
-	TXB1	= 0x42,		/* Transmit buffer 1  0100 0010 */
+	//TXB0	= 0x31,		/* Transmit buffer 0  0011 0001 */
+	//TXB1	= 0x42,		/* Transmit buffer 1  0100 0010 */
 	TXB2	= 0x54,		/* Transmit buffer 2  0101 0100 */
+	TXB0_BASE = 0x30,
+	TXB1_BASE = 0x40,
     };
-    void setTransmitBuffer(txb_t tx_base,
+    static void setTransmitBuffer(txb_t tx_base,
 			    uint16_t sid,
 			    uint16_t eid,
 			    uint8_t len,
-			    const void *data) const;
+			    const void *data);
 
     void doTransmitBuffer(txb_t buffer_set) const;
+
+    /* ------------------------------------------------ */
+    /* Transmit buffer			                */
+    /* ------------------------------------------------ */
+    template<uint8_t REG>
+    struct TXBnCTRL {
+	static const regs	reg = (regs)REG;
+
+	enum __attribute__((__packed__)) mask {
+	    ABTF	= b01000000,	/* Message aborted */
+	    MLOA	= b00100000,	/* Message lost arbitration */
+	    TXERR	= b00010000,	/* Transmission error detect */
+	    TXREQ	= b00001000,	/* Message transmit request */
+	    /* bit 2 is unimplemented */
+	    TXP		= b00000011,	/* Transmit buffer priority */
+	};
+    };
+
+    typedef TXBnCTRL<0x30>  TXB0CTRL;
+    typedef TXBnCTRL<0x40>  TXB1CTRL;
+
+    struct TXB0D0 {
+    };
+
+    struct TXB1D0 {
+    };
+
+    static struct {
+	typedef TXB0CTRL    TXBCTRL;
+	typedef TXB0D0	    TXBDATA;
+
+	static void setTransmitBuffer(
+			    uint16_t sid,
+                            uint16_t eid,
+                            uint8_t len,
+                            const void *data) {
+	    DEVICE::setTransmitBuffer((txb_t)TXBCTRL::reg,
+			    sid,
+			    eid,
+			    len,
+			    data);
+	}
+
+    } TXB0;
+
+    static struct {
+	typedef TXB1CTRL    TXBCTRL;
+	typedef TXB1D0	    TXBDATA;
+
+	static void setTransmitBuffer(
+			    uint16_t sid,
+                            uint16_t eid,
+                            uint8_t len,
+                            const void *data) {
+	    DEVICE::setTransmitBuffer((txb_t)TXBCTRL::reg,
+			    sid,
+			    eid,
+			    len,
+			    data);
+	}
+    } TXB1;
+
+
 
     /* ------------------------------------------------ */
     /* Receive buffer			                */
