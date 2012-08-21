@@ -105,8 +105,8 @@ void  MCP2515<SPI,cs>::setTransmitBuffer(txb_t tx_base,
 }
 
 template<class SPI, pin_t cs>
-void MCP2515<SPI,cs>::doTransmitBuffer(txb_t buffer_set) const {
-    Command	cmd((instr)(RTS | (buffer_set & 0x0F)));
+void MCP2515<SPI,cs>::doTransmitBuffer(txb_rts_t buffer_set) {
+    Command	cmd((instr)(RTS | buffer_set));
 }
 
 template<class SPI, pin_t cs>

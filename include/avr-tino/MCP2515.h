@@ -125,11 +125,6 @@ template<class SPI, pin_t cs> class MCP2515 {
     }
 
     /**
-	Prescaler values for common baud based of F_CPU.
-    */
-    static const uint8_t BAUD9600 = F_CPU/9600/2-1;
-
-    /**
 	Transmit buffer selector.
 
 	High order 4-bits maps to the correspondig TX buffer
@@ -141,11 +136,9 @@ template<class SPI, pin_t cs> class MCP2515 {
     enum __attribute__ ((__packed__)) txb_t {
                                 /*                    TXB  RTS  */
                                 /*                    ---- ---- */
-	//TXB0	= 0x31,		/* Transmit buffer 0  0011 0001 */
-	//TXB1	= 0x42,		/* Transmit buffer 1  0100 0010 */
-	TXB2	= 0x54,		/* Transmit buffer 2  0101 0100 */
-	TXB0_BASE = 0x30,
-	TXB1_BASE = 0x40,
+	TXB0_ID	= 0x31,		/* Transmit buffer 0  0011 0001 */
+	TXB1_ID	= 0x42,		/* Transmit buffer 1  0100 0010 */
+	TXB2_ID	= 0x54,		/* Transmit buffer 2  0101 0100 */
     };
     static void setTransmitBuffer(txb_t tx_base,
 			    uint16_t sid,
@@ -153,7 +146,21 @@ template<class SPI, pin_t cs> class MCP2515 {
 			    uint8_t len,
 			    const void *data);
 
-    void doTransmitBuffer(txb_t buffer_set) const;
+    enum __attribute__ ((__packed__)) txb_rts_t {
+	TXB0_RTS = _BV(0),
+	TXB1_RTS = _BV(1),
+	TXB2_RTS = _BV(2),
+	/* plus combination of the above */
+    };
+
+    friend txb_rts_t operator|(txb_rts_t a, txb_rts_t b) {
+	return (txb_rts_t)(a|b);
+    }
+
+    static void doTransmitBuffer(txb_rts_t buffer_set);
+    static void doTransmitBuffer(txb_t id) {
+	doTransmitBuffer((txb_rts_t)(id & 0x07));
+    }
 
     /* ------------------------------------------------ */
     /* Transmit buffer			                */
@@ -174,49 +181,30 @@ template<class SPI, pin_t cs> class MCP2515 {
 
     typedef TXBnCTRL<0x30>  TXB0CTRL;
     typedef TXBnCTRL<0x40>  TXB1CTRL;
-
-    struct TXB0D0 {
-    };
-
-    struct TXB1D0 {
-    };
-
-    static struct {
-	typedef TXB0CTRL    TXBCTRL;
-	typedef TXB0D0	    TXBDATA;
+    
+    template<uint8_t TXB_ID>
+    struct TXBn {
+	static const uint8_t	TXBCTRL	    = TXB_ID & 0xF0;
+	static const uint8_t	RTS_FLAG    = TXB_ID & 0x07;
 
 	static void setTransmitBuffer(
 			    uint16_t sid,
                             uint16_t eid,
                             uint8_t len,
                             const void *data) {
-	    DEVICE::setTransmitBuffer((txb_t)TXBCTRL::reg,
+	    DEVICE::setTransmitBuffer((txb_t)TXBCTRL,
 			    sid,
 			    eid,
 			    len,
 			    data);
 	}
 
-    } TXB0;
-
-    static struct {
-	typedef TXB1CTRL    TXBCTRL;
-	typedef TXB1D0	    TXBDATA;
-
-	static void setTransmitBuffer(
-			    uint16_t sid,
-                            uint16_t eid,
-                            uint8_t len,
-                            const void *data) {
-	    DEVICE::setTransmitBuffer((txb_t)TXBCTRL::reg,
-			    sid,
-			    eid,
-			    len,
-			    data);
+	static void doTransmitBuffer(void) {
+	    DEVICE::doTransmitBuffer((txb_rts_t)RTS_FLAG);
 	}
-    } TXB1;
-
-
+    };
+    static TXBn<0x30>	TXB0;
+    static TXBn<0x40>	TXB1;
 
     /* ------------------------------------------------ */
     /* Receive buffer			                */

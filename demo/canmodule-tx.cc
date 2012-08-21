@@ -48,8 +48,8 @@ int main() {
     mcp2515.TXB1.setTransmitBuffer(0x1234, 0x5678, 0, "");
 
     while(1) {
-	mcp2515.doTransmitBuffer((CAN_CTRL::txb_t)0x31);
-	mcp2515.doTransmitBuffer((CAN_CTRL::txb_t)0x42);
+	mcp2515.TXB0.doTransmitBuffer();
+	mcp2515.TXB1.doTransmitBuffer();
 	delay(5000);
     }
 
