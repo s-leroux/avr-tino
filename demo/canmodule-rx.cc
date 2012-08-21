@@ -43,7 +43,20 @@ int main() {
     mcp2515.setOperationMode(mcp2515.NORMAL);
 
     mcp2515.RXB0.setMode(mcp2515.RXM_ANY);
-    mcp2515.RXB1.setMode(mcp2515.RXM_ANY);
+
+    CAN_CTRL::RXStatus	status;
+    while(1) {
+	status = mcp2515.readRXStatus();
+	if (status.hasMessageInRX0()) {
+	    DDRA = 0x11;
+	}
+    }
+
+//    uint8_t data;
+//    mcp2515.RXB0.readData(1,&data);
+//    mcp2515.RXB0.readData(1,&data);
+//    mcp2515.RXB1.readData(1,&data);
+//    mcp2515.RXB1.readData(1,&data);
 //    volatile uint8_t r = mcp2515.read(mcp2515.CANCTRL);
 //    mcp2515.write(mcp2515.CANCTRL, r);
 

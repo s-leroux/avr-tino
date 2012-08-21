@@ -80,7 +80,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     /**
 	Read a register value
     */
-    uint8_t read(regs r) const;
+    static uint8_t read(regs r);
 
     /**
 	Write a value into a register
@@ -180,21 +180,66 @@ template<class SPI, pin_t cs> class MCP2515 {
 	RXM_BOTH    = b00000000, /* Receive valid message based on SID or EID*/
     };
 
-    static struct {
-	typedef RXB0CTRL RXBCTRL;
+    struct RXB0D0 {
+	static const regs       reg = (regs)0x66;
+    };
 
-	void setMode(receive_mode_t mode) {
+    struct RXB1D0 {
+	static const regs       reg = (regs)0x76;
+    };
+
+    static struct {
+	typedef RXB0CTRL    RXBCTRL;
+	typedef RXB0D0	    RXBDATA;
+
+	static void setMode(receive_mode_t mode) {
 	    update(RXBCTRL::reg, RXBCTRL::RXM, mode);
+	}
+
+	static void readData(uint8_t len, void * buffer) {
+	    *(uint8_t*)buffer = read(RXBDATA::reg);
 	}
     } RXB0;
 
     static struct {
-	typedef RXB1CTRL RXBCTRL;
+	typedef RXB1CTRL    RXBCTRL;
+	typedef RXB1D0	    RXBDATA;
 
-	void setMode(receive_mode_t mode) {
+	static void setMode(receive_mode_t mode) {
 	    update(RXBCTRL::reg, RXBCTRL::RXM, mode);
 	}
+
+	static void readData(uint8_t len, void * buffer) {
+	    *(uint8_t*)buffer = read(RXBDATA::reg);
+	}
     } RXB1;
+
+    /* RX status */
+    struct RXStatus {
+	uint8_t	    status;
+
+	inline RXStatus() {}
+	inline RXStatus(uint8_t s) : status(s) {}
+
+	enum {
+	    MESSAGE_IN_RX0  = b10000000,
+	    MESSAGE_IN_RX1  = b01000000,
+	    /* bit 5 is unused */
+	    EXTENDED_FRAME  = b00010000,
+	    REMOTE_FRAME    = b00001000,
+	    FILTER_MATCH    = b00000111, /* Filter match mask */
+	};
+
+	inline bool hasMessageInRX0() const {
+	    return status & MESSAGE_IN_RX0;
+	}
+
+	inline bool hasMessageInRX1() const {
+	    return status & MESSAGE_IN_RX1;
+	}
+    };
+
+    static RXStatus readRXStatus();
 
     /* ------------------------------------------------ */
 
@@ -205,6 +250,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 	BIT_MODIFY  = 0x05, /* Bit Modify               - 0000 0101 */
 	READ	    = 0x03, /* Read data                - 0000 0011 */
 	RTS	    = 0x80, /* Request To Send          - 1000 0nnn */
+	RX_STATUS   = b10110000, /* Quick polling of received message */
     };
 
     enum __attribute__ ((__packed__)) canctrl_bits {

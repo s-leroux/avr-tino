@@ -63,7 +63,7 @@ void MCP2515<SPI,cs>::update(regs r, uint8_t mask, uint8_t data) {
 }
 
 template<class SPI, pin_t cs>
-uint8_t MCP2515<SPI,cs>::read(regs r) const {
+uint8_t MCP2515<SPI,cs>::read(regs r) {
     Command cmd(READ);
 
     cmd.write(r);        
@@ -100,5 +100,11 @@ void  MCP2515<SPI,cs>::setTransmitBuffer(txb_t tx_base,
 template<class SPI, pin_t cs>
 void MCP2515<SPI,cs>::doTransmitBuffer(txb_t buffer_set) const {
     Command	cmd((instr)(RTS | (buffer_set & 0x0F)));
+}
+
+template<class SPI, pin_t cs>
+typename MCP2515<SPI,cs>::RXStatus MCP2515<SPI,cs>::readRXStatus() {
+    Command	cmd(RX_STATUS);
+    return cmd.read();
 }
 
