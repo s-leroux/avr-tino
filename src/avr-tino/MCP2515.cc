@@ -35,7 +35,7 @@ void MCP2515<SPI,cs>::reset() const {
 
 template<class SPI, pin_t cs>
 void MCP2515<SPI,cs>::setOperationMode(reqop_t mode) const {
-    update((regs)CANCTRL::addr,
+    update(CANCTRL,
 		_BV(REQOP2) | _BV(REQOP1) | _BV(REQOP0),
 		mode);
 }
@@ -54,7 +54,7 @@ void MCP2515<SPI,cs>::write(regs r, uint8_t data) const {
 }
 
 template<class SPI, pin_t cs>
-void MCP2515<SPI,cs>::update(regs r, uint8_t mask, uint8_t data) {
+void MCP2515<SPI,cs>::update(regs r, uint8_t mask, uint8_t data) const {
     Command cmd(BIT_MODIFY);
 
     cmd.write(r);        
@@ -72,7 +72,7 @@ uint8_t MCP2515<SPI,cs>::read(regs r) const {
 
 template<class SPI, pin_t cs>
 void MCP2515<SPI,cs>::setPrescaler(uint8_t prescaler) const {
-    update((regs)CANCTRL::addr, 0x03, prescaler);
+    update(CANCTRL, 0x03, prescaler);
 }
 
 template<class SPI, pin_t cs>
