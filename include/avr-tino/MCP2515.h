@@ -151,12 +151,6 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* ------------------------------------------------ */
     /* Receive buffer			                */
     /* ------------------------------------------------ */
-    template<class DEVICE, uint8_t REG, uint8_t MASK>
-    struct _M {
-	static const uint8_t	mask = MASK;
-
-	inline operator uint8_t() const { return mask; }
-    };
     struct RXB0CTRL {
 	static const regs	reg = (regs)0x60;
 
