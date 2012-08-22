@@ -182,7 +182,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     typedef TXBnCTRL<0x30>  TXB0CTRL;
     typedef TXBnCTRL<0x40>  TXB1CTRL;
     
-    template<uint8_t TXB_ID>
+    template<txb_t TXB_ID>
     struct TXBn {
 	static const uint8_t	TXBCTRL	    = TXB_ID & 0xF0;
 	static const uint8_t	RTS_FLAG    = TXB_ID & 0x07;
@@ -203,8 +203,8 @@ template<class SPI, pin_t cs> class MCP2515 {
 	    DEVICE::doTransmitBuffer((txb_rts_t)RTS_FLAG);
 	}
     };
-    static TXBn<0x30>	TXB0;
-    static TXBn<0x40>	TXB1;
+    static TXBn<TXB0_ID>	TXB0;
+    static TXBn<TXB1_ID>	TXB1;
 
     /* ------------------------------------------------ */
     /* Receive buffer			                */
