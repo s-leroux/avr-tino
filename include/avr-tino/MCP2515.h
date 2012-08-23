@@ -56,6 +56,8 @@ template<class SPI, pin_t cs> class MCP2515 {
 	TEC	    = 0x1C, /* Transmit error counter   - 1Ch */
 	REC	    = 0x1D, /* reveiver error counter   - 1Dh */
 
+	CANINTF	    = 0x2C,
+
 	/* Transmit buffer 0 */
 //	TXB0CTRL    = 0x30, /* Transmit buffer control */
 	TXB0SIDH    = 0x31, /* Transmit buffer std id high */
@@ -74,6 +76,17 @@ template<class SPI, pin_t cs> class MCP2515 {
 
 	/* Receive buffer 0 */
 //	RXB0CTRL    = 0x60, /* Receive buffer control */
+    };
+
+    enum canintf_flags {
+	MERRF	= b10000000,
+	WAKIF	= b01000000,
+	ERRIF	= b00100000,
+	TX2IF	= b00010000,
+	TX1IF	= b00001000,
+	TX0IF	= b00000100,
+	RX1IF	= b00000010,
+	RX0IF	= b00000001,
     };
 
     /* Common interface */
@@ -104,7 +117,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     /**
 	Clear some bits of a register
     */
-    void clear(regs r, uint8_t mask) const {
+    static void clear(regs r, uint8_t mask) {
 	update(r, mask, 0x00);
     }
 
@@ -112,7 +125,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     /**
 	Set some bits of a register
     */
-    void set(regs r, uint8_t mask) const {
+    static void set(regs r, uint8_t mask) {
 	update(r, mask, mask);
     }
 
@@ -281,6 +294,10 @@ template<class SPI, pin_t cs> class MCP2515 {
 	static void readData(uint8_t len, void * buffer) {
 	    read(RXBDATA::reg, len, buffer);
 	}
+
+	inline void clear() {
+	    DEVICE::clear(CANINTF, RX0IF);
+	}
     } RXB0;
 
     static struct {
@@ -304,8 +321,8 @@ template<class SPI, pin_t cs> class MCP2515 {
 	inline RXStatus(uint8_t s) : status(s) {}
 
 	enum {
-	    MESSAGE_IN_RXB0 = b10000000,
-	    MESSAGE_IN_RXB1 = b01000000,
+	    MESSAGE_IN_RXB1 = b10000000,
+	    MESSAGE_IN_RXB0 = b01000000,
 	    /* bit 5 is unused */
 	    EXTENDED_FRAME  = b00010000,
 	    REMOTE_FRAME    = b00001000,

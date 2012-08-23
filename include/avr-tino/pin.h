@@ -68,6 +68,10 @@ class GuardPinHigh {
 
 static void pinMode(pin_t pin, pinmode_t mode);
 static void digitalWrite(pin_t pin, pinstate_t state);
+static inline void digitalWrite(pin_t pin, bool state) {
+	digitalWrite(pin, state ? HIGH : LOW);
+}
+
 static pinstate_t digitalRead(pin_t pin);
 
 enum __attribute__ ((__packed__)) bitorder_t {

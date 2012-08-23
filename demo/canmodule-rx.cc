@@ -46,11 +46,19 @@ int main() {
     mcp2515.RXB1.setMode(mcp2515.RXM_ANY);
 
     CAN_CTRL::RXStatus	status;
+
+    bool state = false;
+    pinToOutput(PIN_PD1);
+
     while(1) {
 	status = mcp2515.readRXStatus();
 	if (status.hasMessageInRXB0()) {
 	    uint8_t buffer[6];
 	    mcp2515.RXB0.readData(sizeof(buffer), buffer);
+	    state = !state;
+	    digitalWrite(PIN_PD1, state);
+
+	    mcp2515.RXB0.clear();
 	}
     }
 
