@@ -181,6 +181,26 @@ template<class SPI, pin_t cs> class MCP2515 {
 
     typedef TXBnCTRL<0x30>  TXB0CTRL;
     typedef TXBnCTRL<0x40>  TXB1CTRL;
+
+    struct TXStatus {
+	public:
+	TXStatus(uint8_t status) : _status(status) {}
+
+	inline bool hasLostArbitration(void) const {
+	    return _status & TXB0CTRL::MLOA;
+	}
+
+	inline bool isError(void) const {
+	    return _status & TXB0CTRL::TXERR;
+	}
+
+	inline bool isPending(void) const {
+	    return _status & TXB0CTRL::TXREQ;
+	}
+	
+	private:
+	uint8_t	_status;
+    };
     
     template<txb_t TXB_ID>
     struct TXBn {
@@ -201,6 +221,10 @@ template<class SPI, pin_t cs> class MCP2515 {
 
 	static void doTransmitBuffer(void) {
 	    DEVICE::doTransmitBuffer((txb_rts_t)RTS_FLAG);
+	}
+
+	static inline TXStatus status() {
+	    return DEVICE::read((typename DEVICE::regs)TXBCTRL);
 	}
     };
     static TXBn<TXB0_ID>	TXB0;

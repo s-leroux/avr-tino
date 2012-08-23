@@ -48,9 +48,20 @@ int main() {
     mcp2515.TXB1.setTransmitBuffer(0x1234, 0x5678, 0, "");
 
     while(1) {
+	pinToLow(PIN_PD0);
+	pinToLow(PIN_PD1);
+	pinToLow(PIN_PD2);
 	mcp2515.TXB0.doTransmitBuffer();
-	mcp2515.TXB1.doTransmitBuffer();
-	delay(5000);
+	for(uint8_t i = 0; i < 20; ++i) {
+	    CAN_CTRL::TXStatus status = mcp2515.TXB0.status();
+
+	    digitalWrite(PIN_PD0, status.isPending() ? HIGH : LOW);
+	    digitalWrite(PIN_PD1, status.isError() ? HIGH : LOW);
+	    digitalWrite(PIN_PD2, status.hasLostArbitration() ? HIGH : LOW);
+	    delay(500);
+	}
+//	mcp2515.TXB1.doTransmitBuffer();
+	delay(10000);
     }
 
     return 0;
