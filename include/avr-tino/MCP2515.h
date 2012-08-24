@@ -51,7 +51,6 @@ template<class SPI, pin_t cs> class MCP2515 {
     void setOperationMode(reqop_t mode) const;
 
     enum __attribute__ ((__packed__)) regs {
-	CANCTRL	    = 0x0F, /* CAN control register     - ?Fh */
 	CANSTAT	    = 0x0E, /* CAN status register      - ?Eh */
 	TEC	    = 0x1C, /* Transmit error counter   - 1Ch */
 	REC	    = 0x1D, /* reveiver error counter   - 1Dh */
@@ -103,7 +102,18 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* ------------------------------------------------ */
     /* Register description		                */
     /* ------------------------------------------------ */
-    static const uint8_t    CANINTF = 0x2C;
+    static const uint8_t    CANCTRL = 0x0F; /* CAN Control register ?Fh */
+    struct CANCTRL {
+	enum __attribute__ ((__packed__)) mask {
+	    REQOP	= b11100000,
+	    ABAT	= b00010000,
+	    OSM		= b00001000,
+	    CLKEN	= b00000100,
+	    CLKPRE	= b00000011,
+	};
+    };
+
+    static const uint8_t    CANINTF = 0x2C; /* Interrupt flag 2Ch */
     struct CANINTF {
 	enum __attribute__ ((__packed__)) mask {
 	    MERRF	= b10000000,
@@ -387,17 +397,6 @@ template<class SPI, pin_t cs> class MCP2515 {
 	LOAD_TX	    = 0x40, /* Load TX buffer		- 0100 0abc */
 	RTS	    = 0x80, /* Request To Send          - 1000 0nnn */
 	RX_STATUS   = b10110000, /* Quick polling of received message */
-    };
-
-    enum __attribute__ ((__packed__)) canctrl_bits {
-	CLKPRE0	    = 0,
-	CLKPRE1,
-	CLKEN,
-	OSM,
-	ABAT,
-	REQOP0,
-	REQOP1,
-	REQOP2,
     };
 
     enum __attribute__ ((__packed__)) txctrl_bits {
