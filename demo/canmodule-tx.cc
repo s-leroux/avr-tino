@@ -44,8 +44,8 @@ int main() {
 //    volatile uint8_t r = mcp2515.read(mcp2515.CANCTRL);
 //    mcp2515.write(mcp2515.CANCTRL, r);
 
-    mcp2515.TXB0.setTransmitBuffer(0x1234, 0x5678, 0, "");
-    mcp2515.TXB1.setTransmitBuffer(0x1234, 0x5678, 0, "");
+    mcp2515.TXB0.loadTX(0x1234, 0x5678, 0, "");
+    mcp2515.TXB1.loadTX(0x1234, 0x5678, 0, "");
 
     while(1) {
 	pinToLow(PIN_PD0);

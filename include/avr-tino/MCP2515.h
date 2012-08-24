@@ -58,22 +58,6 @@ template<class SPI, pin_t cs> class MCP2515 {
 
 	CANINTF	    = 0x2C,
 
-	/* Transmit buffer 0 */
-//	TXB0CTRL    = 0x30, /* Transmit buffer control */
-	TXB0SIDH    = 0x31, /* Transmit buffer std id high */
-	TXB0SIDL    = 0x32, /* Transmit buffer std id low */
-	TXB0EID8    = 0x33, /* Transmit buffer ext id high*/
-	TXB0EID0    = 0x34, /* Transmit buffer ext id low */
-	TXB0DLC     = 0x35, /* Transmit buffer data length */
-//	TXB0D0      = 0x36, /* Transmit buffer data byte 1 */
-	TXB0D1      = 0x37, /* Transmit buffer data byte 1 */
-	TXB0D2      = 0x38, /* Transmit buffer data byte 2 */
-	TXB0D3      = 0x39, /* Transmit buffer data byte 3 */
-	TXB0D4      = 0x3A, /* Transmit buffer data byte 4 */
-	TXB0D5      = 0x3B, /* Transmit buffer data byte 5 */
-	TXB0D6      = 0x3C, /* Transmit buffer data byte 6 */
-	TXB0D7      = 0x3D, /* Transmit buffer data byte 7 */
-
 	/* Receive buffer 0 */
 //	RXB0CTRL    = 0x60, /* Receive buffer control */
     };
@@ -153,7 +137,8 @@ template<class SPI, pin_t cs> class MCP2515 {
 	TXB1_ID	= 0x42,		/* Transmit buffer 1  0100 0010 */
 	TXB2_ID	= 0x54,		/* Transmit buffer 2  0101 0100 */
     };
-    static void setTransmitBuffer(txb_t tx_base,
+
+    static void loadTX(uint8_t load_tx_location,
 			    uint16_t sid,
 			    uint16_t eid,
 			    uint8_t len,
@@ -178,10 +163,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* ------------------------------------------------ */
     /* Transmit buffer			                */
     /* ------------------------------------------------ */
-    template<uint8_t REG>
     struct TXBnCTRL {
-	static const regs	reg = (regs)REG;
-
 	enum __attribute__((__packed__)) mask {
 	    ABTF	= b01000000,	/* Message aborted */
 	    MLOA	= b00100000,	/* Message lost arbitration */
@@ -192,40 +174,56 @@ template<class SPI, pin_t cs> class MCP2515 {
 	};
     };
 
-    typedef TXBnCTRL<0x30>  TXB0CTRL;
-    typedef TXBnCTRL<0x40>  TXB1CTRL;
-
     struct TXStatus {
 	public:
 	TXStatus(uint8_t status) : _status(status) {}
 
 	inline bool hasLostArbitration(void) const {
-	    return _status & TXB0CTRL::MLOA;
+	    return _status & TXBnCTRL::MLOA;
 	}
 
 	inline bool isError(void) const {
-	    return _status & TXB0CTRL::TXERR;
+	    return _status & TXBnCTRL::TXERR;
 	}
 
 	inline bool isPending(void) const {
-	    return _status & TXB0CTRL::TXREQ;
+	    return _status & TXBnCTRL::TXREQ;
 	}
 	
 	private:
 	uint8_t	_status;
     };
     
-    template<txb_t TXB_ID>
+    template<typename TXTrait>
     struct TXBn {
-	static const uint8_t	TXBCTRL	    = TXB_ID & 0xF0;
-	static const uint8_t	RTS_FLAG    = TXB_ID & 0x07;
+	static const uint8_t	LOAD_TX_SIDH_START  = TXTrait::LOAD_TX_SIDH_START ;
+	static const uint8_t	LOAD_TX_DATA_START  = TXTrait::LOAD_TX_DATA_START;
 
-	static void setTransmitBuffer(
+	static const uint8_t	RTS_MASK	    = TXTrait::RTS_MASK;
+
+	enum __attribute__ ((__packed__)) {
+	    TXBCTRL		= TXTrait::TXBCTRL,
+	    TXBSIDH,	/* Transmit buffer std id high */
+	    TXBSIDL,	/* Transmit buffer std id low */
+	    TXBEID8,	/* Transmit buffer ext id high*/
+	    TXBEID0,	/* Transmit buffer ext id low */
+	    TXBDLC,	/* Transmit buffer data length */
+	    TXBD0,	/* Transmit buffer data byte 1 */
+	    TXBD1,	/* Transmit buffer data byte 1 */
+	    TXBD2,	/* Transmit buffer data byte 2 */
+	    TXBD3,	/* Transmit buffer data byte 3 */
+	    TXBD4,	/* Transmit buffer data byte 4 */
+	    TXBD5,	/* Transmit buffer data byte 5 */
+	    TXBD6,	/* Transmit buffer data byte 6 */
+	    TXBD7,	/* Transmit buffer data byte 7 */
+	};
+
+	static void loadTX(
 			    uint16_t sid,
                             uint16_t eid,
                             uint8_t len,
                             const void *data) {
-	    DEVICE::setTransmitBuffer((txb_t)TXBCTRL,
+	    DEVICE::loadTX(LOAD_TX_SIDH_START,
 			    sid,
 			    eid,
 			    len,
@@ -233,15 +231,44 @@ template<class SPI, pin_t cs> class MCP2515 {
 	}
 
 	static void doTransmitBuffer(void) {
-	    DEVICE::doTransmitBuffer((txb_rts_t)RTS_FLAG);
+	    DEVICE::doTransmitBuffer((txb_rts_t)RTS_MASK);
 	}
 
 	static inline TXStatus status() {
 	    return DEVICE::read((typename DEVICE::regs)TXBCTRL);
 	}
     };
-    static TXBn<TXB0_ID>	TXB0;
-    static TXBn<TXB1_ID>	TXB1;
+
+    struct TXB0Trait	{
+	static const uint8_t	LOAD_TX_SIDH_START  = b00000000;
+	static const uint8_t	LOAD_TX_DATA_START  = b00000001;
+
+	static const uint8_t	RTS_MASK	    = b00000001;
+
+	static const uint8_t	TXBCTRL		    = 0x30;
+    };
+
+    struct TXB1Trait	{
+	static const uint8_t	LOAD_TX_SIDH_START  = b00000010;
+	static const uint8_t	LOAD_TX_DATA_START  = b00000011;
+
+	static const uint8_t	RTS_MASK	    = b00000010;
+
+	static const uint8_t	TXBCTRL		    = 0x40;
+    };
+
+    struct TXB2Trait	{
+	static const uint8_t	LOAD_TX_SIDH_START  = b00000100;
+	static const uint8_t	LOAD_TX_DATA_START  = b00000101;
+
+	static const uint8_t	RTS_MASK	    = b00000100;
+
+	static const uint8_t	TXBCTRL		    = 0x50;
+    };
+
+    TXBn<TXB0Trait>	TXB0;
+    TXBn<TXB1Trait>	TXB1;
+    TXBn<TXB2Trait>	TXB2;
 
     /* ------------------------------------------------ */
     /* Receive buffer			                */
@@ -348,6 +375,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 	WRITE	    = 0x02, /* Write Date               - 0000 0010 */
 	BIT_MODIFY  = 0x05, /* Bit Modify               - 0000 0101 */
 	READ	    = 0x03, /* Read data                - 0000 0011 */
+	LOAD_TX	    = 0x40, /* Load TX buffer		- 0100 0abc */
 	RTS	    = 0x80, /* Request To Send          - 1000 0nnn */
 	RX_STATUS   = b10110000, /* Quick polling of received message */
     };

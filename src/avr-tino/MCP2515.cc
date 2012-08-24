@@ -83,7 +83,7 @@ void MCP2515<SPI,cs>::setPrescaler(uint8_t prescaler) const {
 }
 
 template<class SPI, pin_t cs>
-void  MCP2515<SPI,cs>::setTransmitBuffer(txb_t tx_base,
+void  MCP2515<SPI,cs>::loadTX(uint8_t load_tx_location,
                             uint16_t sid,
                             uint16_t eid,
                             uint8_t len,
@@ -94,7 +94,7 @@ void  MCP2515<SPI,cs>::setTransmitBuffer(txb_t tx_base,
 
     Command	cmd(WRITE);
 
-    cmd.write(tx_base & 0xF0);
+    cmd.write(load_tx_location);
     cmd.write(0); // reset TXBnCTRL
     cmd.write((uint8_t)(sid >> 8));
     cmd.write((uint8_t)(sid));
