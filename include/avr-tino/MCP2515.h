@@ -56,6 +56,27 @@ template<class SPI, pin_t cs> class MCP2515 {
 	};
     };
 
+    struct TXBnCTRL {
+	enum __attribute__((__packed__)) mask {
+	    ABTF	= b01000000,	/* Message aborted */
+	    MLOA	= b00100000,	/* Message lost arbitration */
+	    TXERR	= b00010000,	/* Transmission error detect */
+	    TXREQ	= b00001000,	/* Message transmit request */
+	    /* bit 2 is unimplemented */
+	    TXP		= b00000011,	/* Transmit buffer priority */
+	};
+    };
+
+    static const REG	TXB0CTRL    = (REG)0x30;
+    struct TXB0CTRL : public TXBnCTRL {};
+
+    static const REG	TXB1CTRL    = (REG)0x40;
+    struct TXB1CTRL : public TXBnCTRL {};
+
+    static const REG	TXB2CTRL    = (REG)0x50;
+    struct TXB2CTRL : public TXBnCTRL {};
+
+
     static const REG	RXB0CTRL    = (REG)0x60;
     struct RXB0CTRL {
 	enum __attribute__((__packed__)) mask {
@@ -211,17 +232,6 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* ------------------------------------------------ */
     /* Transmit buffer			                */
     /* ------------------------------------------------ */
-    struct TXBnCTRL {
-	enum __attribute__((__packed__)) mask {
-	    ABTF	= b01000000,	/* Message aborted */
-	    MLOA	= b00100000,	/* Message lost arbitration */
-	    TXERR	= b00010000,	/* Transmission error detect */
-	    TXREQ	= b00001000,	/* Message transmit request */
-	    /* bit 2 is unimplemented */
-	    TXP		= b00000011,	/* Transmit buffer priority */
-	};
-    };
-
     struct TXStatus {
 	public:
 	TXStatus(uint8_t status) : _status(status) {}
