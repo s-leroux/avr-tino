@@ -273,8 +273,17 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* ------------------------------------------------ */
     /* Receive buffer			                */
     /* ------------------------------------------------ */
-    struct RXB0CTRL {
-	static const regs	reg = (regs)0x60;
+    enum __attribute__ ((__packed__)) receive_mode_t {
+	RXM_ANY	    = b01100000, /* Receive any message */
+	RXM_EID	    = b01000000, /* Receive valid message based on EID */
+	RXM_SID	    = b00100000, /* Receive valid message based on SID */
+	RXM_BOTH    = b00000000, /* Receive valid message based on SID or EID*/
+    };
+
+    struct RXB0Trait {
+	static const regs	    RXBCTRL = (regs)b01100000;
+
+	static const uint8_t	    RXIF    = b00000001; /* CANINTF.RXnIF */
 
 	enum __attribute__((__packed__)) mask {
 	    RXM		= b01100000,
@@ -285,8 +294,10 @@ template<class SPI, pin_t cs> class MCP2515 {
 	};
     };
 
-    struct RXB1CTRL {
-	static const regs	reg = (regs)0x70;
+    struct RXB1Trait {
+	static const regs	    RXBCTRL = (regs)b01110000;
+
+	static const uint8_t	    RXIF    = b00000010; /* CANINTF.RXnIF */
 
 	enum __attribute__((__packed__)) mask {
 	    RXM		= b01100000,
@@ -295,50 +306,42 @@ template<class SPI, pin_t cs> class MCP2515 {
 	};
     };
 
-    enum __attribute__ ((__packed__)) receive_mode_t {
-	RXM_ANY	    = b01100000, /* Receive any message */
-	RXM_EID	    = b01000000, /* Receive valid message based on EID */
-	RXM_SID	    = b00100000, /* Receive valid message based on SID */
-	RXM_BOTH    = b00000000, /* Receive valid message based on SID or EID*/
-    };
+    template<class RXTrait>
+    struct RXBn {
+	enum __attribute__ ((__packed__)) {
+	    RXBCTRL	= RXTrait::RXBCTRL,
+	    RXBSIDH,
+	    RXBSIDL,
+	    RXBEID8,
+	    RXBEID0,
+	    RXBDLC,
+	    RXBD0,
+	    RXBD1,
+	    RXBD2,
+	    RXBD3,
+	    RXBD4,
+	    RXBD5,
+	    RXBD6,
+	    RXBD7,
+	};
 
-    struct RXB0D0 {
-	static const regs       reg = (regs)0x66;
-    };
-
-    struct RXB1D0 {
-	static const regs       reg = (regs)0x76;
-    };
-
-    static struct {
-	typedef RXB0CTRL    RXBCTRL;
-	typedef RXB0D0	    RXBDATA;
+	static const uint8_t	RXIF	    = RXTrait::RXIF;
 
 	static void setMode(receive_mode_t mode) {
-	    update(RXBCTRL::reg, RXBCTRL::RXM, mode);
+	    update((regs)RXBCTRL, RXTrait::RXM, mode);
 	}
 
 	static void readData(uint8_t len, void * buffer) {
-	    read(RXBDATA::reg, len, buffer);
+	    read((regs)RXBD0, len, buffer);
 	}
 
 	inline void clear() {
-	    DEVICE::clear(CANINTF, RX0IF);
+	    DEVICE::clear(CANINTF, RXIF);
 	}
-    } RXB0;
+    };
 
-    static struct {
-	typedef RXB1CTRL    RXBCTRL;
-	typedef RXB1D0	    RXBDATA;
-
-	static void setMode(receive_mode_t mode) {
-	    update(RXBCTRL::reg, RXBCTRL::RXM, mode);
-	}
-
-	static void readData(uint8_t len, void * buffer) {
-	    read(RXBDATA::reg, len, buffer);
-	}
-    } RXB1;
+    static RXBn<RXB0Trait>	RXB0;
+    static RXBn<RXB1Trait>	RXB1;
 
     /* RX status */
     struct RXStatus {
