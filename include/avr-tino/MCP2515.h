@@ -356,7 +356,6 @@ template<class SPI, pin_t cs> class MCP2515 {
     static void setMask(typename Mask::base_reg_t reg, const Mask *mask) {
 	write((REG)reg, sizeof(Mask), mask);
     }
-
     /* ------------------------------------------------ */
 
     /* ------------------------------------------------ */
