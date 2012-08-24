@@ -116,7 +116,9 @@ template<class SPI, pin_t cs> class MCP2515 {
 	REC	    = 0x1D, /* reveiver error counter   - 1Dh */
     };
 
-    /* Common interface */
+    /* ------------------------------------------------ */
+    /* Common interface			                */
+    /* ------------------------------------------------ */
     /**
 	Read a register value
     */
@@ -155,6 +157,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     static void set(REG r, uint8_t mask) {
 	update(r, mask, mask);
     }
+    /* ------------------------------------------------ */
 
 
 
