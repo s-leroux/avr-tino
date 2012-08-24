@@ -26,6 +26,66 @@ template<class SPI, pin_t cs> class MCP2515 {
     public:
     typedef MCP2515<SPI,cs>	DEVICE;
 
+    /* ------------------------------------------------ */
+    /* Register description		                */
+    /* ------------------------------------------------ */
+    enum __attribute__ ((__packed__)) REG {};
+
+    static const REG	CANCTRL = (REG)0x0F; /* CAN Control register ?Fh */
+    struct CANCTRL {
+	enum __attribute__ ((__packed__)) mask {
+	    REQOP	= b11100000,
+	    ABAT	= b00010000,
+	    OSM		= b00001000,
+	    CLKEN	= b00000100,
+	    CLKPRE	= b00000011,
+	};
+    };
+
+    static const REG    CANINTF = (REG)0x2C; /* Interrupt flag 2Ch */
+    struct CANINTF {
+	enum __attribute__ ((__packed__)) mask {
+	    MERRF	= b10000000,
+	    WAKIF	= b01000000,
+	    ERRIF	= b00100000,
+	    TX2IF	= b00010000,
+	    TX1IF	= b00001000,
+	    TX0IF	= b00000100,
+	    RX1IF	= b00000010,
+	    RX0IF	= b00000001,
+	};
+    };
+
+    static const REG	RXB0CTRL    = (REG)0x60;
+    struct RXB0CTRL {
+	enum __attribute__((__packed__)) mask {
+	    RXM		= b01100000,
+	    RXRTR	= b00001000,
+	    BUKT	= b00000100,
+	    BUKT1	= b00000010,
+	    FILHIT	= b00000001,
+	};
+    };
+
+    static const REG	RXB1CTRL    = (REG)0x70;
+    struct RXB1CTRL {
+	enum __attribute__((__packed__)) mask {
+	    RXM		= b01100000,
+	    RXRTR	= b00001000,
+	    FILHIT	= b00000111,
+	};
+    };
+
+    static const REG	RXF0SIDH    = (REG)0x00;    
+    static const REG	RXF1SIDH    = (REG)0x04;    
+    static const REG	RXF2SIDH    = (REG)0x08;    
+    static const REG	RXF3SIDH    = (REG)0x10;    
+    static const REG	RXF4SIDH    = (REG)0x14;    
+    static const REG	RXF5SIDH    = (REG)0x18;    
+    /* ------------------------------------------------ */
+
+
+
     MCP2515();
 
     /**
@@ -54,40 +114,37 @@ template<class SPI, pin_t cs> class MCP2515 {
 	CANSTAT	    = 0x0E, /* CAN status register      - ?Eh */
 	TEC	    = 0x1C, /* Transmit error counter   - 1Ch */
 	REC	    = 0x1D, /* reveiver error counter   - 1Dh */
-
-	/* Receive buffer 0 */
-//	RXB0CTRL    = 0x60, /* Receive buffer control */
     };
 
     /* Common interface */
     /**
 	Read a register value
     */
-    static uint8_t read(regs r);
+    static uint8_t read(REG r);
 
     /**
 	Sequencial read registers
     */
-    static void read(regs r, uint8_t len, void * buffer);
+    static void read(REG r, uint8_t len, void * buffer);
 
     /**
 	Write a value into a register
     */
-    void write(regs r, uint8_t data) const;
+    void write(REG r, uint8_t data) const;
 
-    void write(regs r, 
+    void write(REG r, 
 		uint8_t len,
 		const void *data) const;
 
     /**
 	Set and/or clear some bits of a register
     */
-    static void update(regs r, uint8_t masq, uint8_t value);
+    static void update(REG r, uint8_t masq, uint8_t value);
 
     /**
 	Clear some bits of a register
     */
-    static void clear(regs r, uint8_t mask) {
+    static void clear(REG r, uint8_t mask) {
 	update(r, mask, 0x00);
     }
 
@@ -95,38 +152,10 @@ template<class SPI, pin_t cs> class MCP2515 {
     /**
 	Set some bits of a register
     */
-    static void set(regs r, uint8_t mask) {
+    static void set(REG r, uint8_t mask) {
 	update(r, mask, mask);
     }
 
-    /* ------------------------------------------------ */
-    /* Register description		                */
-    /* ------------------------------------------------ */
-    static const uint8_t    CANCTRL = 0x0F; /* CAN Control register ?Fh */
-    struct CANCTRL {
-	enum __attribute__ ((__packed__)) mask {
-	    REQOP	= b11100000,
-	    ABAT	= b00010000,
-	    OSM		= b00001000,
-	    CLKEN	= b00000100,
-	    CLKPRE	= b00000011,
-	};
-    };
-
-    static const uint8_t    CANINTF = 0x2C; /* Interrupt flag 2Ch */
-    struct CANINTF {
-	enum __attribute__ ((__packed__)) mask {
-	    MERRF	= b10000000,
-	    WAKIF	= b01000000,
-	    ERRIF	= b00100000,
-	    TX2IF	= b00010000,
-	    TX1IF	= b00001000,
-	    TX0IF	= b00000100,
-	    RX1IF	= b00000010,
-	    RX0IF	= b00000001,
-	};
-    };
-    /* ------------------------------------------------ */
 
 
     /* Specific commands */
@@ -251,7 +280,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 	}
 
 	static inline TXStatus status() {
-	    return DEVICE::read((typename DEVICE::regs)TXBCTRL);
+	    return DEVICE::read((typename DEVICE::REG)TXBCTRL);
 	}
     };
 
@@ -297,29 +326,17 @@ template<class SPI, pin_t cs> class MCP2515 {
     };
 
     struct RXB0Trait {
-	static const regs	    RXBCTRL = (regs)b01100000;
+	static const REG	    RXBCTRL = RXB0CTRL;
+	struct RXBCTRL : public RXB0CTRL {};
 
 	static const uint8_t	    RXIF    = CANINTF::RX0IF;
-
-	enum __attribute__((__packed__)) mask {
-	    RXM		= b01100000,
-	    RXRTR	= b00001000,
-	    BUKT	= b00000100,
-	    BUKT1	= b00000010,
-	    FILHIT	= b00000001,
-	};
     };
 
     struct RXB1Trait {
-	static const regs	    RXBCTRL = (regs)b01110000;
+	static const REG	    RXBCTRL = RXB1CTRL;
+	struct RXBCTRL : public RXB1CTRL {};
 
 	static const uint8_t	    RXIF    = CANINTF::RX1IF;
-
-	enum __attribute__((__packed__)) mask {
-	    RXM		= b01100000,
-	    RXRTR	= b00001000,
-	    FILHIT	= b00000111,
-	};
     };
 
     template<class RXTrait>
@@ -342,17 +359,18 @@ template<class SPI, pin_t cs> class MCP2515 {
 	};
 
 	static const uint8_t	RXIF	    = RXTrait::RXIF;
+	struct RXBCTRL : public RXTrait::RXBCTRL {};
 
 	static void setMode(receive_mode_t mode) {
-	    update((regs)RXBCTRL, RXTrait::RXM, mode);
+	    update((REG)RXBCTRL, RXBCTRL::RXM, mode);
 	}
 
 	static void readData(uint8_t len, void * buffer) {
-	    read((regs)RXBD0, len, buffer);
+	    read((REG)RXBD0, len, buffer);
 	}
 
 	inline void clear() {
-	    DEVICE::clear((regs)CANINTF, RXIF);
+	    DEVICE::clear((REG)CANINTF, RXIF);
 	}
     };
 

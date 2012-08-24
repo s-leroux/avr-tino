@@ -35,11 +35,11 @@ void MCP2515<SPI,cs>::reset() const {
 
 template<class SPI, pin_t cs>
 void MCP2515<SPI,cs>::setOperationMode(reqop_t mode) const {
-    update((regs)CANCTRL, CANCTRL::REQOP, mode);
+    update(CANCTRL, CANCTRL::REQOP, mode);
 }
 
 template<class SPI, pin_t cs>
-void MCP2515<SPI,cs>::write(regs r, uint8_t len, const void *data) const {
+void MCP2515<SPI,cs>::write(REG r, uint8_t len, const void *data) const {
     Command	cmd(WRITE);
 
     cmd.write(r);
@@ -47,12 +47,12 @@ void MCP2515<SPI,cs>::write(regs r, uint8_t len, const void *data) const {
 }
 
 template<class SPI, pin_t cs>
-void MCP2515<SPI,cs>::write(regs r, uint8_t data) const {
+void MCP2515<SPI,cs>::write(REG r, uint8_t data) const {
     write(r, 1, &data);
 }
 
 template<class SPI, pin_t cs>
-void MCP2515<SPI,cs>::update(regs r, uint8_t mask, uint8_t data) {
+void MCP2515<SPI,cs>::update(REG r, uint8_t mask, uint8_t data) {
     Command cmd(BIT_MODIFY);
 
     cmd.write(r);        
@@ -61,14 +61,14 @@ void MCP2515<SPI,cs>::update(regs r, uint8_t mask, uint8_t data) {
 }
 
 template<class SPI, pin_t cs>
-void MCP2515<SPI,cs>::read(regs r, uint8_t len, void * buffer) {
+void MCP2515<SPI,cs>::read(REG r, uint8_t len, void * buffer) {
     Command cmd(READ);
 
     cmd.read(len, buffer);
 }
 
 template<class SPI, pin_t cs>
-uint8_t MCP2515<SPI,cs>::read(regs r) {
+uint8_t MCP2515<SPI,cs>::read(REG r) {
     Command cmd(READ);
 
     cmd.write(r);        
@@ -77,7 +77,7 @@ uint8_t MCP2515<SPI,cs>::read(regs r) {
 
 template<class SPI, pin_t cs>
 void MCP2515<SPI,cs>::setPrescaler(uint8_t prescaler) const {
-    update((regs)CANCTRL, 0x03, prescaler);
+    update(CANCTRL, 0x03, prescaler);
 }
 
 template<class SPI, pin_t cs>
