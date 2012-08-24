@@ -357,6 +357,28 @@ template<class SPI, pin_t cs> class MCP2515 {
 	write((REG)reg, sizeof(Mask), mask);
     }
     /* ------------------------------------------------ */
+    /* Acceptance filter		                */
+    /* ------------------------------------------------ */
+    struct __attribute__ ((__packed__)) Filter {
+	uint8_t	    sidh;
+	uint8_t	    sidl;
+	uint8_t	    eid8;
+	uint8_t	    eid0;
+
+	enum __attribute__ ((__packed__)) base_reg_t {
+	    RXF0    = RXF0SIDH,
+	    RXF1    = RXF1SIDH,
+	    RXF2    = RXF2SIDH,
+	    RXF3    = RXF3SIDH,
+	    RXF4    = RXF4SIDH,
+	    RXF5    = RXF5SIDH,
+	};
+    };
+
+    static void setFilter(typename Mask::base_reg_t reg, const Mask *mask) {
+	write((REG)reg, sizeof(Mask), mask);
+    }
+    /* ------------------------------------------------ */
 
     /* ------------------------------------------------ */
     /* Receive buffer			                */

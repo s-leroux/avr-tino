@@ -58,10 +58,9 @@ int main() {
 	    digitalWrite(PIN_PD0, status.isPending());
 	    digitalWrite(PIN_PD1, status.isError());
 	    digitalWrite(PIN_PD2, status.hasLostArbitration());
-	    delay(500);
+	    delay(50);
 	}
 //	mcp2515.TXB1.doTransmitBuffer();
-	delay(10000);
     }
 
     return 0;
