@@ -97,12 +97,22 @@ template<class SPI, pin_t cs> class MCP2515 {
 	};
     };
 
-    static const REG	RXF0SIDH    = (REG)0x00;    
-    static const REG	RXF1SIDH    = (REG)0x04;    
-    static const REG	RXF2SIDH    = (REG)0x08;    
-    static const REG	RXF3SIDH    = (REG)0x10;    
-    static const REG	RXF4SIDH    = (REG)0x14;    
-    static const REG	RXF5SIDH    = (REG)0x18;    
+    static const REG	RXF0SIDH    = (REG)0x00; 
+    static const REG	RXF1SIDH    = (REG)0x04;
+    static const REG	RXF2SIDH    = (REG)0x08;
+    static const REG	RXF3SIDH    = (REG)0x10;
+    static const REG	RXF4SIDH    = (REG)0x14;
+    static const REG	RXF5SIDH    = (REG)0x18;
+
+    static const REG	RXM0SIDH    = (REG)0x20;
+    static const REG	RXM0SIDL    = (REG)0x21;
+    static const REG	RXM0EID8    = (REG)0x22;
+    static const REG	RXM0EID0    = (REG)0x23;
+
+    static const REG	RXM1SIDH    = (REG)0x24;
+    static const REG	RXM1SIDL    = (REG)0x25;
+    static const REG	RXM1EID8    = (REG)0x26;
+    static const REG	RXM1EID0    = (REG)0x27;
     /* ------------------------------------------------ */
 
 
@@ -329,6 +339,27 @@ template<class SPI, pin_t cs> class MCP2515 {
     TXBn<TXB2Trait>	TXB2;
 
     /* ------------------------------------------------ */
+    /* Acceptance mask			                */
+    /* ------------------------------------------------ */
+    struct __attribute__ ((__packed__)) Mask {
+	uint8_t	    sidh;
+	uint8_t	    sidl;
+	uint8_t	    eid8;
+	uint8_t	    eid0;
+
+	enum __attribute__ ((__packed__)) base_reg_t {
+	    RXM0    = RXM0SIDH,
+	    RXM1    = RXM1SIDH,
+	};
+    };
+
+    static void setMask(typename Mask::base_reg_t reg, const Mask *mask) {
+	write((REG)reg, sizeof(Mask), mask);
+    }
+
+    /* ------------------------------------------------ */
+
+    /* ------------------------------------------------ */
     /* Receive buffer			                */
     /* ------------------------------------------------ */
     enum __attribute__ ((__packed__)) receive_mode_t {
@@ -343,6 +374,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 	struct RXBCTRL : public RXB0CTRL {};
 
 	static const uint8_t	    RXIF    = CANINTF::RX0IF;
+	static const typename Mask::base_reg_t RXM   = Mask::RXM0;
     };
 
     struct RXB1Trait {
@@ -350,6 +382,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 	struct RXBCTRL : public RXB1CTRL {};
 
 	static const uint8_t	    RXIF    = CANINTF::RX1IF;
+	static const typename Mask::base_reg_t RXM   = Mask::RXM1;
     };
 
     template<class RXTrait>
@@ -374,6 +407,8 @@ template<class SPI, pin_t cs> class MCP2515 {
 	static const uint8_t	RXIF	    = RXTrait::RXIF;
 	struct RXBCTRL : public RXTrait::RXBCTRL {};
 
+	static const typename Mask::base_reg_t RXM   = RXTrait::RXM;
+
 	static void setMode(receive_mode_t mode) {
 	    update((REG)RXBCTRL, RXBCTRL::RXM, mode);
 	}
@@ -382,8 +417,12 @@ template<class SPI, pin_t cs> class MCP2515 {
 	    read((REG)RXBD0, len, buffer);
 	}
 
-	inline void clear() {
+	static void clear() {
 	    DEVICE::clear((REG)CANINTF, RXIF);
+	}
+
+	static void setMask(const Mask *mask) {
+	    DEVICE::setMask(RXM, mask);
 	}
     };
 
