@@ -56,21 +56,8 @@ template<class SPI, pin_t cs> class MCP2515 {
 	TEC	    = 0x1C, /* Transmit error counter   - 1Ch */
 	REC	    = 0x1D, /* reveiver error counter   - 1Dh */
 
-	CANINTF	    = 0x2C,
-
 	/* Receive buffer 0 */
 //	RXB0CTRL    = 0x60, /* Receive buffer control */
-    };
-
-    enum canintf_flags {
-	MERRF	= b10000000,
-	WAKIF	= b01000000,
-	ERRIF	= b00100000,
-	TX2IF	= b00010000,
-	TX1IF	= b00001000,
-	TX0IF	= b00000100,
-	RX1IF	= b00000010,
-	RX0IF	= b00000001,
     };
 
     /* Common interface */
@@ -112,6 +99,25 @@ template<class SPI, pin_t cs> class MCP2515 {
     static void set(regs r, uint8_t mask) {
 	update(r, mask, mask);
     }
+
+    /* ------------------------------------------------ */
+    /* Register description		                */
+    /* ------------------------------------------------ */
+    static const uint8_t    CANINTF = 0x2C;
+    struct CANINTF {
+	enum __attribute__ ((__packed__)) mask {
+	    MERRF	= b10000000,
+	    WAKIF	= b01000000,
+	    ERRIF	= b00100000,
+	    TX2IF	= b00010000,
+	    TX1IF	= b00001000,
+	    TX0IF	= b00000100,
+	    RX1IF	= b00000010,
+	    RX0IF	= b00000001,
+	};
+    };
+    /* ------------------------------------------------ */
+
 
     /* Specific commands */
     void setPrescaler(uint8_t prescaler) const;
@@ -283,7 +289,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     struct RXB0Trait {
 	static const regs	    RXBCTRL = (regs)b01100000;
 
-	static const uint8_t	    RXIF    = b00000001; /* CANINTF.RXnIF */
+	static const uint8_t	    RXIF    = CANINTF::RX0IF;
 
 	enum __attribute__((__packed__)) mask {
 	    RXM		= b01100000,
@@ -297,7 +303,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     struct RXB1Trait {
 	static const regs	    RXBCTRL = (regs)b01110000;
 
-	static const uint8_t	    RXIF    = b00000010; /* CANINTF.RXnIF */
+	static const uint8_t	    RXIF    = CANINTF::RX1IF;
 
 	enum __attribute__((__packed__)) mask {
 	    RXM		= b01100000,
@@ -336,7 +342,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 	}
 
 	inline void clear() {
-	    DEVICE::clear(CANINTF, RXIF);
+	    DEVICE::clear((regs)CANINTF, RXIF);
 	}
     };
 
