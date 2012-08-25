@@ -48,8 +48,8 @@ int main() {
 	b00010010, b00110100, b01011010, b01111000, 0, '\0'
     };
 
-    mcp2515.TXB0.loadTX(&msg);
-    mcp2515.TXB1.loadTX(&msg);
+    mcp2515.TXB0.loadTX(msg);
+    mcp2515.TXB1.loadTX(msg);
 
     while(1) {
 	pinToLow(PIN_PD0);

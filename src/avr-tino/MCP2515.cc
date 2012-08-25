@@ -102,10 +102,10 @@ void  MCP2515<SPI,cs>::loadTX(uint8_t load_tx_location,
 
 template<class SPI, pin_t cs>
 void MCP2515<SPI,cs>::loadTX(uint8_t load_tx_location,
-			    const Frame* frame, uint8_t frame_size) {
+			    const Frame& frame, uint8_t frame_size) {
     Command     cmd((instr)(LOAD_TX | load_tx_location));
     cmd.write((frame_size > sizeof(Frame)) ? sizeof(Frame) : frame_size,
-		frame);
+		&frame);
 }
 
 template<class SPI, pin_t cs>

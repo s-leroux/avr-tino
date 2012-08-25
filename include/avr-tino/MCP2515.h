@@ -236,7 +236,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 			    uint8_t len,
 			    const void *data);
     static void loadTX(uint8_t load_tx_location,
-			const Frame* frame, uint8_t len = sizeof(Frame));
+			const Frame& frame, uint8_t len = sizeof(Frame));
 
     enum __attribute__ ((__packed__)) txb_rts_t {
 	TXB0_RTS = _BV(0),
@@ -313,7 +313,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 			    data);
 	}
 
-	static void loadTX(const Frame* frame, uint8_t len = sizeof(Frame)) {
+	static void loadTX(const Frame& frame, uint8_t len = sizeof(Frame)) {
 	    DEVICE::loadTX(LOAD_TX_SIDH_START, frame, len);
 	}
 
