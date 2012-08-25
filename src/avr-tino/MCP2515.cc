@@ -39,7 +39,7 @@ void MCP2515<SPI,cs>::setOperationMode(reqop_t mode) const {
 }
 
 template<class SPI, pin_t cs>
-void MCP2515<SPI,cs>::write(REG r, uint8_t len, const void *data) const {
+void MCP2515<SPI,cs>::write(REG r, uint8_t len, const void *data) {
     Command	cmd(WRITE);
 
     cmd.write(r);
@@ -47,7 +47,7 @@ void MCP2515<SPI,cs>::write(REG r, uint8_t len, const void *data) const {
 }
 
 template<class SPI, pin_t cs>
-void MCP2515<SPI,cs>::write(REG r, uint8_t data) const {
+void MCP2515<SPI,cs>::write(REG r, uint8_t data) {
     write(r, 1, &data);
 }
 

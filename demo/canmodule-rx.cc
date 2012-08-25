@@ -40,6 +40,12 @@ int main() {
     SPI::begin();
     mcp2515.reset();
     mcp2515.setBaud(100000);
+
+    static CAN_CTRL::Mask	mask = {
+	b11110000, b00000000, b00000000, b00000000
+    };
+    mcp2515.RXB0.setMask(mask);
+
     mcp2515.setOperationMode(mcp2515.NORMAL);
 
     mcp2515.RXB0.setMode(mcp2515.RXM_ANY);

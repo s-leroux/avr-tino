@@ -163,11 +163,11 @@ template<class SPI, pin_t cs> class MCP2515 {
     /**
 	Write a value into a register
     */
-    void write(REG r, uint8_t data) const;
+    static void write(REG r, uint8_t data);
 
-    void write(REG r, 
+    static void write(REG r, 
 		uint8_t len,
-		const void *data) const;
+		const void *data);
 
     /**
 	Set and/or clear some bits of a register
@@ -372,8 +372,8 @@ template<class SPI, pin_t cs> class MCP2515 {
 	};
     };
 
-    static void setMask(typename Mask::base_reg_t reg, const Mask *mask) {
-	write((REG)reg, sizeof(Mask), mask);
+    static void setMask(typename Mask::base_reg_t reg, const Mask &mask) {
+	write((REG)reg, sizeof(Mask), &mask);
     }
 
     /* ------------------------------------------------ */
@@ -395,8 +395,8 @@ template<class SPI, pin_t cs> class MCP2515 {
 	};
     };
 
-    static void setFilter(typename Mask::base_reg_t reg, const Mask *mask) {
-	write((REG)reg, sizeof(Mask), mask);
+    static void setFilter(typename Mask::base_reg_t reg, const Filter &filter) {
+	write((REG)reg, sizeof(Filter), &filter);
     }
 
     /* ------------------------------------------------ */
@@ -482,7 +482,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 	    DEVICE::clear((REG)CANINTF, RXIF);
 	}
 
-	static void setMask(const Mask *mask) {
+	static void setMask(const Mask &mask) {
 	    DEVICE::setMask(RXM, mask);
 	}
     };
