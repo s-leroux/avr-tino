@@ -42,7 +42,14 @@ int main() {
     mcp2515.setBaud(100000);
 
     static CAN_CTRL::Mask	mask = {
+    //	 NNNNNNNN   NNN                             SID
+    //                    NN   NNNNNNNN   NNNNNNNN  EID
+    //                  F                           EXIDE (filter only)
+    //                 X X                          unused
 	b11110000, b00000000, b00000000, b00000000
+    };
+    static CAN_CTRL::Filter	filter = {
+	b00110000, b00000000, b00000000, b00000000
     };
     mcp2515.RXB0.setMask(mask);
 
