@@ -44,8 +44,12 @@ int main() {
 //    volatile uint8_t r = mcp2515.read(mcp2515.CANCTRL);
 //    mcp2515.write(mcp2515.CANCTRL, r);
 
-    mcp2515.TXB0.loadTX(0x1234, 0x5678, 0, "");
-    mcp2515.TXB1.loadTX(0x1234, 0x5678, 0, "");
+    static const CAN_CTRL::Frame    msg = {
+	b00010010, b00110100, b01011010, b01111000, 0, '\0'
+    };
+
+    mcp2515.TXB0.loadTX(&msg);
+    mcp2515.TXB1.loadTX(&msg);
 
     while(1) {
 	pinToLow(PIN_PD0);

@@ -90,16 +90,22 @@ void  MCP2515<SPI,cs>::loadTX(uint8_t load_tx_location,
     // adjust len
     if (len > 8) len = 8;
 
-    Command	cmd(WRITE);
+    Command	cmd((instr)(LOAD_TX | load_tx_location));
 
-    cmd.write(load_tx_location);
-    cmd.write(0); // reset TXBnCTRL
     cmd.write((uint8_t)(sid >> 8));
     cmd.write((uint8_t)(sid));
     cmd.write((uint8_t)(eid >> 8));
     cmd.write((uint8_t)(eid));
     cmd.write((uint8_t)(len));
     cmd.write(len, data);
+}
+
+template<class SPI, pin_t cs>
+void MCP2515<SPI,cs>::loadTX(uint8_t load_tx_location,
+			    const Frame* frame, uint8_t frame_size) {
+    Command     cmd((instr)(LOAD_TX | load_tx_location));
+    cmd.write((frame_size > sizeof(Frame)) ? sizeof(Frame) : frame_size,
+		frame);
 }
 
 template<class SPI, pin_t cs>

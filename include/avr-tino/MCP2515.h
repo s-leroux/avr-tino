@@ -217,11 +217,26 @@ template<class SPI, pin_t cs> class MCP2515 {
 	TXB2_ID	= 0x54,		/* Transmit buffer 2  0101 0100 */
     };
 
+    /* ------------------------------------------------ */
+    /* Frame message			                */
+    /* ------------------------------------------------ */
+    struct __attribute__ ((__packed__)) Frame {
+	uint8_t	    sidh;
+	uint8_t	    sidl;
+	uint8_t	    eid8;
+	uint8_t	    eid0;
+	uint8_t	    dlc;
+	uint8_t	    data[8];
+    };
+    /* ------------------------------------------------ */
+
     static void loadTX(uint8_t load_tx_location,
 			    uint16_t sid,
 			    uint16_t eid,
 			    uint8_t len,
 			    const void *data);
+    static void loadTX(uint8_t load_tx_location,
+			const Frame* frame, uint8_t len = sizeof(Frame));
 
     enum __attribute__ ((__packed__)) txb_rts_t {
 	TXB0_RTS = _BV(0),
@@ -298,6 +313,10 @@ template<class SPI, pin_t cs> class MCP2515 {
 			    data);
 	}
 
+	static void loadTX(const Frame* frame, uint8_t len = sizeof(Frame)) {
+	    DEVICE::loadTX(LOAD_TX_SIDH_START, frame, len);
+	}
+
 	static void doTransmitBuffer(void) {
 	    DEVICE::doTransmitBuffer((txb_rts_t)RTS_MASK);
 	}
@@ -356,6 +375,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     static void setMask(typename Mask::base_reg_t reg, const Mask *mask) {
 	write((REG)reg, sizeof(Mask), mask);
     }
+
     /* ------------------------------------------------ */
     /* Acceptance filter		                */
     /* ------------------------------------------------ */
@@ -378,6 +398,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     static void setFilter(typename Mask::base_reg_t reg, const Mask *mask) {
 	write((REG)reg, sizeof(Mask), mask);
     }
+
     /* ------------------------------------------------ */
 
     /* ------------------------------------------------ */
@@ -396,6 +417,9 @@ template<class SPI, pin_t cs> class MCP2515 {
 
 	static const uint8_t	    RXIF    = CANINTF::RX0IF;
 	static const typename Mask::base_reg_t RXM   = Mask::RXM0;
+
+	static const uint8_t	READ_RX_SIDH = b00000000;
+	static const uint8_t	READ_RX_DATA = b00000010;
     };
 
     struct RXB1Trait {
@@ -404,6 +428,9 @@ template<class SPI, pin_t cs> class MCP2515 {
 
 	static const uint8_t	    RXIF    = CANINTF::RX1IF;
 	static const typename Mask::base_reg_t RXM   = Mask::RXM1;
+
+	static const uint8_t	READ_RX_SIDH = b00000100;
+	static const uint8_t	READ_RX_DATA = b00000110;
     };
 
     template<class RXTrait>
@@ -430,12 +457,25 @@ template<class SPI, pin_t cs> class MCP2515 {
 
 	static const typename Mask::base_reg_t RXM   = RXTrait::RXM;
 
+	static const uint8_t	READ_RX_SIDH = RXTrait::READ_RX_SIDH;
+	static const uint8_t	READ_RX_DATA = RXTrait::READ_RX_DATA;
+
 	static void setMode(receive_mode_t mode) {
 	    update((REG)RXBCTRL, RXBCTRL::RXM, mode);
 	}
 
+	/**
+	    Read RX data and clears corresponding RX flag
+	*/
 	static void readData(uint8_t len, void * buffer) {
-	    read((REG)RXBD0, len, buffer);
+	    read((REG)(READ_RX | READ_RX_DATA), len, buffer);
+	}
+
+	/**
+	    Read RX buffer and clears corresponding RX flag
+	*/
+	static void readRX(Frame * dest, const uint8_t len = sizeof(Frame)) {
+	    read((REG)(READ_RX | READ_RX_SIDH), len, dest);
 	}
 
 	static void clear() {
@@ -487,7 +527,8 @@ template<class SPI, pin_t cs> class MCP2515 {
 	READ	    = 0x03, /* Read data                - 0000 0011 */
 	LOAD_TX	    = 0x40, /* Load TX buffer		- 0100 0abc */
 	RTS	    = 0x80, /* Request To Send          - 1000 0nnn */
-	RX_STATUS   = b10110000, /* Quick polling of received message */
+	READ_RX	    = 0x90, /* Read RX buffer		- 1001 0nm1 */
+	RX_STATUS   = 0xB0, /* RX status                - 1011 0000 */
     };
 
     enum __attribute__ ((__packed__)) txctrl_bits {
