@@ -360,16 +360,30 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* ------------------------------------------------ */
     /* Acceptance mask			                */
     /* ------------------------------------------------ */
-    struct __attribute__ ((__packed__)) Mask {
-	uint8_t	    sidh;
-	uint8_t	    sidl;
-	uint8_t	    eid8;
-	uint8_t	    eid0;
+    union __attribute__ ((__packed__)) Mask {
+	uint32_t    m;
+	struct {
+	    uint8_t	    sidh;
+	    uint8_t	    sidl;
+	    uint8_t	    eid8;
+	    uint8_t	    eid0;
+	} f;
 
 	enum __attribute__ ((__packed__)) base_reg_t {
 	    RXM0    = RXM0SIDH,
 	    RXM1    = RXM1SIDH,
 	};
+    };
+
+    template<uint32_t SID, uint32_t EID>
+    struct M {
+	static const uint32_t mask = 
+				((SID >> 3) & 0xFF) << 24
+				| (((SID << 5) | (EID >> 16)) & 0xFF) << 16
+				| ((EID >> 8) & 0xFF) << 8
+				| ((EID) & 0xFF);
+	static const uint32_t std_filter = mask;
+	static const uint32_t ext_filter = mask | (1 << 19);
     };
 
     static void setMask(typename Mask::base_reg_t reg, const Mask &mask) {
