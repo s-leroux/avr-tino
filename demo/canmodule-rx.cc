@@ -43,7 +43,7 @@ int main() {
 
     static CAN_CTRL::Mask	mask = 
 #if 1
-	 {   CAN_CTRL::M<0b11000000000,0b110000000011111111>::mask };
+	MCP2515_MASK(0b11000000000,0b110000000011111111);
 #else
     {
     //	 NNNNNNNN   NNN                             SID
@@ -53,10 +53,9 @@ int main() {
       { b11000000, b00000011, b00000000, b11111111 }
     };
 #endif
-    static CAN_CTRL::Filter	filter = {
-	CAN_CTRL::M<0b11000000000,0b110000000011111111>::ext_filter
+    static CAN_CTRL::Filter	filter = 
+	MCP2515_EXT_FILTER(0b11000000000,0b110000000011111111);
 //	b00110000, b00000000, b00000000, b00000000
-    };
     mcp2515.RXB0.setMask(mask);
 
     mcp2515.setOperationMode(mcp2515.NORMAL);

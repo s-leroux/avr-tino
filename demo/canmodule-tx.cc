@@ -44,9 +44,8 @@ int main() {
 //    volatile uint8_t r = mcp2515.read(mcp2515.CANCTRL);
 //    mcp2515.write(mcp2515.CANCTRL, r);
 
-    static const CAN_CTRL::Frame    msg = {
-	b00010010, b00110100, b01011010, b01111000, 0, '\0'
-    };
+    static const CAN_CTRL::Frame    msg = 
+	MCP2515_STD_FRAME(0b00010010001, 0b0101101001111000, 5, "HELLO");
 
     mcp2515.TXB0.loadTX(msg);
     mcp2515.TXB1.loadTX(msg);

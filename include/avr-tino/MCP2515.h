@@ -360,14 +360,11 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* ------------------------------------------------ */
     /* Acceptance mask			                */
     /* ------------------------------------------------ */
-    union __attribute__ ((__packed__)) Mask {
-	uint32_t    m;
-	struct {
-	    uint8_t	    sidh;
-	    uint8_t	    sidl;
-	    uint8_t	    eid8;
-	    uint8_t	    eid0;
-	} f;
+    struct __attribute__ ((__packed__)) Mask {
+	uint8_t	    sidh;
+	uint8_t	    sidl;
+	uint8_t	    eid8;
+	uint8_t	    eid0;
 
 	enum __attribute__ ((__packed__)) base_reg_t {
 	    RXM0    = RXM0SIDH,
@@ -375,16 +372,44 @@ template<class SPI, pin_t cs> class MCP2515 {
 	};
     };
 
-    template<uint32_t SID, uint32_t EID>
-    struct M {
-	static const uint32_t mask = 
-				((SID >> 3) & 0xFF) << 24
-				| (((SID << 5) | (EID >> 16)) & 0xFF) << 16
-				| ((EID >> 8) & 0xFF) << 8
-				| ((EID) & 0xFF);
-	static const uint32_t std_filter = mask;
-	static const uint32_t ext_filter = mask | (1 << 19);
-    };
+#define _MCP2515_SIDH(SID,EID)	uint8_t(SID >> 3)
+#define _MCP2515_SIDL(SID,EID)	uint8_t((SID << 5) | (uint32_t(EID) >> 16))
+#define _MCP2515_EID8(SID,EID)	uint8_t(EID >> 8)
+#define _MCP2515_EID0(SID,EID)	uint8_t(EID)
+
+#define MCP2515_MASK(SID,EID) { \
+		_MCP2515_SIDH(SID,EID), \
+		_MCP2515_SIDL(SID,EID), \
+		_MCP2515_EID8(SID,EID), \
+		_MCP2515_EID0(SID,EID) \
+		}
+#define MCP2515_STD_FILTER(SID,EID)	MCP2515_MASK(SID,EID)
+#define MCP2515_EXT_FILTER(SID,EID) { \
+		_MCP2515_SIDH(SID,EID), \
+		(_MCP2515_SIDL(SID,EID) | (1 << 3)), \
+		_MCP2515_EID8(SID,EID), \
+		_MCP2515_EID0(SID,EID) \
+		}
+
+#define MCP2515_EXT_FRAME(SID,EID,SIZE,DATA) { \
+		_MCP2515_SIDH(SID,EID), \
+		(_MCP2515_SIDL(SID,EID) | (1 << 3)), \
+		_MCP2515_EID8(SID,EID), \
+		_MCP2515_EID0(SID,EID), \
+		SIZE, \
+		DATA \
+		}
+
+#define MCP2515_STD_FRAME(SID,EID,SIZE,DATA) { \
+		_MCP2515_SIDH(SID,EID), \
+		_MCP2515_SIDL(SID,EID), \
+		_MCP2515_EID8(SID,EID), \
+		_MCP2515_EID0(SID,EID), \
+		SIZE, \
+		DATA \
+		}
+		
+
 
     static void setMask(typename Mask::base_reg_t reg, const Mask &mask) {
 	write((REG)reg, sizeof(Mask), &mask);
