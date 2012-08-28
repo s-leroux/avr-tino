@@ -78,7 +78,8 @@ SRCFILES=$(SRCDIR)pin.cc \
 
 ifeq ($(BOARD),CANModule)
 DEMOS += build-$(MCU)-$(BOARD)/bin/canmodule-tx \
-	build-$(MCU)-$(BOARD)/bin/canmodule-rx
+	build-$(MCU)-$(BOARD)/bin/canmodule-rx \
+	build-$(MCU)-$(BOARD)/bin/canmodule-log 
 SRCFILES += $(SRCDIR)/target/CANModule.cc
 endif
 

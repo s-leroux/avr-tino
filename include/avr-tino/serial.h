@@ -47,11 +47,17 @@ class Serial {
 	while(*str) { send(*str++); }
     }
 
-    void send(uint8_t data) const {
+    void send(uint8_t data) const { // XXX Shouldn't we call that 'write' ?
 	while ( ! (UCSRA & _BV(UDRE)) ) {
 	    // do nothing
 	}
 	UDR = data;
+    }
+
+    void send(const void* data, uint8_t len) const {
+	for(uint8_t i = 0; i < len; ++i) {
+	    send(((const uint8_t*)data)[i]);
+	}
     }
 
     uint8_t receive() const {
