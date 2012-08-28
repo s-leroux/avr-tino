@@ -19,6 +19,8 @@
 #if !defined AVR_TINO_MCP2515_H
 #define AVR_TINO_MCP2515_H
 
+#include "avr-tino/can.h"
+
 /*
  * Interface file for the MCP2515 Stand Alone CAN controller With SPI
  */
@@ -220,15 +222,8 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* ------------------------------------------------ */
     /* Frame message			                */
     /* ------------------------------------------------ */
-    struct __attribute__ ((__packed__)) ID {
-	uint8_t	    sidh;
-	uint8_t	    sidl;
-	uint8_t	    eid8;
-	uint8_t	    eid0;
-    };
-
     struct __attribute__ ((__packed__)) Frame {
-	ID	    id;
+	CAN::ID	    id;
 	uint8_t	    dlc;
 	uint8_t	    data[8];
     };
@@ -368,7 +363,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* Acceptance mask			                */
     /* ------------------------------------------------ */
     struct __attribute__ ((__packed__)) Mask {
-	ID	    id;
+	CAN::ID	    id;
 
 	enum __attribute__ ((__packed__)) base_reg_t {
 	    RXM0    = RXM0SIDH,
@@ -432,7 +427,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* Acceptance filter		                */
     /* ------------------------------------------------ */
     struct __attribute__ ((__packed__)) Filter {
-	ID	    id;
+	CAN::ID	    id;
 
 	enum __attribute__ ((__packed__)) base_reg_t {
 	    RXF0    = RXF0SIDH,
