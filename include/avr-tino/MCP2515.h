@@ -220,11 +220,15 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* ------------------------------------------------ */
     /* Frame message			                */
     /* ------------------------------------------------ */
-    struct __attribute__ ((__packed__)) Frame {
+    struct __attribute__ ((__packed__)) ID {
 	uint8_t	    sidh;
 	uint8_t	    sidl;
 	uint8_t	    eid8;
 	uint8_t	    eid0;
+    };
+
+    struct __attribute__ ((__packed__)) Frame {
+	ID	    id;
 	uint8_t	    dlc;
 	uint8_t	    data[8];
     };
@@ -236,7 +240,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 			    uint8_t len,
 			    const void *data);
     static void loadTX(uint8_t load_tx_location,
-			const Frame& frame, uint8_t len = sizeof(Frame));
+			const Frame* frame, uint8_t len = sizeof(Frame));
 
     enum __attribute__ ((__packed__)) txb_rts_t {
 	TXB0_RTS = _BV(0),
@@ -313,8 +317,11 @@ template<class SPI, pin_t cs> class MCP2515 {
 			    data);
 	}
 
-	static void loadTX(const Frame& frame, uint8_t len = sizeof(Frame)) {
-	    DEVICE::loadTX(LOAD_TX_SIDH_START, frame, len);
+	template<class FRAME>
+	static void loadTX(const FRAME& frame, uint8_t len = sizeof(FRAME)) {
+	    DEVICE::loadTX(LOAD_TX_SIDH_START, 
+			    (const typename DEVICE::Frame*)&frame, 
+			    len);
 	}
 
 	static void doTransmitBuffer(void) {
@@ -361,10 +368,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* Acceptance mask			                */
     /* ------------------------------------------------ */
     struct __attribute__ ((__packed__)) Mask {
-	uint8_t	    sidh;
-	uint8_t	    sidl;
-	uint8_t	    eid8;
-	uint8_t	    eid0;
+	ID	    id;
 
 	enum __attribute__ ((__packed__)) base_reg_t {
 	    RXM0    = RXM0SIDH,
@@ -377,12 +381,27 @@ template<class SPI, pin_t cs> class MCP2515 {
 #define _MCP2515_EID8(SID,EID)	uint8_t(EID >> 8)
 #define _MCP2515_EID0(SID,EID)	uint8_t(EID)
 
+#define MCP2515_SID(SID) { \
+		_MCP2515_SIDH(SID,0), \
+		_MCP2515_SIDL(SID,0), \
+		_MCP2515_EID8(SID,0), \
+		_MCP2515_EID0(SID,0) \
+		}
+
+#define MCP2515_EID(SID, EID) { \
+		_MCP2515_SIDH(SID,EID), \
+		(_MCP2515_SIDL(SID,EID) | (1 << 3)), \
+		_MCP2515_EID8(SID,EID), \
+		_MCP2515_EID0(SID,EID) \
+		}
+
 #define MCP2515_MASK(SID,EID) { \
 		_MCP2515_SIDH(SID,EID), \
 		_MCP2515_SIDL(SID,EID), \
 		_MCP2515_EID8(SID,EID), \
 		_MCP2515_EID0(SID,EID) \
 		}
+
 #define MCP2515_STD_FILTER(SID,EID)	MCP2515_MASK(SID,EID)
 #define MCP2515_EXT_FILTER(SID,EID) { \
 		_MCP2515_SIDH(SID,EID), \
@@ -392,19 +411,13 @@ template<class SPI, pin_t cs> class MCP2515 {
 		}
 
 #define MCP2515_EXT_FRAME(SID,EID,SIZE,DATA) { \
-		_MCP2515_SIDH(SID,EID), \
-		(_MCP2515_SIDL(SID,EID) | (1 << 3)), \
-		_MCP2515_EID8(SID,EID), \
-		_MCP2515_EID0(SID,EID), \
+		MCP2515_EID(SID,EID), \
 		SIZE, \
 		DATA \
 		}
 
 #define MCP2515_STD_FRAME(SID,EID,SIZE,DATA) { \
-		_MCP2515_SIDH(SID,EID), \
-		_MCP2515_SIDL(SID,EID), \
-		_MCP2515_EID8(SID,EID), \
-		_MCP2515_EID0(SID,EID), \
+		MCP2515_SID(SID), \
 		SIZE, \
 		DATA \
 		}
@@ -419,10 +432,7 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* Acceptance filter		                */
     /* ------------------------------------------------ */
     struct __attribute__ ((__packed__)) Filter {
-	uint8_t	    sidh;
-	uint8_t	    sidl;
-	uint8_t	    eid8;
-	uint8_t	    eid0;
+	ID	    id;
 
 	enum __attribute__ ((__packed__)) base_reg_t {
 	    RXF0    = RXF0SIDH,

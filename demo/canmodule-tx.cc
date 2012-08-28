@@ -29,13 +29,23 @@
 // XXX Must be done otherwise
 #include "avr-tino/target/CANModule.h"
 
+typedef SPIMaster SPI;
+typedef MCP2515<SPI, MCP2515_CS>	CAN_CTRL;
+
+struct MyFrame {
+    CAN_CTRL::ID    id;
+    uint8_t dlc;
+    uint8_t a, b;
+};
+MyFrame	frame[] = {
+    MCP2515_SID(0b00010010001), 2, 1, 2 
+};
+
 int main() __attribute__ ((OS_main));
 int main() {
-    typedef SPIMaster SPI;
 
     /* MCP2515 reset */
-    typedef MCP2515<SPI, MCP2515_CS>	CAN_CTRL;
-    const MCP2515<SPI, MCP2515_CS>	mcp2515;
+    const CAN_CTRL	mcp2515;
 
     SPI::begin();
     mcp2515.reset();
@@ -44,11 +54,8 @@ int main() {
 //    volatile uint8_t r = mcp2515.read(mcp2515.CANCTRL);
 //    mcp2515.write(mcp2515.CANCTRL, r);
 
-    static const CAN_CTRL::Frame    msg = 
-	MCP2515_STD_FRAME(0b00010010001, 0b0101101001111000, 5, "HELLO");
-
-    mcp2515.TXB0.loadTX(msg);
-    mcp2515.TXB1.loadTX(msg);
+    mcp2515.TXB0.loadTX(frame[0]);
+    mcp2515.TXB1.loadTX(frame[0]);
 
     while(1) {
 	pinToLow(PIN_PD0);
