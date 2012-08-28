@@ -33,7 +33,7 @@ typedef SPIMaster SPI;
 typedef MCP2515<SPI, MCP2515_CS>	CAN_CTRL;
 
 struct MyFrame {
-    CAN_CTRL::ID    id;
+    CAN::ID    id;
     uint8_t dlc;
     uint8_t a, b;
 };
