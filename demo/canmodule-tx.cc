@@ -36,10 +36,10 @@ typedef MCP2515<SPI, MCP2515_CS>	CAN_CTRL;
 struct __attribute__ ((__packed__)) MyFrame {
     CAN::ID    id;
     uint8_t dlc;
-    uint8_t a, b;
+    uint8_t c[8];
 };
 MyFrame	frame[] = {
-    { MCP2515_SID(0b11110010001), 2, 1, 2 }
+    { MCP2515_SID(0b11110010001), 8, 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' }
 };
 #else
 struct __attribute__ ((__packed__)) MyFrame {
