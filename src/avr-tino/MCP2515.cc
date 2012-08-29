@@ -68,6 +68,13 @@ void MCP2515<SPI,cs>::read(REG r, uint8_t len, void * buffer) {
 }
 
 template<class SPI, pin_t cs>
+void MCP2515<SPI,cs>::readRX(uint8_t base, uint8_t len, void * buffer) {
+    Command cmd((instr)(READ_RX|base));
+
+    cmd.read(len, buffer);
+}
+
+template<class SPI, pin_t cs>
 uint8_t MCP2515<SPI,cs>::read(REG r) {
     Command cmd(READ);
 

@@ -62,25 +62,8 @@ int main() {
 	    CAN_CTRL::Frame frame;
 	    mcp2515.RXB0.readRX(&frame);
 	    // mcp2515.RXB0.clear();
-
 	    serial.send(&frame, sizeof(frame));
 	}
-    }
-
-//    uint8_t data;
-//    mcp2515.RXB0.readData(1,&data);
-//    mcp2515.RXB0.readData(1,&data);
-//    mcp2515.RXB1.readData(1,&data);
-//    mcp2515.RXB1.readData(1,&data);
-//    volatile uint8_t r = mcp2515.read(mcp2515.CANCTRL);
-//    mcp2515.write(mcp2515.CANCTRL, r);
-
-    // mcp2515.setTransmitBuffer(mcp2515.TXB0, 0x1234, 0x5678, 6, "Hello");
-//    mcp2515.setTransmitBuffer(mcp2515.TXB0, 0x1234, 0x5678, 0, "");
-
-    while(1) {
-//	mcp2515.doTransmitBuffer(mcp2515.TXB0);
-//	delay(5000);
     }
 
     return 0;

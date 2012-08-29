@@ -32,14 +32,22 @@
 typedef SPIMaster SPI;
 typedef MCP2515<SPI, MCP2515_CS>	CAN_CTRL;
 
-struct MyFrame {
+#if 1
+struct __attribute__ ((__packed__)) MyFrame {
     CAN::ID    id;
     uint8_t dlc;
     uint8_t a, b;
 };
 MyFrame	frame[] = {
-    MCP2515_SID(0b00010010001), 2, 1, 2 
+    { MCP2515_SID(0b11110010001), 2, 1, 2 }
 };
+#else
+struct __attribute__ ((__packed__)) MyFrame {
+    const char addr[4];
+    uint8_t len;
+    const char data[8];
+} frame[] = { { "abc", 8, "efghijk" } };
+#endif
 
 int main() __attribute__ ((OS_main));
 int main() {
@@ -55,7 +63,7 @@ int main() {
 //    mcp2515.write(mcp2515.CANCTRL, r);
 
     mcp2515.TXB0.loadTX(frame[0]);
-    mcp2515.TXB1.loadTX(frame[0]);
+    // mcp2515.TXB1.loadTX(frame[0]);
 
     while(1) {
 	pinToLow(PIN_PD0);

@@ -162,6 +162,8 @@ template<class SPI, pin_t cs> class MCP2515 {
     */
     static void read(REG r, uint8_t len, void * buffer);
 
+    static void readRX(uint8_t base, uint8_t len, void * buffer);
+
     /**
 	Write a value into a register
     */
@@ -512,14 +514,14 @@ template<class SPI, pin_t cs> class MCP2515 {
 	    Read RX data and clears corresponding RX flag
 	*/
 	static void readData(uint8_t len, void * buffer) {
-	    read((REG)(READ_RX | READ_RX_DATA), len, buffer);
+	    DEVICE::readRX(READ_RX_DATA, len, buffer);
 	}
 
 	/**
 	    Read RX buffer and clears corresponding RX flag
 	*/
 	static void readRX(Frame * dest, const uint8_t len = sizeof(Frame)) {
-	    read((REG)(READ_RX | READ_RX_SIDH), len, dest);
+	    DEVICE::readRX(READ_RX_SIDH, len, dest);
 	}
 
 	static void clear() {
