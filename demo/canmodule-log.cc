@@ -24,30 +24,21 @@
 #include "avr-tino.h"
 
 #include "avr-tino/delay.h"
+#include "avr-tino/serial.h"
 #include "avr-tino/MCP2515.h"
 #include "avr-tino/SPI.h"
 // XXX Must be done otherwise
 #include "avr-tino/target/CANModule.h"
 
+/*
+    Sample program to use with my MCP2515-based CAN module.
+
+    This program logs to serial incomming CAN frames. Mostly for
+    debugging purpose
+*/
+
 typedef SPIMaster SPI;
 typedef MCP2515<SPI, MCP2515_CS>	CAN_CTRL;
-
-#if 1
-struct __attribute__ ((__packed__)) MyFrame {
-    CAN::ID    id;
-    uint8_t dlc;
-    uint8_t c[8];
-};
-MyFrame	frame[] = {
-    { MCP2515_SID(0b11110010001), 8, 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' }
-};
-#else
-struct __attribute__ ((__packed__)) MyFrame {
-    const char addr[4];
-    uint8_t len;
-    const char data[8];
-} frame[] = { { "abc", 8, "efghijk" } };
-#endif
 
 int main() __attribute__ ((OS_main));
 int main() {
@@ -55,30 +46,24 @@ int main() {
     /* MCP2515 reset */
     const CAN_CTRL	mcp2515;
 
+    Serial  serial;
+    serial.begin(9600);
     SPI::begin();
     mcp2515.reset();
     mcp2515.setBaud(100000);
-    mcp2515.setOperationMode(mcp2515.NORMAL);
-//    volatile uint8_t r = mcp2515.read(mcp2515.CANCTRL);
-//    mcp2515.write(mcp2515.CANCTRL, r);
 
-    mcp2515.TXB0.loadTX(frame[0]);
-    // mcp2515.TXB1.loadTX(frame[0]);
+    mcp2515.setOperationMode(mcp2515.NORMAL);
+    mcp2515.RXB0.setMode(mcp2515.RXM_ANY);
 
     while(1) {
-	pinToLow(PIN_PD0);
-	pinToLow(PIN_PD1);
-	pinToLow(PIN_PD2);
-	mcp2515.TXB0.doTransmitBuffer();
-	for(uint8_t i = 0; i < 20; ++i) {
-	    CAN_CTRL::TXStatus status = mcp2515.TXB0.status();
+	CAN_CTRL::RXStatus status = mcp2515.readRXStatus();
 
-	    digitalWrite(PIN_PD0, status.isPending());
-	    digitalWrite(PIN_PD1, status.isError());
-	    digitalWrite(PIN_PD2, status.hasLostArbitration());
-	    delay(50);
+	if (status.hasMessageInRXB0()) {
+	    CAN_CTRL::Frame frame;
+	    mcp2515.RXB0.readRX(&frame);
+	    // mcp2515.RXB0.clear();
+	    serial.send(&frame, sizeof(frame));
 	}
-//	mcp2515.TXB1.doTransmitBuffer();
     }
 
     return 0;
