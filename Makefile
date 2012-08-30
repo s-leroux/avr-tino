@@ -40,9 +40,10 @@ SIZE=$(PROGRAM_PREFIX)size$(PROGRAM_SUFFIX)
 CPPFLAGS=-I./include -include "avr-tino/target/$(BOARD).h"
 CXXFLAGS=-mmcu=$(MCU) \
 	-Os \
+	-fipa-cp \
 	-ffunction-sections -fdata-sections \
 	-fno-rtti \
-	-g
+	-g 
 LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections
 
 
