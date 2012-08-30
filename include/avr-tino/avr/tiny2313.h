@@ -84,5 +84,11 @@ typedef Port<0x1A, 0x19, 0x1B>	    PortA;
 typedef Port<0x17, 0x16, 0x18>	    PortB;
 typedef Port<0x11, 0x10, 0x12>	    PortD;
 
+#include "avr-tino/EEPROM.h"
+/*
+typedef EEPROM<0x1C, EEMPE, EEPE, EERE, EEPM0, EEPM1,
+	       0x1E,
+	       0x1D>		    EEPROM;
+*/
 #endif
 

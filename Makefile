@@ -57,6 +57,7 @@ DIRS=$(BUILDDIR) $(OBJDIR) $(BINDIR) $(DEPDIR)
 
 DEMOS=	$(BINDIR)input  \
 	$(BINDIR)port \
+	$(BINDIR)eeprom \
 	$(BINDIR)shiftout \
 	$(BINDIR)spiout \
 	$(BINDIR)1-wire \
