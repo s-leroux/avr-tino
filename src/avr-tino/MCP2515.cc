@@ -116,6 +116,18 @@ void MCP2515<SPI,cs>::loadTX(uint8_t load_tx_location,
 }
 
 template<class SPI, pin_t cs>
+void MCP2515<SPI,cs>::loadTX(uint8_t load_tx_location,
+			CAN::ID id,
+                        const void* data, 
+			uint8_t len) {
+    Command     cmd((instr)(LOAD_TX | load_tx_location));
+
+    cmd.write(sizeof(CAN::ID), &id);
+    cmd.write(len);
+    cmd.write(len, data);
+}
+
+template<class SPI, pin_t cs>
 void MCP2515<SPI,cs>::doTransmitBuffer(txb_rts_t buffer_set) {
     Command	cmd((instr)(RTS | buffer_set));
 }

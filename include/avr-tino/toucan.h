@@ -19,6 +19,8 @@
 #if !defined AVR_TINO_TOUCAN_H
 #define AVR_TINO_TOUCAN_H
 
+#include "avr-tino/can.h"
+
 /*
     ''touCAN'' is the ''truly open CAN'' specification for home automation.
 
@@ -50,14 +52,14 @@
 
 #define TOUCAN_OID(PR, CID, CMD, GR, DEST) { \
     uint8_t((PR << 6) | CID), \
-    uint8_t((CMD << 5) | GR), \
+    uint8_t(CMD | GR), \
     uint8_t(DEST >> 8), \
     uint8_t(DEST) \
     }
 
 #define TOUCAN_PR(OID) (OID.sidh >> 6)
 #define TOUCAN_CID(OID) (OID.sidh & 0x3F)
-#define TOUCAN_CMD(OID) (OID.sidl >> 5)
+#define TOUCAN_CMD(OID) (OID.sidl & (0b111 << 5) )
 #define TOUCAN_GR(OID) (OID.sidl & 0x03)
 #define TOUCAN_DEST(OID) uint16_t((OID.eid8 << 8) | OID.eid0)
 
@@ -73,59 +75,80 @@
 #define TOUCAN_CID_RESERVED_END	    0x10
 
 // generic devices
-#define TOUCAN_CID_ANALOG_SENSOR    0x11
-#define TOUCAN_CID_DIGITAL_SENSOR   0x12
+#define TOUCAN_CID_ANALOG_INPUT	    0x11
+#define TOUCAN_CID_DIGITAL_INPUT    0x12
 #define TOUCAN_CID_ANALOG_OUTPUT    0x13
 #define TOUCAN_CID_DIGITAL_OUTPUT   0x14
 
+#define TOUCAN_CID_MASK	    0x3F // 
+
 
 #define TOUCAN_GRP_ADDR	    0b00
-#define TOUCAN_DEV_ADDR	    0b11
+#define TOUCAN_DEV_ADDR	    0b10
+#define TOUCAN_SRC_ADDR	    0b01
+#define TOUCAN_DST_ADDR	    0b00
 
-#define TOUCAN_CMD_PING	    0b000
-#define TOUCAN_CMD_RESET    0b001
-#define TOUCAN_CMD_INFO	    0b100 // PING response
-#define TOUCAN_CMD_GET	    0b010
-#define TOUCAN_CMD_SET	    0b011
-#define TOUCAN_CMD_DATA	    0b110 // GET response
+#define TOUCAN_CMD_PING	    (0b000 << 5)
+#define TOUCAN_CMD_ECHO	    (0b100 << 5) // PING response
+#define TOUCAN_CMD_RESET    (0b001 << 5)
+#define TOUCAN_CMD_GET	    (0b010 << 5)
+#define TOUCAN_CMD_SET	    (0b011 << 5)
+#define TOUCAN_CMD_DATA	    (0b110 << 5) // GET response
+
 
 namespace TouCAN {
 
-struct Frame __attribute__ ((__packed__)) {
-    CAN::ID	    oid;
+typedef CAN::ID	    OID;
+
+inline bool match(OID a, OID b) {
+    return (TOUCAN_CID(a) == TOUCAN_CID(b))
+	    && (a.eid8 == b.eid8)
+	    && (a.eid0 == b.eid0);
+}
+
+template<class PL, uint8_t CMD>
+struct __attribute__ ((__packed__)) Frame {
+    inline Frame<PL, CMD>(OID theOid, const PL& thePl) 
+	: oid(theOid),
+	  dlc(sizeof(PL)),
+	  pl(thePl) { oid.sidl |= CMD;  }
+    OID		    oid;
     uint8_t	    dlc;
-    union {
-	uint8_t	    data[8];
+    PL		    pl;
+};
 
-	struct {
+struct __attribute__ ((__packed__)) PingPL {
+    PingPL(OID theFrom) : from(theFrom) {}
 
-	} ping;
+    OID		    from;
+};
 
-	struct {
+#define TOUCAN_PING(frame) (*(::TouCAN::PingPL*)(frame.data))
 
-	} reset;
+Frame<PingPL, TOUCAN_CMD_PING> ping(OID oid, OID from) {
+    return Frame<PingPL, TOUCAN_CMD_PING>(oid, from);
+}
 
-	struct {
-	    uint8_t	id;
-	    uint32_t	value;
-	} info;
+struct __attribute__ ((__packed__)) EchoPL {
+    EchoPL(OID theFrom) : from(theFrom) {}
 
-	struct {
-	    uint8_t	id;
-	} get;
+    OID		    from;
+};
 
-	struct {
-	    uint8_t	id;
-	    uint32_t	value;
-	} data;
+#define TOUCAN_ECHO(frame) (*(::TouCAN::EchoPL*)(frame.data))
 
-	struct {
-	    uint8_t	id;
-	    uint32_t	value;
-	} set;
-    };
+Frame<EchoPL, TOUCAN_CMD_ECHO> echo(OID oid, OID from) {
+    return Frame<EchoPL, TOUCAN_CMD_ECHO>(oid, from);
+}
+
+struct __attribute__ ((__packed__)) SelfPL {
+    OID		    oid;
 };
 
 }; // namespace
 
+static const TouCAN::OID    TOUCAN_OID_DEV_MASK = 
+    TOUCAN_OID(0, TOUCAN_CID_MASK, 0, TOUCAN_DEV_ADDR, 0xFFFF);
+
 #endif
+
