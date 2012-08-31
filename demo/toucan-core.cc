@@ -41,10 +41,13 @@ typedef MCP2515<SPI, MCP2515_CS>	CAN_CTRL;
 static const uint16_t	CID	= TOUCAN_CID_DIGITAL_INPUT;
 static TouCAN::OID	self	= TOUCAN_OID(0, CID, 0, 0, 0x0000);
 
+static TouCAN::Ping	ping	= TOUCAN_PING_FRAME(self, self);
+
 static const CAN_CTRL	mcp2515;
 
 static CAN_CTRL::Frame	frame;
 static volatile bool	empty	= true;
+static volatile bool    inConfigurationMode = false;
 
 ISR(PCINT_vect) {
     if (empty) {
@@ -53,9 +56,56 @@ ISR(PCINT_vect) {
 	    mcp2515.RXB0.readRX(&frame);
 	    empty = false;
 	}
+	if (! (PINB & _BV(7)) ) {
+	    inConfigurationMode = true;
+	}
     }
     else {
 	// discard
+    }
+}
+
+/**
+    In configuration mode, only accept
+    CONFIG frame from any host
+*/
+void beginConfigurationMode() {
+    pinToHigh(PIN_PB6);
+
+    mcp2515.setOperationMode(mcp2515.CONFIGURATION);
+    mcp2515.RXB0.setMask(TOUCAN_CONFIG_MASK);
+    mcp2515.setFilter(CAN_CTRL::RXF0, TOUCAN_CONFIG_OID);
+    mcp2515.setOperationMode(mcp2515.NORMAL);
+
+    empty = true; // flush incomming frames
+    while(inConfigurationMode) {
+	if (!empty) {
+	    const ConfigFrame* fr = (ConfigFrame*)&frame;
+	    self = fr->phy;
+
+	    inConfigurationMode = false;
+	    empty = true;
+	}
+    }
+}
+
+void beginNormalMode() {
+    pinToLow(PIN_PB6);
+
+    mcp2515.setOperationMode(mcp2515.CONFIGURATION);
+    mcp2515.RXB0.setMask(TOUCAN_OID_DEV_MASK);
+    mcp2515.setFilter(CAN_CTRL::RXF0, self);
+    mcp2515.setOperationMode(mcp2515.NORMAL);
+
+    empty = true; // flush incomming frames
+    while(!inConfigurationMode) {
+	if (!empty) {
+	    switch(TOUCAN_CMD(frame.id)) {
+		case TOUCAN_CMD_SET:	PORTD = frame.data[0];
+					break;
+	    }
+	    empty = true;
+	}
     }
 }
 
@@ -74,30 +124,14 @@ int main() {
     GIMSK |= _BV(PCIE);
     PCMSK |= _BV(PCINT0);
 
-    // 1) TouCAN device auto ID assignation
-    //	    The device take one random address
-    //	    Ping that address
-    //	    If no response is obtained after 1000ms keep that address
-    do {
-	empty = true;
-	self.eid0++;
-	mcp2515.setOperationMode(mcp2515.CONFIGURATION);
-	mcp2515.RXB0.setMask(TOUCAN_OID_DEV_MASK);
-	mcp2515.setFilter(CAN_CTRL::RXF0, self);
-	mcp2515.setOperationMode(mcp2515.NORMAL);
-	mcp2515.TXB0.loadTX(TouCAN::ping(self, self));
-	
-	delay(1000);
-    } while(!empty);
+    DDRD = 0xFF;
+    DDRB |= _BV(6);
 
     while(1) {
-	if (!empty) {
-	    if (TouCAN::match(self, frame.id)) {
-		if (TOUCAN_CMD(frame.id) == TOUCAN_CMD_PING) {
-		    mcp2515.TXB0.loadTX(TouCAN::echo(TOUCAN_PING(frame).from, self));
-		}
-	    }
-	}
+	if (inConfigurationMode)
+	    beginConfigurationMode();
+	else
+	    beginNormalMode();
     }
 
     return 0;

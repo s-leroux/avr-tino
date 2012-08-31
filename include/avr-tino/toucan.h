@@ -95,6 +95,26 @@
 #define TOUCAN_CMD_SET	    (0b011 << 5)
 #define TOUCAN_CMD_DATA	    (0b110 << 5) // GET response
 
+#define TOUCAN_CMD_CONFIG   (0b111 << 5)
+#define TOUCAN_CMD_MASK	    (0b111 << 5)
+
+static const CAN::ID    TOUCAN_OID_DEV_MASK = 
+    TOUCAN_OID(0, TOUCAN_CID_MASK, 0, TOUCAN_DEV_ADDR, 0xFFFF);
+
+static CAN::ID	TOUCAN_CONFIG_MASK = TOUCAN_OID(0, 0,
+						TOUCAN_CMD_MASK,
+						0,0);
+static CAN::ID	TOUCAN_CONFIG_OID = TOUCAN_OID(0, 0,
+						TOUCAN_CMD_CONFIG,
+						0,0);
+
+struct __attribute__ ((__packed__)) ConfigFrame {
+    CAN::ID	    oid;
+    uint8_t	    dlc;
+    CAN::ID	    phy;
+    CAN::ID	    grp;
+};
+
 
 namespace TouCAN {
 
@@ -116,6 +136,13 @@ struct __attribute__ ((__packed__)) Frame {
     uint8_t	    dlc;
     PL		    pl;
 };
+
+struct __attribute__ ((__packed__)) Ping {
+    OID		    oid;
+    uint8_t	    dlc;
+    OID		    from;
+};
+#define TOUCAN_PING_FRAME(OID_FROM, OID_TO) { OID_FROM, sizeof(::TouCAN::OID), OID_TO }
 
 struct __attribute__ ((__packed__)) PingPL {
     PingPL(OID theFrom) : from(theFrom) {}
@@ -146,9 +173,6 @@ struct __attribute__ ((__packed__)) SelfPL {
 };
 
 }; // namespace
-
-static const TouCAN::OID    TOUCAN_OID_DEV_MASK = 
-    TOUCAN_OID(0, TOUCAN_CID_MASK, 0, TOUCAN_DEV_ADDR, 0xFFFF);
 
 #endif
 
