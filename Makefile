@@ -81,7 +81,8 @@ ifeq ($(BOARD),CANModule)
 DEMOS += build-$(MCU)-$(BOARD)/bin/canmodule-tx \
 	build-$(MCU)-$(BOARD)/bin/canmodule-rx \
 	build-$(MCU)-$(BOARD)/bin/canmodule-log \
-	build-$(MCU)-$(BOARD)/bin/toucan-core
+	build-$(MCU)-$(BOARD)/bin/toucan-core \
+	build-$(MCU)-$(BOARD)/bin/toucan-send
 SRCFILES += $(SRCDIR)/target/CANModule.cc
 endif
 
