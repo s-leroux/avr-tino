@@ -68,6 +68,13 @@ void MCP2515<SPI,cs>::read(REG r, uint8_t len, void * buffer) {
 }
 
 template<class SPI, pin_t cs>
+void MCP2515<SPI,cs>::readRX(uint8_t base, uint8_t len, void * buffer) {
+    Command cmd((instr)(READ_RX|base));
+
+    cmd.read(len, buffer);
+}
+
+template<class SPI, pin_t cs>
 uint8_t MCP2515<SPI,cs>::read(REG r) {
     Command cmd(READ);
 
@@ -106,6 +113,18 @@ void MCP2515<SPI,cs>::loadTX(uint8_t load_tx_location,
     Command     cmd((instr)(LOAD_TX | load_tx_location));
     cmd.write((frame_size > sizeof(Frame)) ? sizeof(Frame) : frame_size,
 		frame);
+}
+
+template<class SPI, pin_t cs>
+void MCP2515<SPI,cs>::loadTX(uint8_t load_tx_location,
+			CAN::ID id,
+                        const void* data, 
+			uint8_t len) {
+    Command     cmd((instr)(LOAD_TX | load_tx_location));
+
+    cmd.write(sizeof(CAN::ID), &id);
+    cmd.write(len);
+    cmd.write(len, data);
 }
 
 template<class SPI, pin_t cs>

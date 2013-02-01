@@ -19,6 +19,8 @@
 #if !defined AVR_TINO_MCP2515_H
 #define AVR_TINO_MCP2515_H
 
+#include "avr-tino/can.h"
+
 /*
  * Interface file for the MCP2515 Stand Alone CAN controller With SPI
  */
@@ -160,6 +162,8 @@ template<class SPI, pin_t cs> class MCP2515 {
     */
     static void read(REG r, uint8_t len, void * buffer);
 
+    static void readRX(uint8_t base, uint8_t len, void * buffer);
+
     /**
 	Write a value into a register
     */
@@ -220,15 +224,8 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* ------------------------------------------------ */
     /* Frame message			                */
     /* ------------------------------------------------ */
-    struct __attribute__ ((__packed__)) ID {
-	uint8_t	    sidh;
-	uint8_t	    sidl;
-	uint8_t	    eid8;
-	uint8_t	    eid0;
-    };
-
     struct __attribute__ ((__packed__)) Frame {
-	ID	    id;
+	CAN::ID	    id;
 	uint8_t	    dlc;
 	uint8_t	    data[8];
     };
@@ -241,6 +238,9 @@ template<class SPI, pin_t cs> class MCP2515 {
 			    const void *data);
     static void loadTX(uint8_t load_tx_location,
 			const Frame* frame, uint8_t len = sizeof(Frame));
+    static void loadTX(uint8_t load_tx_location,
+			CAN::ID id,
+			const void* data, uint8_t len = sizeof(Frame));
 
     enum __attribute__ ((__packed__)) txb_rts_t {
 	TXB0_RTS = _BV(0),
@@ -317,6 +317,15 @@ template<class SPI, pin_t cs> class MCP2515 {
 			    data);
 	}
 
+	template<class DATA>
+	static void loadTX(CAN::ID id,
+			    const DATA& data,
+			    uint8_t len = sizeof(DATA)) {
+	    DEVICE::loadTX(LOAD_TX_SIDH_START,
+			    id, &data,
+			    len);
+	}
+
 	template<class FRAME>
 	static void loadTX(const FRAME& frame, uint8_t len = sizeof(FRAME)) {
 	    DEVICE::loadTX(LOAD_TX_SIDH_START, 
@@ -367,13 +376,10 @@ template<class SPI, pin_t cs> class MCP2515 {
     /* ------------------------------------------------ */
     /* Acceptance mask			                */
     /* ------------------------------------------------ */
-    struct __attribute__ ((__packed__)) Mask {
-	ID	    id;
-
-	enum __attribute__ ((__packed__)) base_reg_t {
-	    RXM0    = RXM0SIDH,
-	    RXM1    = RXM1SIDH,
-	};
+    typedef CAN::ID Mask;
+    enum __attribute__ ((__packed__)) mask_reg_t {
+	RXM0    = RXM0SIDH,
+	RXM1    = RXM1SIDH,
     };
 
 #define _MCP2515_SIDH(SID,EID)	uint8_t(SID >> 3)
@@ -424,27 +430,24 @@ template<class SPI, pin_t cs> class MCP2515 {
 		
 
 
-    static void setMask(typename Mask::base_reg_t reg, const Mask &mask) {
+    static void setMask(mask_reg_t reg, const Mask &mask) {
 	write((REG)reg, sizeof(Mask), &mask);
     }
 
     /* ------------------------------------------------ */
     /* Acceptance filter		                */
     /* ------------------------------------------------ */
-    struct __attribute__ ((__packed__)) Filter {
-	ID	    id;
-
-	enum __attribute__ ((__packed__)) base_reg_t {
-	    RXF0    = RXF0SIDH,
-	    RXF1    = RXF1SIDH,
-	    RXF2    = RXF2SIDH,
-	    RXF3    = RXF3SIDH,
-	    RXF4    = RXF4SIDH,
-	    RXF5    = RXF5SIDH,
-	};
+    typedef CAN::ID	Filter;
+    enum __attribute__ ((__packed__)) filter_reg_t {
+	RXF0    = RXF0SIDH,
+	RXF1    = RXF1SIDH,
+	RXF2    = RXF2SIDH,
+	RXF3    = RXF3SIDH,
+	RXF4    = RXF4SIDH,
+	RXF5    = RXF5SIDH,
     };
 
-    static void setFilter(typename Mask::base_reg_t reg, const Filter &filter) {
+    static void setFilter(filter_reg_t reg, const Filter &filter) {
 	write((REG)reg, sizeof(Filter), &filter);
     }
 
@@ -465,7 +468,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 	struct RXBCTRL : public RXB0CTRL {};
 
 	static const uint8_t	    RXIF    = CANINTF::RX0IF;
-	static const typename Mask::base_reg_t RXM   = Mask::RXM0;
+	static const mask_reg_t RXM   = RXM0;
 
 	static const uint8_t	READ_RX_SIDH = b00000000;
 	static const uint8_t	READ_RX_DATA = b00000010;
@@ -476,7 +479,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 	struct RXBCTRL : public RXB1CTRL {};
 
 	static const uint8_t	    RXIF    = CANINTF::RX1IF;
-	static const typename Mask::base_reg_t RXM   = Mask::RXM1;
+	static const mask_reg_t RXM   = RXM1;
 
 	static const uint8_t	READ_RX_SIDH = b00000100;
 	static const uint8_t	READ_RX_DATA = b00000110;
@@ -504,7 +507,7 @@ template<class SPI, pin_t cs> class MCP2515 {
 	static const uint8_t	RXIF	    = RXTrait::RXIF;
 	struct RXBCTRL : public RXTrait::RXBCTRL {};
 
-	static const typename Mask::base_reg_t RXM   = RXTrait::RXM;
+	static const mask_reg_t RXM   = RXTrait::RXM;
 
 	static const uint8_t	READ_RX_SIDH = RXTrait::READ_RX_SIDH;
 	static const uint8_t	READ_RX_DATA = RXTrait::READ_RX_DATA;
@@ -517,14 +520,14 @@ template<class SPI, pin_t cs> class MCP2515 {
 	    Read RX data and clears corresponding RX flag
 	*/
 	static void readData(uint8_t len, void * buffer) {
-	    read((REG)(READ_RX | READ_RX_DATA), len, buffer);
+	    DEVICE::readRX(READ_RX_DATA, len, buffer);
 	}
 
 	/**
 	    Read RX buffer and clears corresponding RX flag
 	*/
 	static void readRX(Frame * dest, const uint8_t len = sizeof(Frame)) {
-	    read((REG)(READ_RX | READ_RX_SIDH), len, dest);
+	    DEVICE::readRX(READ_RX_SIDH, len, dest);
 	}
 
 	static void clear() {
