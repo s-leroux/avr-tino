@@ -25,7 +25,6 @@
     the SPI interface to send a byte
 */
 int main() {
-    typedef SPIMaster SPI;
     SPI::begin();
 
     while(1) {

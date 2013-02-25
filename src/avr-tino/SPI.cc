@@ -19,20 +19,25 @@
 #include "avr-tino/pin.h"
 #include "avr-tino/SPI.h"
 
-void SPIMaster::begin() {
+template <uint8_t CR, uint8_t SR, uint8_t DR, uint8_t IF, uint8_t CRFLAGS>
+void SPIMaster<CR,SR,DR,IF,CRFLAGS>::begin() {
     pinToOutput(MISO); // Stupid naming scheme for attn2313 where miSO is *always* output...
     pinToOutput(SCK);
     pinToInput(MOSI);  // Stupid naming scheme for attn2313 where moSI is *always* input...
 }
 
-uint8_t SPIMaster::transfert(uint8_t byte) {
-    USIDR = byte;
-    USISR = _BV(USIOIF);
-    do {
-	USICR = _BV(USIWM0) | _BV(USITC) | _BV(USICS1) | _BV(USICLK) ;
-    } while (! (USISR & _BV(USIOIF)) );
+template <uint8_t CR, uint8_t SR, uint8_t DR, uint8_t IF, uint8_t CRFLAGS>
+uint8_t SPIMaster<CR,SR,DR,IF,CRFLAGS>::transfert(uint8_t byte) {
+    _SFR_IO8(DR) = byte;
 
-    return USIDR;
+    _SFR_IO8(SR) = _BV(IF);
+
+    do {
+	if (CRFLAGS) { _SFR_IO8(CR) = CRFLAGS; }
+	//_BV(USIWM0) | _BV(USITC) | _BV(USICS1) | _BV(USICLK) ;
+    } while (! (_SFR_IO8(SR) & _BV(IF)) );
+
+    return _SFR_IO8(DR);
 }
 
 

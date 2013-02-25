@@ -19,7 +19,9 @@
 #if !defined AVR_TINO_TARGET_TINY2313_FACTORY_H
 #define AVR_TINO_TARGET_TINY2313_FACTORY_H
 
+#if !defined F_CPU
 #define F_CPU 1000000
+#endif
 
 #define BAORD_factory 1
 

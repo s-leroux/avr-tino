@@ -89,7 +89,7 @@ static void shiftOut(pin_t dataPin, pin_t clockPin,
                 bitorder_t bitOrder,
                 const void *data, uint16_t size);
 
-template<uint8_t DDR, uint8_t PIN, uint8_t POUT>
+template<uint8_t PIN, uint8_t DDR = PIN+1, uint8_t POUT = DDR+1>
 class Port {
     public:
     static void toInput(uint8_t mask) {

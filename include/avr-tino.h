@@ -27,14 +27,7 @@ extern "C" void __cxa_pure_virtual(void) { /* do nothing */ }
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 
-// Borrowed from /usr/lib/avr/include/avr/io.h 
-#if defined (__AVR_ATtiny2313__)
-#  include "avr-tino/avr/tiny2313.h"
-#elif defined (__AVR_ATtiny4313__)
-#  include "avr-tino/avr/tiny4313.h"
-#else
-#  error "Unknown target AVR. Don't you forget '-mmcu'?"
-#endif
+#include "avr-tino/hardware/mcu-def.h"
 
 #include "avr-tino/pin.h"
 #include "avr-tino/bits.h"

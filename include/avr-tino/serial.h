@@ -20,27 +20,44 @@
 #define AVR_TINO_SERIAL_H
 
 // XXX should use namespace instead ?
+template <uint8_t DR, uint8_t SRA, uint8_t SRB, uint8_t SRC, uint8_t RRL, uint8_t RRH>
 class Serial {
     public:
+    
+    /*
+	Hard coded values common (?) to every 8-bit AVR
+	XXX
+    */
     enum __attribute__ ((__packed__)) protocol_t {
 	// Asynchronous
 	A8N1	= 6 ,
-	A8E1	= _BV(UPM1) | 6 ,
-	A8O1	= _BV(UPM1) |_BV(UPM0) |  6 ,
+	A8E1	= _BV(5) | 6 ,
+	A8O1	= _BV(5) |_BV(4) |  6 ,
 	// Synchronous
-	S8N1	= _BV(UMSEL) | 6 ,
-	S8E1	= _BV(UMSEL) | _BV(UPM1) | 6 ,
-	S8O1	= _BV(UMSEL) | _BV(UPM1) | _BV(UPM0) | 6 ,
+	S8N1	= _BV(6) | 6 ,
+	S8E1	= _BV(6) | _BV(5) | 6 ,
+	S8O1	= _BV(6) | _BV(5) | _BV(4) | 6 ,
+    };
+
+    enum {
+	TXEN	    = 3,
+	RXEN	    = 4,
+    };
+
+    enum {
+	UDRE	    = 5,
+	TXC	    = 6,
+	RXC	    = 7,
     };
 
     void begin(uint32_t baud, protocol_t protocol = A8N1) const {
 	uint16_t UBRR = F_CPU / 16 / baud - 1;
 	
-	UBRRH = (uint8_t)(UBRR >> 8);
-	UBRRL = (uint8_t)(UBRR);
+	_SFR_MEM8(RRH) = (uint8_t)(UBRR >> 8);
+	_SFR_MEM8(RRL) = (uint8_t)(UBRR);
 	
-	UCSRB = _BV(RXEN) | _BV(TXEN);
-	UCSRC = protocol;
+	_SFR_MEM8(SRB) = _BV(RXEN) | _BV(TXEN);
+	_SFR_MEM8(SRC) = protocol;
     }
 
     void print(const char* str) const {
@@ -48,10 +65,10 @@ class Serial {
     }
 
     void send(uint8_t data) const { // XXX Shouldn't we call that 'write' ?
-	while ( ! (UCSRA & _BV(UDRE)) ) {
+	while ( ! (_SFR_MEM8(SRA) & _BV(UDRE)) ) {
 	    // do nothing
 	}
-	UDR = data;
+	_SFR_MEM8(DR) = data;
     }
 
     void send(const void* data, uint8_t len) const {
@@ -61,10 +78,10 @@ class Serial {
     }
 
     uint8_t receive() const {
-	while ( ! (UCSRA & _BV(RXC) ) ) {
+	while ( ! (_SFR_MEM8(SRA) & _BV(RXC) ) ) {
 	    // do nothing
 	}
-	return UDR;
+	return _SFR_MEM8(DR);
     }
 };
 

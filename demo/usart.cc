@@ -30,14 +30,14 @@
 int main() {
     char    message[] = "\r\nHello ";
 
-    Serial  serial;
+    USART  serial;
     serial.begin(9600);
     uint8_t n = 0;
     while(1) {
 	print(serial, message);
 	print(serial, n++);
 
-	delay(100);
+	delay(1000);
     }
 
     return 0;

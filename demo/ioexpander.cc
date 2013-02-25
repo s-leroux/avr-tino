@@ -25,7 +25,6 @@
 
 int main() __attribute__ ((OS_main));
 int main() {
-    typedef SPIMaster SPI;
 
     /* MCP2515 reset */
     const MCP23Sxx<SPI, PIN_PB0>	mcp23S08;

@@ -23,7 +23,7 @@
   The ATtiny4313 is basicly the same chip as ATtiny2313 with twice
   more memory (flash/eeprom/ram)
 */
-#include "avr-tino/avr/tiny2313.h"
+#include "avr-tino/../../hardware/avr/tiny2313/tiny2313.h"
 
 #endif
 
