@@ -90,6 +90,28 @@ static volatile uint8_t& pin_to_input(pin_t p) {
 	     PIND );
 }
 
+/**
+    TWI (2-wire/i2c) implementation
+*/
+struct ATmega328_TWI {
+    static const uint8_t    CR = 0xBC; /* XXX */
+    static const uint8_t    START   = _BV(TWINT)|_BV(TWEN)|_BV(TWSTA);
+    static const uint8_t    STOP    = _BV(TWINT)|_BV(TWEN)|_BV(TWSTO);
+    static const uint8_t    WRITE   = _BV(TWINT)|_BV(TWEN);
+    static const uint8_t    SEND    = _BV(TWINT);
+
+    static const uint8_t    SR = 0xB9; /* XXX */
+    static const uint8_t    MT_START = 0x08; /* datasheet p229 */
+    static const uint8_t    MT_W_SLA_ACK = 0x18; /* datasheet p229 */
+    static const uint8_t    MT_W_SLA_NACK = 0x20; /* datasheet p229 */
+    static const uint8_t    MT_W_DATA_ACK = 0x28; /* datasheet p229 */
+    static const uint8_t    MT_W_DATA_NACK = 0x30; /* datasheet p229 */
+
+
+    static const uint8_t    DR = 0xBB; /* XXX */
+};
+
+
 #include "avr-tino/pin.h"
 
 typedef Port<0x03>	    PortB;
@@ -100,6 +122,7 @@ typedef Port<0x09>	    PortD;
 #include "avr-tino/EEPROM.h"
 #include "avr-tino/SPI.h"
 #include "avr-tino/serial.h"
+#include "avr-tino/TWI.h"
 
 typedef SPIMaster<0x2C,0x2D,0x2E,SPIF>			SPI;
 typedef Serial<0xC6, 0xC0, 0xC1, 0xC2, 0xC4, 0xC5>	USART;
@@ -109,6 +132,9 @@ struct MCU {
     typedef ::PortB PortB;
     typedef ::PortC PortC;
     typedef ::PortD PortD;
+
+    typedef ::TWI<ATmega328_TWI>    TWI;
+    typedef ::USART		    USART;
 };
 
 /*

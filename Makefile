@@ -22,39 +22,9 @@
 MCU=tiny2313
 BOARD=factory
 
-# Load specific config
-CONFIG_MK=./hardware/avr/$(MCU)/Makefile
--include $(CONFIG_MK)
-
-PROGRAM_PREFIX=avr-
-PROGRAM_SUFFIX=
-
-# Tools
-OBJCOPY=$(PROGRAM_PREFIX)objcopy$(PROGRAM_SUFFIX)
-GCC=$(PROGRAM_PREFIX)gcc$(PROGRAM_SUFFIX)
-SIZE=$(PROGRAM_PREFIX)size$(PROGRAM_SUFFIX)
-
-
 #
-# For better optimization, this makefile
-# will combine all source files in one that will
-# be compiled and linked by a single command-line
-# call to avr-gcc
+# Directories & main targets
 #
-CPPFLAGS=-I./$(BUILDDIR)include -I./include -include "avr-tino/target/$(BOARD).h"
-ifdef F_CPU
-    CPPFLAGS+= -DF_CPU=$(F_CPU)
-endif
-
-CXXFLAGS=-mmcu=$(GCC_MMCU) \
-	-Os \
-	-fipa-cp \
-	-ffunction-sections -fdata-sections \
-	-fno-rtti \
-	-g 
-LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections
-
-
 DEMOSRCDIR=./demo/
 SRCDIR=./src/avr-tino/
 
@@ -97,6 +67,41 @@ SRCFILES += $(SRCDIR)/target/CANModule.cc
 endif
 
 TARGET_DEF=$(BUILDDIR)include/avr-tino/hardware/mcu-def.h
+
+#
+# Load specific config
+#
+CONFIG_MK=./hardware/avr/$(MCU)/Makefile
+-include $(CONFIG_MK)
+
+PROGRAM_PREFIX=avr-
+PROGRAM_SUFFIX=
+
+# Tools
+OBJCOPY=$(PROGRAM_PREFIX)objcopy$(PROGRAM_SUFFIX)
+GCC=$(PROGRAM_PREFIX)gcc$(PROGRAM_SUFFIX)
+SIZE=$(PROGRAM_PREFIX)size$(PROGRAM_SUFFIX)
+
+
+#
+# For better optimization, this makefile
+# will combine all source files in one that will
+# be compiled and linked by a single command-line
+# call to avr-gcc
+#
+CPPFLAGS=-I./$(BUILDDIR)include -I./include -include "avr-tino/target/$(BOARD).h"
+ifdef F_CPU
+    CPPFLAGS+= -DF_CPU=$(F_CPU)
+endif
+
+CXXFLAGS=-mmcu=$(GCC_MMCU) \
+	-Os \
+	-fipa-cp \
+	-ffunction-sections -fdata-sections \
+	-fno-rtti \
+	-g 
+LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections
+
 
 all:	demo hex
 

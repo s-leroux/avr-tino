@@ -50,7 +50,7 @@ class Serial {
 	RXC	    = 7,
     };
 
-    void begin(uint32_t baud, protocol_t protocol = A8N1) const {
+    static void begin(uint32_t baud, protocol_t protocol = A8N1) {
 	uint16_t UBRR = F_CPU / 16 / baud - 1;
 	
 	_SFR_MEM8(RRH) = (uint8_t)(UBRR >> 8);
@@ -60,24 +60,24 @@ class Serial {
 	_SFR_MEM8(SRC) = protocol;
     }
 
-    void print(const char* str) const {
+    static void print(const char* str) {
 	while(*str) { send(*str++); }
     }
 
-    void send(uint8_t data) const { // XXX Shouldn't we call that 'write' ?
+    static void send(uint8_t data) { // XXX Shouldn't we call that 'write' ?
 	while ( ! (_SFR_MEM8(SRA) & _BV(UDRE)) ) {
 	    // do nothing
 	}
 	_SFR_MEM8(DR) = data;
     }
 
-    void send(const void* data, uint8_t len) const {
+    static void send(const void* data, uint8_t len) {
 	for(uint8_t i = 0; i < len; ++i) {
 	    send(((const uint8_t*)data)[i]);
 	}
     }
 
-    uint8_t receive() const {
+    static uint8_t receive() {
 	while ( ! (_SFR_MEM8(SRA) & _BV(RXC) ) ) {
 	    // do nothing
 	}
