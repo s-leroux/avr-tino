@@ -100,12 +100,21 @@ struct ATmega328_TWI {
     static const uint8_t    WRITE   = _BV(TWINT)|_BV(TWEN);
     static const uint8_t    SEND    = _BV(TWINT);
 
+    static const uint8_t    READ_ACK= _BV(TWINT) | _BV(TWEN) | _BV(TWEA);
+    static const uint8_t    READ_NACK= _BV(TWINT) | _BV(TWEN);
+
     static const uint8_t    SR = 0xB9; /* XXX */
     static const uint8_t    MT_START = 0x08; /* datasheet p229 */
     static const uint8_t    MT_W_SLA_ACK = 0x18; /* datasheet p229 */
     static const uint8_t    MT_W_SLA_NACK = 0x20; /* datasheet p229 */
     static const uint8_t    MT_W_DATA_ACK = 0x28; /* datasheet p229 */
     static const uint8_t    MT_W_DATA_NACK = 0x30; /* datasheet p229 */
+
+    static const uint8_t    MR_R_SLA_ACK = 0x40; /* datasheet p232 */
+    static const uint8_t    MR_R_SLA_NACK = 0x48; /* datasheet p232 */
+    static const uint8_t    MR_R_DATA_ACK = 0x50; /* datasheet p232 */
+    static const uint8_t    MR_R_DATA_NACK = 0x58; /* datasheet p232 */
+
 
 
     static const uint8_t    DR = 0xBB; /* XXX */

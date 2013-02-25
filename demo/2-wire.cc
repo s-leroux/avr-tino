@@ -37,10 +37,26 @@ int main() {
 	MCU::USART::send((uint8_t)tag[n++ % 10]);
 
 	bool result;
+#if 1
 	result = MCU::TWI::write(1,(uint8_t*)"A",0x27<<1);
 	if (result) {
-	    MCU::USART::print("(OK)");
+	    MCU::USART::print("WRITE(OK) ");
 	}
+
+	delay(50);
+#endif
+	uint8_t buffer[2];
+	result = MCU::TWI::read(2, buffer, 0x27<<1);
+	if (result) {
+	    MCU::USART::print("READ(OK) ");
+	}
+	for(uint8_t i = 0; i < 8; ++i) {
+	    MCU::USART::print(buffer[0] & (1<<i)? "1" : "0");
+	}
+	for(uint8_t i = 0; i < 8; ++i) {
+	    MCU::USART::print(buffer[1] & (1<<i)? "1" : "0");
+	}
+
 	#if 0
 	bool result;
 	

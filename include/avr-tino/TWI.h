@@ -32,7 +32,7 @@ class TWI {
     /**
 	Master write
     */
-    static bool write(uint8_t len, uint8_t * buffer, uint8_t addr) {
+    static bool write(uint8_t len, const uint8_t * buffer, uint8_t addr) {
 	TWBR = 2; // XXX debug
 
 	bool result = start();
@@ -54,6 +54,33 @@ class TWI {
 	
 	return result;
     }
+
+    static bool read(uint8_t len, uint8_t * buffer, uint8_t addr) {
+	bool result = start();
+
+	if (result)
+	    result = write_sla(addr, false);
+
+	uint8_t state = Impl::MR_R_SLA_ACK;
+
+	while (result && len-- > 0) {
+	    read_next_ack();
+	    result = read_if_state(buffer++, state);
+	    state = Impl::MR_R_DATA_ACK;
+	}
+
+	if (result) {
+	    read_next_nack();
+	    result = read_if_state(buffer++, state);
+	}
+
+	if (result)
+	    wait();
+	stop();
+
+	return result;
+    }
+
 
     /**
 	Send a start condition
@@ -81,6 +108,23 @@ class TWI {
 	_SFR_MEM8(Impl::CR) = Impl::WRITE;
 	
 	return true;
+    }
+
+    static bool read_if_state(uint8_t *byte, uint8_t state) {
+	if (!isState(state))
+	    return false;
+
+	*byte = _SFR_MEM8(Impl::DR);
+
+	return true;
+    }
+
+    static void read_next_ack() {
+	_SFR_MEM8(Impl::CR) = Impl::READ_ACK;
+    }
+
+    static void read_next_nack() {
+	_SFR_MEM8(Impl::CR) = Impl::READ_NACK;
     }
 
     static bool write_sla(uint8_t addr, bool w = false) {
