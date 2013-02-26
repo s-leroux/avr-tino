@@ -19,11 +19,12 @@
 #if !defined AVR_TINO_SERIAL_H
 #define AVR_TINO_SERIAL_H
 
+#include "avr-tino/printer.h"
+
 // XXX should use namespace instead ?
 template <uint8_t DR, uint8_t SRA, uint8_t SRB, uint8_t SRC, uint8_t RRL, uint8_t RRH>
-class Serial {
+class Serial : public Printer<Serial<DR,SRA,SRB,SRC,RRL,RRH> > {
     public:
-    
     /*
 	Hard coded values common (?) to every 8-bit AVR
 	XXX
@@ -60,7 +61,7 @@ class Serial {
 	_SFR_MEM8(SRC) = protocol;
     }
 
-    static void print(const char* str) {
+    static void write(const char* str) {
 	while(*str) { send(*str++); }
     }
 

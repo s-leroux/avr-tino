@@ -21,7 +21,6 @@
 #include "avr-tino.h"
 
 #include "avr-tino/HD44780.h"
-#include "avr-tino/printer.h"
 #include "avr-tino/delay.h"
 
 #include "avr-tino/TWI.h"
@@ -31,6 +30,7 @@ int main() {
     static const  char* tag = "0123456789";
 
     MCU::USART::begin(9600);
+    MCU::USART::print("\n\r\n\r" __FILE__ "\n\r");
 
     while(1) {
 	MCU::USART::print("\n\r");
@@ -50,9 +50,9 @@ int main() {
 	if (result) {
 	    MCU::USART::print("READ(OK) ");
 	}
-	Printer<MCU::USART>::print(word, 2);
+	MCU::USART::print(word, 2);
 	MCU::USART::print("  ");
-	Printer<MCU::USART>::print(word);
+	MCU::USART::print(word);
 
 	#if 0
 	bool result;

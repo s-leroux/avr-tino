@@ -42,22 +42,27 @@ template<class T>
 void print(const T& dest, int i, uint8_t base = 10);
 
 /**
-    Forward all 'print' method to T::print(const char*)
+    Forward all 'print' method to T::write(const char*)
 */
 template<class T>
 class Printer {
     public:
     static void print(const char* str) {
-	T::print(str);
+	T::write(str);
     }
 
     static void print(char c) {
 	char s[2] = { c, 0 }; 
 
-	T::print(s); 
+	T::write(s); 
     }
 
-    static void print(int i, uint8_t base = 10);
+    static void print(int16_t i, uint8_t base = 10);
+    static void print(uint16_t i, uint8_t base = 10) {
+	// XXX fixme
+	// fall-back to print(int, base)
+	print((int16_t)i, base);
+    }
 };
 
 

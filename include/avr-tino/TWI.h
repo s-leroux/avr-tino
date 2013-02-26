@@ -19,6 +19,8 @@
 #if !defined AVR_TINO_TWI_H
 #define AVR_TINO_TWI_H
 
+#include "avr-tino/printer.h"
+
 /**
     Two Wire Interface
     
@@ -26,7 +28,7 @@
 */
 
 template <typename Impl>
-class TWI {
+class TWI : public Printer<TWI<Impl> > {
     public:
 
     /**
