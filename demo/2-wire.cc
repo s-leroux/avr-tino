@@ -32,7 +32,7 @@ int main() {
     MCU::USART::begin(9600);
     MCU::USART::print("\n\r\n\r" __FILE__ "\n\r");
 
-    MCU::TWI::Device	target = MCU::TWI::device(0x27<<1);
+    MCU::TWI::Device	target = MCU::TWI::device(0x27);
 
     while(1) {
 	MCU::USART::print("\n\r");

@@ -76,8 +76,8 @@ class TWI_Common {
 	return true;
     }
 
-    static bool write_sla(uint8_t addr, bool w = false) {
-	return write_if_state(addr | ( w ? 0x00 : 0x01), Impl::MT_START);
+    static bool write_sla(uint8_t addr_rw) {
+	return write_if_state(addr_rw, Impl::MT_START);
     }
 
     static bool read_if_state(uint8_t *byte, uint8_t state) {
@@ -128,7 +128,7 @@ class TWI {
 	bool result = TWI_Common<Impl>::start();
 	
 	if (result)
-	    result = TWI_Common<Impl>::write_sla(addr, true);
+	    result = TWI_Common<Impl>::write_sla(addr<<1 | 0x00);
 
 	if (result && len--) {
 	    result = TWI_Common<Impl>::write_if_state(*buffer++, Impl::MT_W_SLA_ACK);
@@ -149,7 +149,7 @@ class TWI {
 	bool result = TWI_Common<Impl>::start();
 
 	if (result)
-	    result = TWI_Common<Impl>::write_sla(addr, false);
+	    result = TWI_Common<Impl>::write_sla(addr<<1 | 0x01);
 
 	uint8_t state = Impl::MR_R_SLA_ACK;
 
