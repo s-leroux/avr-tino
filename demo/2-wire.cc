@@ -40,7 +40,7 @@ int main() {
 
 	bool result;
 #if 1
-	result = target.write(1,(uint8_t*)"A");
+	result = target.write("A");
 	if (result) {
 	    MCU::USART::print("WRITE(OK) ");
 	}
@@ -48,7 +48,7 @@ int main() {
 	delay(50);
 #endif
 	int16_t word;
-	result = target.read(2, (uint8_t*)&word);
+	result = target.read(&word);
 	if (result) {
 	    MCU::USART::print("READ(OK) ");
 	}

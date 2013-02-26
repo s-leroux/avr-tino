@@ -113,6 +113,16 @@ class TWI {
 	    return TWI<Impl>::read(len, buffer, _addr);
 	}
 
+	template<typename T>
+	bool write(const T* src) {
+	    return write(sizeof(T), (const uint8_t*)src);
+	}
+
+	template<typename T>
+	bool read(T* dest) {
+	    return read(sizeof(T), (uint8_t*)dest);
+	}
+
 	private:
 	const uint8_t _addr;
     };
@@ -169,14 +179,6 @@ class TWI {
 	TWI_Common<Impl>::stop();
 
 	return result;
-    }
-
-
-    /**
-	Write a byte
-    */
-    static bool write(uint8_t byte) {
-	
     }
 };
 
