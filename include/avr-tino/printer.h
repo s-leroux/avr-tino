@@ -39,7 +39,27 @@ void print(const T& dest, char c) {
 }
 
 template<class T>
-void print(const T& dest, int i);
+void print(const T& dest, int i, uint8_t base = 10);
+
+/**
+    Forward all 'print' method to T::print(const char*)
+*/
+template<class T>
+class Printer {
+    public:
+    static void print(const char* str) {
+	T::print(str);
+    }
+
+    static void print(char c) {
+	char s[2] = { c, 0 }; 
+
+	T::print(s); 
+    }
+
+    static void print(int i, uint8_t base = 10);
+};
+
 
 #endif
 
