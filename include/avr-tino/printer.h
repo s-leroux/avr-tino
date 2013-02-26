@@ -63,6 +63,24 @@ class Printer {
 	// fall-back to print(int, base)
 	print((int16_t)i, base);
     }
+
+    static void bindump(uint8_t len, const void* data) {
+	const uint8_t *src = (const uint8_t*)data;
+	while(len--) {
+	    uint8_t byte = *src++;
+
+	    for(uint8_t i = 0; i < 8; ++i) {
+		print( (byte & 0x80) ? "1" : "0");
+		byte <<= 1;
+	    }
+	    print(" ");
+	}
+    }
+
+    template <class Blob>
+    static void bindump(const Blob* data) {
+	bindump(sizeof(Blob), data);
+    }
 };
 
 

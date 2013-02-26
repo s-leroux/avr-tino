@@ -52,7 +52,7 @@ int main() {
 	if (result) {
 	    MCU::USART::print("READ(OK) ");
 	}
-	MCU::USART::print(word, 2);
+	MCU::USART::bindump(&word);
 	MCU::USART::print("  ");
 	MCU::USART::print(word);
 
