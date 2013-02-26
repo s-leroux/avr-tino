@@ -26,64 +26,12 @@
     
     2-wire is an i2c compatible protocol supported on some AVR (ATMega328)
 */
+template<typename Impl> class TWI_Start;
+template<typename Impl> class TWI_SLA;
 
-template <typename Impl>
-class TWI : public Printer<TWI<Impl> > {
+template<typename Impl> 
+class TWI_Common {
     public:
-
-    /**
-	Master write
-    */
-    static bool write(uint8_t len, const uint8_t * buffer, uint8_t addr) {
-	TWBR = 2; // XXX debug
-
-	bool result = start();
-	
-	if (result)
-	    result = write_sla(addr, true);
-
-	if (result && len--) {
-	    result = write_if_state(*buffer++, Impl::MT_W_SLA_ACK);
-	}
-
-	while (result && len--) {
-	    result = write_if_state(*buffer++, Impl::MT_W_DATA_ACK);
-	}
-
-	if (result)
-	    wait();
-	stop();
-	
-	return result;
-    }
-
-    static bool read(uint8_t len, uint8_t * buffer, uint8_t addr) {
-	bool result = start();
-
-	if (result)
-	    result = write_sla(addr, false);
-
-	uint8_t state = Impl::MR_R_SLA_ACK;
-
-	while (result && len-- > 0) {
-	    read_next_ack();
-	    result = read_if_state(buffer++, state);
-	    state = Impl::MR_R_DATA_ACK;
-	}
-
-	if (result) {
-	    read_next_nack();
-	    result = read_if_state(buffer++, state);
-	}
-
-	if (result)
-	    wait();
-	stop();
-
-	return result;
-    }
-
-
     /**
 	Send a start condition
     */
@@ -101,6 +49,22 @@ class TWI : public Printer<TWI<Impl> > {
 
 	return true;
     }
+    
+    /**
+	Active wait for 2-wire op. completion
+    */
+    static void wait() {
+	while(! ( _SFR_MEM8(Impl::CR) & Impl::SEND)) {
+	    /* do nothing */
+	}
+    }
+
+    /** wait for transmission to complete and expect a status */
+    static bool isState(uint8_t status) {
+	wait();
+    
+	return ((_SFR_MEM8(Impl::SR) & 0xF8) == status);
+    }
 
     static bool write_if_state(uint8_t byte, uint8_t state) {
 	if (!isState(state))
@@ -110,6 +74,10 @@ class TWI : public Printer<TWI<Impl> > {
 	_SFR_MEM8(Impl::CR) = Impl::WRITE;
 	
 	return true;
+    }
+
+    static bool write_sla(uint8_t addr, bool w = false) {
+	return write_if_state(addr | ( w ? 0x00 : 0x01), Impl::MT_START);
     }
 
     static bool read_if_state(uint8_t *byte, uint8_t state) {
@@ -128,23 +96,64 @@ class TWI : public Printer<TWI<Impl> > {
     static void read_next_nack() {
 	_SFR_MEM8(Impl::CR) = Impl::READ_NACK;
     }
+};
 
-    static bool write_sla(uint8_t addr, bool w = false) {
-	return write_if_state(addr | ( w ? 0x00 : 0x01), Impl::MT_START);
-    }
+template <typename Impl>
+class TWI : public Printer<TWI<Impl> > {
+    public:
 
-    static void wait() {
-	while(! ( _SFR_MEM8(Impl::CR) & Impl::SEND)) {
-	    /* do nothing */
+    /**
+	Master write
+    */
+    static bool write(uint8_t len, const uint8_t * buffer, uint8_t addr) {
+	TWBR = 2; // XXX debug
+
+	bool result = TWI_Common<Impl>::start();
+	
+	if (result)
+	    result = TWI_Common<Impl>::write_sla(addr, true);
+
+	if (result && len--) {
+	    result = TWI_Common<Impl>::write_if_state(*buffer++, Impl::MT_W_SLA_ACK);
 	}
+
+	while (result && len--) {
+	    result = TWI_Common<Impl>::write_if_state(*buffer++, Impl::MT_W_DATA_ACK);
+	}
+
+	if (result)
+	    TWI_Common<Impl>::wait();
+	TWI_Common<Impl>::stop();
+	
+	return result;
     }
 
-    /** wait for transmission to complete and expect a status */
-    static bool isState(uint8_t status) {
-	wait();
-    
-	return ((_SFR_MEM8(Impl::SR) & 0xF8) == status);
+    static bool read(uint8_t len, uint8_t * buffer, uint8_t addr) {
+	bool result = TWI_Common<Impl>::start();
+
+	if (result)
+	    result = TWI_Common<Impl>::write_sla(addr, false);
+
+	uint8_t state = Impl::MR_R_SLA_ACK;
+
+	while (result && len-- > 0) {
+	    TWI_Common<Impl>::read_next_ack();
+	    result = TWI_Common<Impl>::read_if_state(buffer++, state);
+	    state = Impl::MR_R_DATA_ACK;
+	}
+
+	if (result) {
+	    TWI_Common<Impl>::read_next_nack();
+	    result = TWI_Common<Impl>::read_if_state(buffer++, state);
+	}
+
+	if (result)
+	    TWI_Common<Impl>::wait();
+	TWI_Common<Impl>::stop();
+
+	return result;
     }
+
 
     /**
 	Write a byte
