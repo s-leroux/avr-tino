@@ -32,13 +32,15 @@ int main() {
     MCU::USART::begin(9600);
     MCU::USART::print("\n\r\n\r" __FILE__ "\n\r");
 
+    MCU::TWI::Device	target = MCU::TWI::device(0x27<<1);
+
     while(1) {
 	MCU::USART::print("\n\r");
 	MCU::USART::send((uint8_t)tag[n++ % 10]);
 
 	bool result;
 #if 1
-	result = MCU::TWI::write(1,(uint8_t*)"A",0x27<<1);
+	result = target.write(1,(uint8_t*)"A");
 	if (result) {
 	    MCU::USART::print("WRITE(OK) ");
 	}
@@ -46,7 +48,7 @@ int main() {
 	delay(50);
 #endif
 	int16_t word;
-	result = MCU::TWI::read(2, (uint8_t*)&word, 0x27<<1);
+	result = target.read(2, (uint8_t*)&word);
 	if (result) {
 	    MCU::USART::print("READ(OK) ");
 	}

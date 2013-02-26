@@ -99,8 +99,25 @@ class TWI_Common {
 };
 
 template <typename Impl>
-class TWI : public Printer<TWI<Impl> > {
+class TWI {
     public:
+    class Device : public Printer<Device> {
+	public:
+	Device(uint8_t addr) : _addr(addr) {}
+
+	bool write(uint8_t len, const uint8_t * buffer) {
+	    return TWI<Impl>::write(len, buffer, _addr);
+	};
+
+	bool read(uint8_t len, uint8_t * buffer) {
+	    return TWI<Impl>::read(len, buffer, _addr);
+	}
+
+	private:
+	const uint8_t _addr;
+    };
+
+    static Device device(uint8_t addr) { return Device(addr); }
 
     /**
 	Master write
