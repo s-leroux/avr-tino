@@ -41,14 +41,14 @@ class Serial : public Printer<Serial<DR,SRA,SRB,SRC,RRL,RRH> > {
     };
 
     enum {
-	TXEN	    = 3,
-	RXEN	    = 4,
+	f_TXEN	    = 3,
+	f_RXEN	    = 4,
     };
 
     enum {
-	UDRE	    = 5,
-	TXC	    = 6,
-	RXC	    = 7,
+	f_UDRE	    = 5,
+	f_TXC	    = 6,
+	f_RXC	    = 7,
     };
 
     static void begin(uint32_t baud, protocol_t protocol = A8N1) {
@@ -57,7 +57,7 @@ class Serial : public Printer<Serial<DR,SRA,SRB,SRC,RRL,RRH> > {
 	_SFR_MEM8(RRH) = (uint8_t)(UBRR >> 8);
 	_SFR_MEM8(RRL) = (uint8_t)(UBRR);
 	
-	_SFR_MEM8(SRB) = _BV(RXEN) | _BV(TXEN);
+	_SFR_MEM8(SRB) = _BV(f_RXEN) | _BV(f_TXEN);
 	_SFR_MEM8(SRC) = protocol;
     }
 
@@ -66,7 +66,7 @@ class Serial : public Printer<Serial<DR,SRA,SRB,SRC,RRL,RRH> > {
     }
 
     static void send(uint8_t data) { // XXX Shouldn't we call that 'write' ?
-	while ( ! (_SFR_MEM8(SRA) & _BV(UDRE)) ) {
+	while ( ! (_SFR_MEM8(SRA) & _BV(f_UDRE)) ) {
 	    // do nothing
 	}
 	_SFR_MEM8(DR) = data;
@@ -79,7 +79,7 @@ class Serial : public Printer<Serial<DR,SRA,SRB,SRC,RRL,RRH> > {
     }
 
     static uint8_t receive() {
-	while ( ! (_SFR_MEM8(SRA) & _BV(RXC) ) ) {
+	while ( ! (_SFR_MEM8(SRA) & _BV(f_RXC) ) ) {
 	    // do nothing
 	}
 	return _SFR_MEM8(DR);
