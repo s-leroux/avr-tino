@@ -81,8 +81,9 @@ class TWI_Common {
     }
 
     static bool read_if_state(uint8_t *byte, uint8_t state) {
-	if (!isState(state))
-	    return false;
+	// if (!isState(state))
+	//     return false;
+	wait();
 
 	*byte = _SFR_MEM8(Impl::DR);
 
@@ -90,10 +91,12 @@ class TWI_Common {
     }
 
     static void read_next_ack() {
+	wait(); // XXX 
 	_SFR_MEM8(Impl::CR) = Impl::READ_ACK;
     }
 
     static void read_next_nack() {
+	wait();
 	_SFR_MEM8(Impl::CR) = Impl::READ_NACK;
     }
 };
