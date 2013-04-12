@@ -27,6 +27,7 @@ extern "C" void __cxa_pure_virtual(void) { /* do nothing */ }
 #include <avr/io.h>
 #include <avr/pgmspace.h>
 
+#include "avr-tino/hardware/board-def.h"
 #include "avr-tino/hardware/mcu-def.h"
 
 #include "avr-tino/pin.h"

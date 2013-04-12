@@ -72,6 +72,7 @@ SRCFILES += $(TINO_SRCDIR)/target/CANModule.cc
 endif
 
 TARGET_DEF=$(BUILDDIR)include/avr-tino/hardware/mcu-def.h
+BOARD_DEF=$(BUILDDIR)include/avr-tino/hardware/board-def.h
 
 #
 # Load specific config
@@ -94,7 +95,7 @@ SIZE=$(PROGRAM_PREFIX)size$(PROGRAM_SUFFIX)
 # be compiled and linked by a single command-line
 # call to avr-gcc
 #
-CPPFLAGS=-I./$(BUILDDIR)include -I./include -include "avr-tino/target/$(BOARD).h"
+CPPFLAGS=-I./$(BUILDDIR)include -I./include 
 ifdef F_CPU
     CPPFLAGS+= -DF_CPU=$(F_CPU)
 endif
@@ -118,10 +119,10 @@ $(DIRS):
 
 dirs:	$(DIRS)
 
-init:	$(DIRS) $(TARGET_DEF)
+init:	$(DIRS) $(TARGET_DEF) $(BOARD_DEF)
 .PHONY : init
 
-firmware:	$(DIRS) $(TARGET_DEF) $(FIRMWARE:%=$(BINDIR)%)
+firmware:	$(DIRS) $(TARGET_DEF) $(BOARD_DEF) $(FIRMWARE:%=$(BINDIR)%)
 
 hex:	$(DIRS) $(FIRMWARE:%=$(BINDIR)%.hex)
 
@@ -171,6 +172,9 @@ $(OBJDIR)%.combined.cc : $(SRCDIR)/%.cc $(SRCFILES)
 #
 #
 $(BUILDDIR)include/avr-tino/hardware/mcu-def.h : ./hardware/avr/$(MCU)/$(MCU).h
+	( echo '#line 1 "$<"' ; cat $< ) > $@
+
+$(BUILDDIR)include/avr-tino/hardware/board-def.h : ./hardware/boards/$(BOARD)/$(BOARD).h
 	( echo '#line 1 "$<"' ; cat $< ) > $@
 
 #
