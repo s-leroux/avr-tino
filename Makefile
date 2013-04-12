@@ -26,6 +26,7 @@ BOARD=factory
 # Directories & main targets
 #
 DEMOSRCDIR=./demo/
+MYSRCDIR=$(DEMOSRCDIR)
 SRCDIR=./src/avr-tino/
 
 BUILDDIR=build-$(MCU)-$(BOARD)/
@@ -145,7 +146,7 @@ help:
 # Combine all source file in one for better optimization
 #
 .PRECIOUS: $(OBJDIR)%.combined.cc
-$(OBJDIR)%.combined.cc : init $(DEMOSRCDIR)%.cc $(SRCFILES)
+$(OBJDIR)%.combined.cc : init $(MYSRCDIR)%.cc $(SRCFILES)
 	for i in $^; do \
 	    if [ -f $$i ] ; then \
 		echo '#line 1 "'$$i'"' ; \
