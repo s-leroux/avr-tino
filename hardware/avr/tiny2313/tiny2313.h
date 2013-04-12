@@ -53,6 +53,7 @@ static const pin_t MOSI = PIN_PB5;
 static const pin_t MISO = PIN_PB6;
 static const pin_t SCK	= PIN_PB7;
 
+
 /*
  I/O Port abstraction layer
 */
@@ -90,5 +91,13 @@ typedef EEPROM<0x1C, EEMPE, EEPE, EERE, EEPM0, EEPM1,
 	       0x1E,
 	       0x1D>		    EEPROM;
 */
+
+#include "avr-tino/SPI.h"
+typedef SPIMaster<0x0D,0x0E,0x0F,USISIF>          SPI;
+
+#include "avr-tino/serial.h"
+typedef Serial<0x0C, 0x0B, 0x0A, 0x03, 0x09, 0x02>  USART;
+
+
 #endif
 
