@@ -25,10 +25,15 @@ BOARD=factory
 #
 # Directories & main targets
 #
-DEMOSRCDIR=./demo/
-SRCDIR=./src/avr-tino/
 
-BUILDDIR=build-$(MCU)-$(BOARD)/
+# Adjust this to suit your needs
+FIRMWARE=$(DEMOS)
+BASEDIR=./
+
+TINO_SRCDIR=./src/avr-tino/
+
+SRCDIR=$(BASEDIR)/fw/
+BUILDDIR=$(BASEDIR)/build-$(MCU)-$(BOARD)/
 OBJDIR=$(BUILDDIR)obj/
 BINDIR=$(BUILDDIR)bin/
 DEPDIR=$(BUILDDIR)deps/
@@ -47,15 +52,15 @@ DEMOS=	input  \
 	ioexpander \
 	blink
 
-SRCFILES=$(SRCDIR)pin.cc \
-	$(SRCDIR)printer.cc \
-	$(SRCDIR)1-wire.cc \
-	$(SRCDIR)SPI.cc \
-	$(SRCDIR)serial.cc \
-	$(SRCDIR)HD44780.cc \
-	$(SRCDIR)DS18S20.cc \
-	$(SRCDIR)MCP23Sxx.cc \
-	$(SRCDIR)MCP2515.cc 
+SRCFILES=$(TINO_SRCDIR)pin.cc \
+	$(TINO_SRCDIR)printer.cc \
+	$(TINO_SRCDIR)1-wire.cc \
+	$(TINO_SRCDIR)SPI.cc \
+	$(TINO_SRCDIR)serial.cc \
+	$(TINO_SRCDIR)HD44780.cc \
+	$(TINO_SRCDIR)DS18S20.cc \
+	$(TINO_SRCDIR)MCP23Sxx.cc \
+	$(TINO_SRCDIR)MCP2515.cc 
 
 ifeq ($(BOARD),CANModule)
 DEMOS += canmodule-tx \
@@ -63,7 +68,7 @@ DEMOS += canmodule-tx \
 	canmodule-log \
 	toucan-core \
 	toucan-send
-SRCFILES += $(SRCDIR)/target/CANModule.cc
+SRCFILES += $(TINO_SRCDIR)/target/CANModule.cc
 endif
 
 TARGET_DEF=$(BUILDDIR)include/avr-tino/hardware/mcu-def.h
@@ -76,11 +81,6 @@ CONFIG_MK=./hardware/avr/$(MCU)/Makefile
 
 PROGRAM_PREFIX=avr-
 PROGRAM_SUFFIX=
-
-
-# Adjust this to suit your needs
-MYSRCDIR=$(DEMOSRCDIR)
-FIRMWARE=$(DEMOS)
 
 # Tools
 OBJCOPY=$(PROGRAM_PREFIX)objcopy$(PROGRAM_SUFFIX)
@@ -119,6 +119,7 @@ $(DIRS):
 dirs:	$(DIRS)
 
 init:	$(DIRS) $(TARGET_DEF)
+.PHONY : init
 
 firmware:	$(DIRS) $(TARGET_DEF) $(FIRMWARE:%=$(BINDIR)%)
 
@@ -148,7 +149,7 @@ help:
 	@echo "====="
 	@echo "pwd=" `pwd`
 	@echo "FIRMWARE=${FIRMWARE}"
-	@echo "MYSRCDIR=${MYSRCDIR}"
+	@echo "SRCDIR=${SRCDIR}"
 	@echo "BINDIR=${BINDIR}"
 
 .PHONY: all clean init dirs demo hex stat help git-clean
@@ -157,8 +158,8 @@ help:
 # Combine all source file in one for better optimization
 #
 .PRECIOUS: $(OBJDIR)%.combined.cc
-$(OBJDIR)%.combined.cc : init $(MYSRCDIR)/%.cc $(SRCFILES)
-	for i in $^; do \
+$(OBJDIR)%.combined.cc : $(SRCDIR)/%.cc $(SRCFILES)
+	for i in $(filter %.cc,$^); do \
 	    if [ -f $$i ] ; then \
 		echo '#line 1 "'$$i'"' ; \
 		cat $$i; \
