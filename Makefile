@@ -26,7 +26,6 @@ BOARD=factory
 # Directories & main targets
 #
 DEMOSRCDIR=./demo/
-MYSRCDIR=$(DEMOSRCDIR)
 SRCDIR=./src/avr-tino/
 
 BUILDDIR=build-$(MCU)-$(BOARD)/
@@ -36,17 +35,17 @@ DEPDIR=$(BUILDDIR)deps/
 DIRS=$(BUILDDIR) $(BUILDDIR)include $(BUILDDIR)include/avr-tino  $(BUILDDIR)include/avr-tino/hardware \
      $(OBJDIR) $(BINDIR) $(DEPDIR)
 
-DEMOS=	$(BINDIR)input  \
-	$(BINDIR)port \
-	$(BINDIR)eeprom \
-	$(BINDIR)shiftout \
-	$(BINDIR)spiout \
-	$(BINDIR)1-wire \
-	$(BINDIR)ds18s20 \
-	$(BINDIR)usart \
-	$(BINDIR)lcd \
-	$(BINDIR)ioexpander \
-	$(BINDIR)blink
+DEMOS=	input  \
+	port \
+	eeprom \
+	shiftout \
+	spiout \
+	1-wire \
+	ds18s20 \
+	usart \
+	lcd \
+	ioexpander \
+	blink
 
 SRCFILES=$(SRCDIR)pin.cc \
 	$(SRCDIR)printer.cc \
@@ -59,11 +58,11 @@ SRCFILES=$(SRCDIR)pin.cc \
 	$(SRCDIR)MCP2515.cc 
 
 ifeq ($(BOARD),CANModule)
-DEMOS += build-$(MCU)-$(BOARD)/bin/canmodule-tx \
-	build-$(MCU)-$(BOARD)/bin/canmodule-rx \
-	build-$(MCU)-$(BOARD)/bin/canmodule-log \
-	build-$(MCU)-$(BOARD)/bin/toucan-core \
-	build-$(MCU)-$(BOARD)/bin/toucan-send
+DEMOS += canmodule-tx \
+	canmodule-rx \
+	canmodule-log \
+	toucan-core \
+	toucan-send
 SRCFILES += $(SRCDIR)/target/CANModule.cc
 endif
 
@@ -77,6 +76,11 @@ CONFIG_MK=./hardware/avr/$(MCU)/Makefile
 
 PROGRAM_PREFIX=avr-
 PROGRAM_SUFFIX=
+
+
+# Adjust this to suit your needs
+MYSRCDIR=$(DEMOSRCDIR)
+FIRMWARE=$(DEMOS)
 
 # Tools
 OBJCOPY=$(PROGRAM_PREFIX)objcopy$(PROGRAM_SUFFIX)
@@ -104,7 +108,7 @@ CXXFLAGS=-mmcu=$(GCC_MMCU) \
 LDFLAGS=-Wl,--gc-sections -Wl,--print-gc-sections
 
 
-all:	demo hex
+all:	firmware hex
 
 stat:	all
 	$(SIZE) `find $(BINDIR) -executable -type f -print`
@@ -116,9 +120,9 @@ dirs:	$(DIRS)
 
 init:	$(DIRS) $(TARGET_DEF)
 
-demo:	$(DIRS) $(TARGET_DEF) $(DEMOS)
+firmware:	$(DIRS) $(TARGET_DEF) $(FIRMWARE:%=$(BINDIR)%)
 
-hex:	$(DIRS) $(DEMOS:=.hex)
+hex:	$(DIRS) $(FIRMWARE:%=$(BINDIR)%.hex)
 
 clean:
 	rm -rf -- $(DIRS) build-*
@@ -139,6 +143,13 @@ help:
 	@echo "CONFIG_MK=${CONFIG_MK}"
 	@echo "GCC_MMCU=${GCC_MMCU}"
 	@echo "AVRDUDE_PART=${AVRDUDE_PART}"
+	@echo
+	@echo "Build"
+	@echo "====="
+	@echo "pwd=" `pwd`
+	@echo "FIRMWARE=${FIRMWARE}"
+	@echo "MYSRCDIR=${MYSRCDIR}"
+	@echo "BINDIR=${BINDIR}"
 
 .PHONY: all clean init dirs demo hex stat help git-clean
 
@@ -146,7 +157,7 @@ help:
 # Combine all source file in one for better optimization
 #
 .PRECIOUS: $(OBJDIR)%.combined.cc
-$(OBJDIR)%.combined.cc : init $(MYSRCDIR)%.cc $(SRCFILES)
+$(OBJDIR)%.combined.cc : init $(MYSRCDIR)/%.cc $(SRCFILES)
 	for i in $^; do \
 	    if [ -f $$i ] ; then \
 		echo '#line 1 "'$$i'"' ; \
