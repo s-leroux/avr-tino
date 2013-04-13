@@ -22,7 +22,7 @@
 MCU=tiny2313
 BOARD=factory
 
-AVRDUDE=echo avrdude
+AVRDUDE=avrdude
 PROGRAMMER=usbasp
 
 #
