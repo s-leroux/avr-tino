@@ -22,6 +22,9 @@
 MCU=tiny2313
 BOARD=factory
 
+AVRDUDE=echo avrdude
+PROGRAMMER=usbasp
+
 #
 # Directories & main targets
 #
@@ -113,6 +116,17 @@ all:	firmware hex
 
 stat:	all
 	$(SIZE) `find $(BINDIR) -executable -type f -print`
+
+upload: firmware $(FIRMWARE:%=$(BINDIR)%.hex)
+	if [ $(words $(FIRMWARE)) -gt 1 ] ; then \
+	    echo "Could only upload 1 firmware" && exit 1 ; \
+        fi
+	for i in $(FIRMWARE:%=$(BINDIR)%.hex) ; do \
+	    $(AVRDUDE) -p $(AVRDUDE_PART) -c $(PROGRAMMER) -U flash:w:$$i; \
+	done
+
+            
+        
 
 $(DIRS): 
 	mkdir $@
