@@ -43,6 +43,7 @@ class ZigBee {
             memset(&_frame._frameID, 0, sizeof(_frame)-1);
 
             _frame._frameType = 0x10;
+            _frame._frameID = 0x01;
         }
 
         void send(uint16_t length, const void* data) {
@@ -75,26 +76,46 @@ class ZigBee {
     class Frame {
         public:
         Frame(uint16_t length) : _checksum(0xFF) {
-            UART::send(API_START);
-            UART::send(uint8_t(length >> 8));
-            UART::send(uint8_t(length &0xFF));
+            sendRaw(API_START);
+            sendEscaped(uint8_t(length >> 8));
+            sendEscaped(uint8_t(length &0xFF));
         }
 
         ~Frame() {
-            UART::send(_checksum);
+            sendEscaped(_checksum);
+        }
+
+        inline void sendRaw(uint8_t byte) {
+            UART::send(byte);
+        }
+
+        inline void sendEscaped(uint8_t byte) {
+            switch (byte) {
+                case API_START:
+                case ESCAPE:
+                case XON:
+                case XOFF:      UART::send(ESCAPE);
+                                byte ^= 0x20;
+                                // don't break here !
+                default:        UART::send(byte);
+            }
         }
 
         void send(uint16_t length, const void* data) {
             const uint8_t *buffer = (const uint8_t*)data;
             while(length--) {
                 uint8_t byte = *buffer++;
-                UART::send(byte);
                 _checksum -= byte;
+                
+                sendEscaped(byte);
             }
         }
 
         private:
         static const uint8_t    API_START   = 0x7E;
+        static const uint8_t    ESCAPE      = 0x7D;
+        static const uint8_t    XON         = 0x11;
+        static const uint8_t    XOFF        = 0x12;
         uint8_t _checksum;
     };
 /**
