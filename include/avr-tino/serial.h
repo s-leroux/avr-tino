@@ -78,6 +78,10 @@ class Serial : public Printer<Serial<DR,SRA,SRB,SRC,RRL,RRH> > {
 	}
     }
 
+    static bool available() {
+        return _SFR_MEM8(SRA) & _BV(f_RXC);
+    }
+
     static uint8_t receive() {
 	while ( ! (_SFR_MEM8(SRA) & _BV(f_RXC) ) ) {
 	    // do nothing
