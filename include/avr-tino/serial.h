@@ -90,6 +90,45 @@ class Serial : public Printer<Serial<DR,SRA,SRB,SRC,RRL,RRH> > {
     }
 };
 
+template <class USART>
+class Buffer {
+/**
+    Support buffered read from USART
+*/
+    public:
+    static const uint8_t BUFFER_SIZE    = 64;
+
+    static inline bool available() {
+        return top != tail;
+    }
+
+    static inline void append(uint8_t byte) {
+        buffer[tail] = byte;
+
+        tail = (tail+1) % BUFFER_SIZE;
+        if (tail == top)
+            top = (top + 1) % BUFFER_SIZE;
+    }
+
+    static inline uint8_t pop() {
+        if (!available()) {
+            return 0;
+        }
+
+        uint8_t result = buffer[top];
+        top = (top + 1) % BUFFER_SIZE;
+    }
+    
+
+    static uint8_t  buffer[BUFFER_SIZE];
+    static uint8_t  top;
+    static uint8_t  tail;
+};
+
+template<class USART> uint8_t  Buffer<USART>::top     = 0;
+template<class USART> uint8_t  Buffer<USART>::tail    = 0;
+template<class USART> uint8_t  Buffer<USART>::buffer[Buffer<USART>::BUFFER_SIZE];
+
 
 #endif
 

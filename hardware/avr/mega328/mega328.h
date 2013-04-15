@@ -144,7 +144,20 @@ struct MCU {
 
     typedef ::TWI<ATmega328_TWI>    TWI;
     typedef ::USART		    USART;
+#if 1
+    typedef ::Buffer<USART>         RECV;
+#endif
 };
+
+#include "avr/interrupt.h"
+
+#if 1
+ISR(USART_RX_vect) {
+    MCU::PortC::set(_BV(0));
+
+    MCU::RECV::append(UDR0);
+}
+#endif
 
 /*
 typedef EEPROM<0x1C, EEMPE, EEPE, EERE, EEPM0, EEPM1,
