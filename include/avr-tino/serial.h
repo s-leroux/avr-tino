@@ -99,6 +99,7 @@ class Buffer {
     static const uint8_t BUFFER_SIZE    = 64;
 
     static inline bool available() {
+//    if (top != tail) PORTC |= _BV(1);
         return top != tail;
     }
 
@@ -117,17 +118,19 @@ class Buffer {
 
         uint8_t result = buffer[top];
         top = (top + 1) % BUFFER_SIZE;
+
+        return result;
     }
     
 
-    static uint8_t  buffer[BUFFER_SIZE];
-    static uint8_t  top;
-    static uint8_t  tail;
+    static volatile uint8_t buffer[BUFFER_SIZE];
+    static volatile uint8_t  top;
+    static volatile uint8_t  tail;
 };
 
-template<class USART> uint8_t  Buffer<USART>::top     = 0;
-template<class USART> uint8_t  Buffer<USART>::tail    = 0;
-template<class USART> uint8_t  Buffer<USART>::buffer[Buffer<USART>::BUFFER_SIZE];
+template<class USART> volatile uint8_t  Buffer<USART>::top     = 0;
+template<class USART> volatile uint8_t  Buffer<USART>::tail    = 0;
+template<class USART> volatile uint8_t Buffer<USART>::buffer[Buffer<USART>::BUFFER_SIZE];
 
 
 #endif

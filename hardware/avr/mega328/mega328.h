@@ -153,8 +153,6 @@ struct MCU {
 
 #if 1
 ISR(USART_RX_vect) {
-    MCU::PortC::set(_BV(0));
-
     MCU::RECV::append(UDR0);
 }
 #endif
