@@ -30,6 +30,15 @@ void Printer<T>::print(int n, uint8_t base) {
 }
 
 template<class T>
+void Printer<T>::print(float n) {
+    static const int LEN = 18;
+    char	buffer[LEN]; // int goes up to 32767 -- that is 5 digits
+
+    dtostrf(n, 5, 1, buffer);
+    T::print(buffer);
+}
+
+template<class T>
 void print(const T& dest, int n, uint8_t base) {
     static const int LEN = 18;
     char	buffer[LEN]; // int goes up to 32767 -- that is 5 digits

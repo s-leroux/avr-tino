@@ -57,6 +57,8 @@ class Printer {
 	T::write(s); 
     }
 
+    static void print(float v);
+
     static void print(int16_t i, uint8_t base = 10);
     static void print(uint16_t i, uint8_t base = 10) {
 	// XXX fixme

@@ -24,12 +24,17 @@
 */
 
 template<class TWI>
-class HIH6120 : public TWI::Device {
+class HIH6120 : public TWI::Device { // XXX replace inheritance by composition
     public:
     static const uint8_t FACTORY_ID = 0x27;
     struct __attribute__((__packed__)) Data {
         uint16_t hum;
         uint16_t temp;
+    };
+
+    struct Measure {
+        float   hum;
+        float   temp;
     };
 
     enum __attribute__((__packed__)) {
@@ -57,6 +62,19 @@ class HIH6120 : public TWI::Device {
         dest.temp = ( buffer[2] << 8 ) | ( buffer[1] & 0xC0 );
 
         return buffer[0] & 0xC0;
+    }
+
+    uint8_t acquire(Measure& dest) {
+        Data binaryData;
+        uint8_t status = acquire(binaryData);
+
+        if (status)
+            return status;
+
+        dest.hum = float(binaryData.hum)*100./16382.;
+
+        // '*4' below to discard non significant 2 bits
+        dest.temp = float(binaryData.temp)*165./(16382.*4)-40.; 
     }
 };
 
