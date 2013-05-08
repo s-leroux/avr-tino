@@ -166,7 +166,7 @@ class TWI {
 
 	uint8_t state = Impl::MR_R_SLA_ACK;
 
-	while (result && len-- > 0) {
+	while (result && (len-- > 0)) {
 	    TWI_Common<Impl>::read_next_ack();
 	    result = TWI_Common<Impl>::read_if_state(buffer++, state);
 	    state = Impl::MR_R_DATA_ACK;
@@ -174,7 +174,9 @@ class TWI {
 
 	if (result) {
 	    TWI_Common<Impl>::read_next_nack();
-	    result = TWI_Common<Impl>::read_if_state(buffer++, state);
+
+            uint8_t unused; // XXX Bug?
+	    result = TWI_Common<Impl>::read_if_state(&unused, state);
 	}
 
 	if (result)

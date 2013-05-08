@@ -59,7 +59,7 @@ class HIH6120 : public TWI::Device { // XXX replace inheritance by composition
 
         // swap endianess
         dest.hum = ((buffer[0] & 0x3F) << 8 ) | buffer[1];
-        dest.temp = ( buffer[2] << 8 ) | ( buffer[1] & 0xC0 );
+        dest.temp = ( buffer[2] << 8 ) | ( buffer[3] & 0xC0 );
 
         return buffer[0] & 0xC0;
     }
