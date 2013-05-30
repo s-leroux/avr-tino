@@ -147,9 +147,7 @@ struct MCU {
 #if 1
     typedef ::Buffer<USART>         RECV;
 #endif
-    typedef ::EEPROM<0x1C, EEMPE, EEPE, EERE, EEPM0, EEPM1,
-                   0x1E,
-                   0x1D>		    EEPROM;
+    typedef ::EEPROM		    EEPROM;
 };
 
 #include "avr/interrupt.h"
