@@ -26,6 +26,107 @@
 //uint64_t test = 0x1122334455667788ULL;
 
 template <class UART>
+class SimpleZigBee {
+    public:
+    typedef struct __attribute__ ((__packed__)) {
+        uint8_t     byte[8];
+    } Addr64; // use an array to overcome endianness
+
+    typedef struct __attribute__ ((__packed__)) {
+        uint8_t     byte[2];
+    } Addr16; // use an array to overcome endianness
+
+    public:
+    static const uint8_t TRANSMIT_REQUEST = 0x10;
+   
+    struct __attribute__ ((__packed__)) TransmitRequest {
+        uint8_t _frameType;
+        uint8_t _frameID;
+        Addr64  _destinationAddress64;
+        Addr16  _destinationAddress16;
+        uint8_t _broadcastRadius;
+        uint8_t _options;
+
+        TransmitRequest(void) {
+            _frameType = TRANSMIT_REQUEST;
+            memset(&_frameID, 0, sizeof(this)-1);
+        }
+    };
+
+    static void sendRequest(uint16_t hLen, const void* header,
+                            uint16_t dLen, const void* data) {
+        OutputFrame of(hLen+dLen);
+
+        of.send(hLen, header);
+        of.send(dLen, data);
+    }
+
+    template <class R>
+    static inline void sendRequest(const R& request,
+                    uint16_t length, const void *data) {
+        sendRequest(sizeof(R), &request, length, data);
+    }
+
+    static void sendTransmitRequest(Addr64 addr64, Addr16 addr16,
+                    uint16_t length, const void *data) {
+        TransmitRequest request;
+
+        request._frameID = 0x01;
+        request._destinationAddress64 = addr64;
+        request._destinationAddress16 = addr16;
+
+        sendRequest(request, length, data);
+    }
+
+    protected:
+    static const uint8_t    API_START   = 0x7E;
+    static const uint8_t    ESCAPE      = 0x7D;
+    static const uint8_t    XON         = 0x11;
+    static const uint8_t    XOFF        = 0x12;
+
+    class OutputFrame {
+        public:
+        OutputFrame(uint16_t length)  : _checksum(0xFF) {
+            sendRaw(API_START);
+            send(uint8_t(length >> 8));
+            send(uint8_t(length & 0xFF));
+        }
+
+        ~OutputFrame() {
+            send(_checksum);
+        }
+
+        inline void sendRaw(uint8_t byte) {
+            UART::send(byte);
+        }
+
+        inline void send(uint8_t byte) {
+            switch (byte) {
+                case API_START:
+                case ESCAPE:
+                case XON:
+                case XOFF:      UART::send(ESCAPE);
+                                byte ^= 0x20;
+                                // don't break here !
+                default:        UART::send(byte);
+            }
+        }
+
+        void send(uint16_t length, const void* data) {
+            const uint8_t *buffer = (const uint8_t*)data;
+            while(length--) {
+                uint8_t byte = *buffer++;
+                _checksum -= byte;
+                
+                send(byte);
+            }
+        }
+
+        uint8_t _checksum;
+    };
+};
+
+template <class UART>
 class ZigBee {
     public:
     typedef struct __attribute__ ((__packed__)) {
