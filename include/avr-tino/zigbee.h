@@ -37,6 +37,7 @@ class SimpleZigBee {
     } Addr16; // use an array to overcome endianness
 
     public:
+    static const uint8_t AT_COMMAND       = 0x08;
     static const uint8_t TRANSMIT_REQUEST = 0x10;
    
     struct __attribute__ ((__packed__)) TransmitRequest {
@@ -50,6 +51,19 @@ class SimpleZigBee {
         TransmitRequest(void) {
             _frameType = TRANSMIT_REQUEST;
             memset(&_frameID, 0, sizeof(this)-1);
+        }
+    };
+   
+    struct __attribute__ ((__packed__)) ATCommand {
+        uint8_t     _frameType;
+        uint8_t     _frameID;
+        char        _command[2];
+
+        ATCommand(char c1, char c2) {
+            _frameType = AT_COMMAND;
+            _frameID = 'R';
+            _command[0] = c1;
+            _command[1] = c2;
         }
     };
 
@@ -76,6 +90,12 @@ class SimpleZigBee {
         request._destinationAddress16 = addr16;
 
         sendRequest(request, length, data);
+    }
+
+    static void sendATCommand(char c1, char c2) {
+        ATCommand request(c1, c2);
+
+        sendRequest(request, 0, NULL);
     }
 
     protected:
