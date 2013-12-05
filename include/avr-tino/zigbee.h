@@ -50,7 +50,7 @@ class SimpleZigBee {
 
         TransmitRequest(void) {
             _frameType = TRANSMIT_REQUEST;
-            memset(&_frameID, 0, sizeof(this)-1);
+            memset(&_frameID, 0, sizeof(*this)-1);
         }
     };
    
