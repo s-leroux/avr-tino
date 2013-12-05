@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012 Sylvain Leroux <sylvain@chicoree.fr>
+  Copyright (c) 2012-2013 Sylvain Leroux <sylvain@chicoree.fr>
   
   This file is part of avr-tino -- http://github.com/s-leroux/avr-tino
   
@@ -16,18 +16,19 @@
   You should have received a copy of the GNU General Public License
   along with avr-tino.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "avr-tino.h"
-#include "avr-tino/delay.h"
+#if !defined AVR_TINO_TINY13_H
+#define AVR_TINO_TINY13_H
 
-int main() {
-    static const uint8_t LED_PIN = 3;
-    PortB::toOutput(1<<LED_PIN);
+#include "avr-tino/pin.h"
 
-    while(1) {
-        PortB::set(1<<LED_PIN);
-	delay(500);
-        PortB::clear(1<<LED_PIN);
-	delay(500);
-    }
-    return 0;
-}
+typedef Port<0x16, 0x17, 0x18>	    PortB;
+
+typedef PortB                       SPIPort;
+static const uint8_t MOSI   = 0x01;
+static const uint8_t MISO   = 0x02;
+static const uint8_t SCK    = 0x04;
+
+
+
+#endif
+

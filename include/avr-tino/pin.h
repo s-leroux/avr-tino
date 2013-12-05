@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012 Sylvain Leroux <sylvain@chicoree.fr>
+  Copyright (c) 2012-2013 Sylvain Leroux <sylvain@chicoree.fr>
   
   This file is part of avr-tino -- http://github.com/s-leroux/avr-tino
   
@@ -31,63 +31,16 @@ enum __attribute__ ((__packed__)) pinmode_t {
 };
 
 enum __attribute__ ((__packed__)) pinstate_t {
-    LOW,
+    LOW = 0,
     HIGH
 };
 
 //extern "C" {
 
-#define pinToHigh(pin) ( pin_to_output(pin) |= pin_to_mask(pin) )
-#define pinToLow(pin) ( pin_to_output(pin) &= ~pin_to_mask(pin) )
-#define pinToOutput(pin) ( pin_to_mode(pin) |= pin_to_mask(pin) )
-#define pinToInput(pin) ( pin_to_mode(pin) &= ~pin_to_mask(pin) )
-
-template<pin_t pin>
-class GuardPinLow {
-    public:
-    inline GuardPinLow() {
-	pinToLow(pin);
-    }
-
-    inline ~GuardPinLow() {
-	pinToHigh(pin);
-    }
-};
-
-template<pin_t pin>
-class GuardPinHigh {
-    public:
-    inline GuardPinHigh() {
-	pinToHigh(pin);
-    }
-
-    inline ~GuardPinHigh() {
-	pinToLow(pin);
-    }
-};
-
-static void pinMode(pin_t pin, pinmode_t mode);
-static void digitalWrite(pin_t pin, pinstate_t state);
-static inline void digitalWrite(pin_t pin, bool state) {
-	digitalWrite(pin, state ? HIGH : LOW);
-}
-
-static pinstate_t digitalRead(pin_t pin);
-
 enum __attribute__ ((__packed__)) bitorder_t {
     LSBFIRST,
     MSBFIRST
 };
-
-static uint8_t shiftIn(pin_t dataPin, pin_t clockPin, 
-		bitorder_t bitOrder);
-static void shiftOut(pin_t dataPin, pin_t clockPin, 
-		bitorder_t bitOrder, 
-		uint8_t val);
-
-static void shiftOut(pin_t dataPin, pin_t clockPin,
-                bitorder_t bitOrder,
-                const void *data, uint16_t size);
 
 template<uint8_t PIN, uint8_t DDR = PIN+1, uint8_t POUT = DDR+1>
 class Port {
@@ -100,15 +53,23 @@ class Port {
 	_SFR_IO8(DDR) |= mask;
     }
 
-    static uint8_t get(uint8_t mask) {
+    static uint8_t read(uint8_t mask = 0xFF) {
 	return _SFR_IO8(PIN) & mask;
     }
 
-    static void set(uint8_t mask) {
+    static void write(uint8_t value) {
+	_SFR_IO8(POUT) = value;
+    }
+
+    static void invert(uint8_t mask = 0xFF) {
+        write(read() ^ mask);
+    }
+
+    static void set(uint8_t mask = 0xFF) {
 	_SFR_IO8(POUT) |= mask;
     }
 
-    static void clear(uint8_t mask) {
+    static void clear(uint8_t mask = 0xFF) {
 	_SFR_IO8(POUT) &= ~mask;
     }
 };

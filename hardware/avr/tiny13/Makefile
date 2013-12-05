@@ -1,0 +1,5 @@
+GCC_MMCU=attiny13
+AVRDUDE_PART=t13
+
+SRCFILES+=$(TINO_SRCDIR)pin.cc
+

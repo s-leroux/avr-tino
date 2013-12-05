@@ -19,6 +19,8 @@
 #include "avr-tino.h"
 #include "avr-tino/pin.h"
 
+#if 0
+
 void pinMode(pin_t pin, pinmode_t mode) {
     if (mode == INPUT) {
 	pin_to_mode(pin) &= ~pin_to_mask(pin);
@@ -87,3 +89,5 @@ void shiftOut(pin_t dataPin, pin_t clockPin,
 	shiftOut(dataPin, clockPin, bitOrder, ((const uint8_t*)data)[i]);
     }
 }
+
+#endif
