@@ -45,6 +45,9 @@ enum __attribute__ ((__packed__)) bitorder_t {
 template<uint8_t PIN, uint8_t DDR = PIN+1, uint8_t POUT = DDR+1>
 class Port {
     public:
+    //
+    // Port direction
+    //
     static void toInput(uint8_t mask) {
 	_SFR_IO8(DDR) &= ~mask;
     }
@@ -53,6 +56,9 @@ class Port {
 	_SFR_IO8(DDR) |= mask;
     }
 
+    //
+    // Whole port access
+    //
     static uint8_t read(uint8_t mask = 0xFF) {
 	return _SFR_IO8(PIN) & mask;
     }
@@ -65,6 +71,9 @@ class Port {
         write(read() ^ mask);
     }
 
+    //
+    // Pin-group access
+    //
     static void set(uint8_t mask = 0xFF) {
 	_SFR_IO8(POUT) |= mask;
     }
@@ -73,6 +82,35 @@ class Port {
 	_SFR_IO8(POUT) &= ~mask;
     }
 };
+
+template<class _Port, uint8_t _pin>
+class Pin {
+    public:
+    typedef Pin<_Port, _pin>    This;
+
+    static const uint8_t  pin = _pin;
+    static const uint8_t  mask = 1<<_pin;
+    typedef _Port    Port;
+
+    static void set() { _Port::set(This::mask); }
+    static void clear() { _Port::clear(This::mask); }
+};
+
+template<class DataPin, class ClockPin>
+static void shiftOut(uint8_t value) {
+    /* !!! data and clock are *masks* not pin numbers !!! */
+    for(uint8_t i = 0; i < 8; ++i) {
+        if ((value & 0x01)) {
+            DataPin::set();
+        }
+        else {
+            DataPin::clear();
+        }
+        ClockPin::set();
+        value>>=1;
+        ClockPin::clear();
+    }
+}
 
 //} // extern "C"
 

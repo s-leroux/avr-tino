@@ -23,11 +23,66 @@
 
 typedef Port<0x16, 0x17, 0x18>	    PortB;
 
-typedef PortB                       SPIPort;
-static const uint8_t MOSI   = 0x01;
-static const uint8_t MISO   = 0x02;
-static const uint8_t SCK    = 0x04;
+typedef Pin<PortB,0>  PB0_PIN;
+typedef Pin<PortB,1>  PB1_PIN;
+typedef Pin<PortB,2>  PB2_PIN;
+typedef Pin<PortB,3>  PB3_PIN;
+typedef Pin<PortB,4>  PB4_PIN;
+typedef Pin<PortB,5>  PB5_PIN;
+typedef Pin<PortB,6>  PB6_PIN;
+typedef Pin<PortB,7>  PB7_PIN;
 
+typedef PortB                       SPIPort;
+typedef PB0_PIN MOSI_PIN;
+typedef PB1_PIN MISO_PIN;
+typedef PB2_PIN SCK_PIN;
+
+//
+// ADC support
+//
+enum /* ADMUX constants */ {
+    ADC0                = 0x00,
+    ADC1                = 0x01,
+    ADC2                = 0x02,
+    ADC3                = 0x03,
+    ADCLeftAdjustResult = 1 << ADLAR,
+    ADCInternalVoltageReference = 1 << REFS0,
+};
+
+enum {
+    
+};
+
+class ADConv {
+    public:
+    static void select(uint8_t mux_selection) {
+        ADMUX = mux_selection;
+    }
+
+    static void startConversion() {
+        ADCSRA |= (1<<ADSC)|(1<<ADEN);
+    }
+
+    static int conversionPending() {
+        return ADCSRA & (1<<ADSC);
+    }
+
+    static void waitForConversion() {
+        while(conversionPending()) {
+            // do nothing
+        }
+    }
+
+    static uint8_t read() {
+        return ADCH;
+    }
+
+    static uint8_t convert() {
+        startConversion();
+        waitForConversion();
+        return read();
+    }
+};
 
 
 #endif
