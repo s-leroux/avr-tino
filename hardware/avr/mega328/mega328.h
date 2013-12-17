@@ -136,6 +136,39 @@ typedef Port<0x09>	    PortD;
 typedef SPIMaster<0x2C,0x2D,0x2E,SPIF>			SPI;
 typedef Serial<0xC6, 0xC0, 0xC1, 0xC2, 0xC4, 0xC5>	USART;
 
+class USART0 {
+    public:
+    static const uint8_t    DR = 0xC6;
+
+    static const uint8_t    SRA = 0xC0;
+    static const uint8_t    SRB = 0xC1;
+    static const uint8_t    SRC = 0xC2;
+
+    static const uint8_t    RRL = 0xC4;
+    static const uint8_t    RRH = 0xC5;
+
+    static const uint8_t    UDRE = 5;
+
+    static void enable() {
+#if 1
+        UCSR0B |= _BV(RXCIE0)|_BV(RXEN0)|_BV(TXEN0);
+#else
+        UCSR0B |= _BV(RXEN0)|_BV(TXEN0);
+#endif
+    }
+
+    static void write(uint8_t byte) {
+        _SFR_MEM8(DR) = byte;
+    }
+
+    static uint8_t read() {
+        return _SFR_MEM8(DR);
+    }
+
+    static bool busy(void) {
+        return ! (_SFR_MEM8(SRA) & _BV(UDRE));
+    }
+};
 
 struct MCU {
     typedef ::PortB PortB;
@@ -144,7 +177,7 @@ struct MCU {
 
     typedef ::TWI<ATmega328_TWI>    TWI;
     typedef ::USART		    USART;
-#if 1
+#if USE_BUFFERED_RECV
     typedef ::Buffer<USART>         RECV;
 #endif
     typedef ::EEPROM		    EEPROM;
@@ -152,7 +185,7 @@ struct MCU {
 
 #include "avr/interrupt.h"
 
-#if 1
+#if USE_BUFFERED_RECV
 ISR(USART_RX_vect) {
     MCU::RECV::append(UDR0);
 }

@@ -21,35 +21,107 @@
 
 #include "avr-tino/printer.h"
 
+/*
+    Hard coded values common (?) to every 8-bit AVR
+    XXX
+*/
+enum __attribute__ ((__packed__)) protocol_t {
+    // Asynchronous
+    A8N1	= 6 ,
+    A8E1	= _BV(5) | 6 ,
+    A8O1	= _BV(5) |_BV(4) |  6 ,
+    // Synchronous
+    S8N1	= _BV(6) | 6 ,
+    S8E1	= _BV(6) | _BV(5) | 6 ,
+    S8O1	= _BV(6) | _BV(5) | _BV(4) | 6 ,
+};
+
+enum {
+    f_TXEN	    = 3,
+    f_RXEN	    = 4,
+};
+
+enum {
+    f_UDRE	    = 5,
+    f_TXC	    = 6,
+    f_RXC	    = 7,
+};
+
+template <uint8_t mode, uint16_t _baud>
+class SerialMode {
+    /** Asynchronous serial communication */
+
+    public:
+    static const uint8_t protocol = mode;
+    static const uint16_t baud = _baud;
+    static const bool   hasU2X = ! (mode & _BV(6));
+};
+
+class NoFlowControl {
+    public:
+    static bool readyToSend() { return true; }
+};
+
+template<class USART, class Protocol, class FlowControl>
+class NSerial {
+    /** The new "Serial" class. Protocol based.
+    
+        USART is the register mapping for a given MCU. */
+    
+    public:
+    static void begin() {
+	uint16_t UBRR = (Protocol::hasU2X) ? F_CPU / 8 / Protocol::baud - 1
+                                        : F_CPU / 16 / Protocol::baud - 1;
+	
+	_SFR_MEM8(USART::RRH) = (uint8_t)(UBRR >> 8);
+	_SFR_MEM8(USART::RRL) = (uint8_t)(UBRR);
+	
+	_SFR_MEM8(USART::SRC) = Protocol::protocol;
+        if (Protocol::hasU2X) {
+            _SFR_MEM8(USART::SRA) |= _BV(U2X0);
+        }
+        USART::enable();
+    }
+
+    static void send(uint8_t data) { // XXX Shouldn't we call that 'write' ?
+	while ( USART::busy() ) {
+	    // do nothing
+	}
+
+	while ( ! FlowControl::readyToSend() ) {
+	    // do nothing
+	}
+
+	USART::write(data);
+    }
+
+
+    static void write(const char* str) {
+	while(*str) { send(*str++); }
+    }
+
+    static void send(const void* data, uint8_t len) {
+	for(uint8_t i = 0; i < len; ++i) {
+	    send(((const uint8_t*)data)[i]);
+	}
+    }
+
+    static bool available() {
+        return USART::available();
+    }
+
+    static uint8_t receive() {
+	while ( ! available ) {
+	    // do nothing
+	}
+	return USART::read();
+    }
+};
+
 // XXX should use namespace instead ?
 template <uint8_t DR, uint8_t SRA, uint8_t SRB, uint8_t SRC, uint8_t RRL, uint8_t RRH>
 class Serial : public Printer<Serial<DR,SRA,SRB,SRC,RRL,RRH> > {
     public:
-    /*
-	Hard coded values common (?) to every 8-bit AVR
-	XXX
-    */
-    enum __attribute__ ((__packed__)) protocol_t {
-	// Asynchronous
-	A8N1	= 6 ,
-	A8E1	= _BV(5) | 6 ,
-	A8O1	= _BV(5) |_BV(4) |  6 ,
-	// Synchronous
-	S8N1	= _BV(6) | 6 ,
-	S8E1	= _BV(6) | _BV(5) | 6 ,
-	S8O1	= _BV(6) | _BV(5) | _BV(4) | 6 ,
-    };
-
-    enum {
-	f_TXEN	    = 3,
-	f_RXEN	    = 4,
-    };
-
-    enum {
-	f_UDRE	    = 5,
-	f_TXC	    = 6,
-	f_RXC	    = 7,
-    };
 
     static void begin(uint32_t baud, protocol_t protocol = A8N1) {
 	uint16_t UBRR = F_CPU / 16 / baud - 1;
@@ -69,6 +141,14 @@ class Serial : public Printer<Serial<DR,SRA,SRB,SRC,RRL,RRH> > {
 	while ( ! (_SFR_MEM8(SRA) & _BV(f_UDRE)) ) {
 	    // do nothing
 	}
+
+        // XXX Hardware flow control -- testing !!!
+        // on the test board /CTS connected to PB7
+        //
+        while( (PINB & (1<<PB7)) ) {
+	    // do nothing
+
+        }
 	_SFR_MEM8(DR) = data;
     }
 
