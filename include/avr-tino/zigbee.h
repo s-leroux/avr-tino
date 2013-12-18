@@ -28,6 +28,11 @@
 template <class UART>
 class SimpleZigBee {
     public:
+    static const uint8_t    API_START   = 0x7E;
+    static const uint8_t    ESCAPE      = 0x7D;
+    static const uint8_t    XON         = 0x11;
+    static const uint8_t    XOFF        = 0x12;
+
     typedef struct __attribute__ ((__packed__)) {
         uint8_t     byte[8];
     } Addr64; // use an array to overcome endianness
@@ -38,36 +43,56 @@ class SimpleZigBee {
 
     public:
     static const uint8_t AT_COMMAND       = 0x08;
-    static const uint8_t TRANSMIT_REQUEST = 0x10;
-   
-    struct __attribute__ ((__packed__)) TransmitRequest {
-        uint8_t _frameType;
-        uint8_t _frameID;
-        Addr64  _destinationAddress64;
-        Addr16  _destinationAddress16;
-        uint8_t _broadcastRadius;
-        uint8_t _options;
-
-        TransmitRequest(void) {
-            _frameType = TRANSMIT_REQUEST;
-            memset(&_frameID, 0, sizeof(*this)-1);
-        }
-    };
-   
     struct __attribute__ ((__packed__)) ATCommand {
-        uint8_t     _frameType;
-        uint8_t     _frameID;
-        char        _command[2];
+        uint8_t     frameType;
+        uint8_t     frameID;
+        char        command[2];
 
-        ATCommand(char c1, char c2) {
-            _frameType = AT_COMMAND;
-            _frameID = 'R';
-            _command[0] = c1;
-            _command[1] = c2;
-        }
+//        ATCommand(char c1, char c2) {
+//            _frameType = AT_COMMAND;
+//            _frameID = 'R';
+//            _command[0] = c1;
+//            _command[1] = c2;
+//        }
+    };
+   
+    static const uint8_t TRANSMIT_REQUEST = 0x10;
+    struct __attribute__ ((__packed__)) TransmitRequest {
+        uint8_t     frameType;
+        uint8_t     frameID;
+        Addr64      destinationAddress64;
+        Addr16      destinationAddress16;
+        uint8_t     broadcastRadius;
+        uint8_t     options;
+
+//        TransmitRequest(void) {
+//            _frameType = TRANSMIT_REQUEST;
+//            memset(&_frameID, 0, sizeof(*this)-1);
+//        }
     };
 
-    static void sendRequest(uint16_t hLen, const void* header,
+    static const uint8_t RECEIVE_PACKET = 0x90;
+    struct __attribute__ ((__packed__)) ReceivePacket {
+        uint8_t     frameType;
+        Addr64      destinationAddress64;
+        Addr16      destinationAddress16;
+        uint8_t     options;
+        uint8_t     data[0];
+    };
+
+    struct __attribute__ ((__packed__)) APIFrame {
+        union __attribute__ ((__packed__)) {
+            TransmitRequest transmitRequest;
+            ATCommand       atCommand;
+            ReceivePacket   receivePacket;
+
+            uint8_t         frameType;
+            uint8_t         raw[0];
+        };
+    };
+   
+
+    static void sendFrame(uint16_t hLen, const void* header,
                             uint16_t dLen, const void* data) {
         OutputFrame of(hLen+dLen);
 
@@ -75,35 +100,123 @@ class SimpleZigBee {
         of.send(dLen, data);
     }
 
-    template <class R>
-    static inline void sendRequest(const R& request,
+    template <class F>
+    static inline void sendFrame(const F& frame,
                     uint16_t length, const void *data) {
-        sendRequest(sizeof(R), &request, length, data);
+        sendFrame(sizeof(F), &frame, length, data);
     }
 
     static void sendTransmitRequest(Addr64 addr64, Addr16 addr16,
                     uint16_t length, const void *data) {
         TransmitRequest request;
 
-        request._frameID = 0x01;
-        request._destinationAddress64 = addr64;
-        request._destinationAddress16 = addr16;
+        request.frameType = TRANSMIT_REQUEST;
+        request.frameID = 0x01;
+        request.destinationAddress64 = addr64;
+        request.destinationAddress16 = addr16;
 
-        sendRequest(request, length, data);
+        sendFrame(request, length, data);
     }
 
     static void sendATCommand(char c1, char c2) {
-        ATCommand request(c1, c2);
+        ATCommand request;
 
-        sendRequest(request, 0, NULL);
+        request.frameType = AT_COMMAND;
+        request.command[0] = c1;
+        request.command[1] = c2;
+
+        sendFrame(request, 0, NULL);
     }
 
-    protected:
-    static const uint8_t    API_START   = 0x7E;
-    static const uint8_t    ESCAPE      = 0x7D;
-    static const uint8_t    XON         = 0x11;
-    static const uint8_t    XOFF        = 0x12;
+    class SimpleReader {
+        public:
+        SimpleReader() : _mode(BAD) {
+        }
 
+        void reset() volatile {
+            _escaping = false;
+            _offset = 0;
+            _cs = 0;
+            _mode = LOOK_HI_LENGTH;
+        }
+
+        bool has_frame() volatile const {
+            return (_mode == OK);
+        }
+
+        uint8_t frame_length() volatile const {
+            return _frame.lo_length;
+        }
+
+        const APIFrame* frame_content() volatile const {
+            return (APIFrame*)_frame.buffer;
+        }
+
+        void next() volatile {
+            _mode = BAD;
+        }
+
+        void append(uint8_t byte) volatile {
+            if (_mode != OK) {
+                switch (byte) {
+                    case API_START: 
+                            reset();
+                            break;
+                    case ESCAPE:    
+                            _escaping = true;
+                            break;
+                    default:        
+                            if (_escaping) {
+                                byte ^= 0x20;
+                                _escaping = false;
+                            }
+                            switch(_mode) {
+                                case LOOK_HI_LENGTH:
+                                        _frame.hi_length = byte;
+                                        // only support data up to 254
+                                        // bytes
+                                        _mode = (byte == 0) ? LOOK_LO_LENGTH 
+                                                           : BAD;
+                                        break;
+                                case LOOK_LO_LENGTH:
+                                        _frame.hi_length = byte;
+                                        // only support data up to 254
+                                        // bytes
+                                        _mode = (byte < 255) ? LOOK_DATA
+                                                            : BAD;
+                                        break;
+                                case LOOK_DATA:
+                                        _frame.buffer[_offset++] = byte;
+                                        _cs += byte;
+                                        if (_offset > _frame.lo_length) {
+                                            _mode = (_cs==0xFF) ? OK : BAD;
+                                        }
+                            }
+                }
+            }
+            
+        }
+
+        private:
+        bool        _escaping;
+        uint8_t     _offset;
+        uint8_t     _cs;
+        enum {
+            LOOK_HI_LENGTH,
+            LOOK_LO_LENGTH,
+            LOOK_DATA,
+            OK,
+            BAD,
+        } _mode;
+
+        struct __attribute__ ((__packed__)) {
+            uint8_t hi_length;
+            uint8_t lo_length;
+            uint8_t buffer[256];
+        } _frame;
+    };
+
+    protected:
     class OutputFrame {
         public:
         OutputFrame(uint16_t length)  : _checksum(0xFF) {
