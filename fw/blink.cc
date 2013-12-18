@@ -20,11 +20,13 @@
 #include "avr-tino/delay.h"
 
 int main() {
-    pinMode(PIN_PD0, OUTPUT);
+    static const uint8_t LED_PIN = 3;
+    PortB::toOutput(1<<LED_PIN);
+
     while(1) {
-	digitalWrite(PIN_PD0, HIGH);
+        PortB::set(1<<LED_PIN);
 	delay(500);
-	digitalWrite(PIN_PD0, LOW);
+        PortB::clear(1<<LED_PIN);
 	delay(500);
     }
     return 0;

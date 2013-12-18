@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2012 Sylvain Leroux <sylvain@chicoree.fr>
+  Copyright (c) 2012-2013 Sylvain Leroux <sylvain@chicoree.fr>
   
   This file is part of avr-tino -- http://github.com/s-leroux/avr-tino
   
@@ -31,67 +31,23 @@ enum __attribute__ ((__packed__)) pinmode_t {
 };
 
 enum __attribute__ ((__packed__)) pinstate_t {
-    LOW,
+    LOW = 0,
     HIGH
 };
 
 //extern "C" {
-
-#define pinToHigh(pin) ( pin_to_output(pin) |= pin_to_mask(pin) )
-#define pinToLow(pin) ( pin_to_output(pin) &= ~pin_to_mask(pin) )
-#define pinToOutput(pin) ( pin_to_mode(pin) |= pin_to_mask(pin) )
-#define pinToInput(pin) ( pin_to_mode(pin) &= ~pin_to_mask(pin) )
-
-template<pin_t pin>
-class GuardPinLow {
-    public:
-    inline GuardPinLow() {
-	pinToLow(pin);
-    }
-
-    inline ~GuardPinLow() {
-	pinToHigh(pin);
-    }
-};
-
-template<pin_t pin>
-class GuardPinHigh {
-    public:
-    inline GuardPinHigh() {
-	pinToHigh(pin);
-    }
-
-    inline ~GuardPinHigh() {
-	pinToLow(pin);
-    }
-};
-
-static void pinMode(pin_t pin, pinmode_t mode);
-static void digitalWrite(pin_t pin, pinstate_t state);
-static inline void digitalWrite(pin_t pin, bool state) {
-	digitalWrite(pin, state ? HIGH : LOW);
-}
-
-static pinstate_t digitalRead(pin_t pin);
 
 enum __attribute__ ((__packed__)) bitorder_t {
     LSBFIRST,
     MSBFIRST
 };
 
-static uint8_t shiftIn(pin_t dataPin, pin_t clockPin, 
-		bitorder_t bitOrder);
-static void shiftOut(pin_t dataPin, pin_t clockPin, 
-		bitorder_t bitOrder, 
-		uint8_t val);
-
-static void shiftOut(pin_t dataPin, pin_t clockPin,
-                bitorder_t bitOrder,
-                const void *data, uint16_t size);
-
 template<uint8_t PIN, uint8_t DDR = PIN+1, uint8_t POUT = DDR+1>
 class Port {
     public:
+    //
+    // Port direction
+    //
     static void toInput(uint8_t mask) {
 	_SFR_IO8(DDR) &= ~mask;
     }
@@ -100,18 +56,61 @@ class Port {
 	_SFR_IO8(DDR) |= mask;
     }
 
-    static uint8_t get(uint8_t mask) {
+    //
+    // Whole port access
+    //
+    static uint8_t read(uint8_t mask = 0xFF) {
 	return _SFR_IO8(PIN) & mask;
     }
 
-    static void set(uint8_t mask) {
+    static void write(uint8_t value) {
+	_SFR_IO8(POUT) = value;
+    }
+
+    static void invert(uint8_t mask = 0xFF) {
+        write(read() ^ mask);
+    }
+
+    //
+    // Pin-group access
+    //
+    static void set(uint8_t mask = 0xFF) {
 	_SFR_IO8(POUT) |= mask;
     }
 
-    static void clear(uint8_t mask) {
+    static void clear(uint8_t mask = 0xFF) {
 	_SFR_IO8(POUT) &= ~mask;
     }
 };
+
+template<class _Port, uint8_t _pin>
+class Pin {
+    public:
+    typedef Pin<_Port, _pin>    This;
+
+    static const uint8_t  pin = _pin;
+    static const uint8_t  mask = 1<<_pin;
+    typedef _Port    Port;
+
+    static void set() { _Port::set(This::mask); }
+    static void clear() { _Port::clear(This::mask); }
+};
+
+template<class DataPin, class ClockPin>
+static void shiftOut(uint8_t value) {
+    /* !!! data and clock are *masks* not pin numbers !!! */
+    for(uint8_t i = 0; i < 8; ++i) {
+        if ((value & 0x01)) {
+            DataPin::set();
+        }
+        else {
+            DataPin::clear();
+        }
+        ClockPin::set();
+        value>>=1;
+        ClockPin::clear();
+    }
+}
 
 //} // extern "C"
 

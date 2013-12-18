@@ -55,16 +55,7 @@ DEMOS=	input  \
 	ioexpander \
 	blink
 
-SRCFILES=$(TINO_SRCDIR)pin.cc \
-	$(TINO_SRCDIR)printer.cc \
-	$(TINO_SRCDIR)1-wire.cc \
-	$(TINO_SRCDIR)SPI.cc \
-	$(TINO_SRCDIR)serial.cc \
-        $(TINO_SRCDIR)zigbee.cc \
-	$(TINO_SRCDIR)HD44780.cc \
-	$(TINO_SRCDIR)DS18S20.cc \
-	$(TINO_SRCDIR)MCP23Sxx.cc \
-	$(TINO_SRCDIR)MCP2515.cc 
+SRCFILES=
 
 ifeq ($(BOARD),CANModule)
 DEMOS += canmodule-tx \
