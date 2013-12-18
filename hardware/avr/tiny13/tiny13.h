@@ -82,6 +82,11 @@ class ADConv {
         waitForConversion();
         return read();
     }
+
+    static uint8_t convert(uint8_t mux_selection) {
+        select(mux_selection);
+        return convert();
+    }
 };
 
 
