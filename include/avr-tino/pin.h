@@ -92,8 +92,13 @@ class Pin {
     static const uint8_t  mask = 1<<_pin;
     typedef _Port    Port;
 
+    static void toInput() { _Port::toInput(This::mask); }
+    static void toOutput() { _Port::toOutput(This::mask); }
     static void set() { _Port::set(This::mask); }
     static void clear() { _Port::clear(This::mask); }
+
+    static bool isSet() { return _Port::read(This::mask) != 0; }
+    static bool isClear() { return !isSet(); }
 };
 
 template<class DataPin, class ClockPin>
