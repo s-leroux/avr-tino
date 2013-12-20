@@ -26,29 +26,26 @@
 //uint64_t test = 0x1122334455667788ULL;
 
 #include <util/atomic.h>
+#include "avr-tino/queue.h"
 
-template <class UART>
-class SimpleZigBee {
-    public:
-    static const uint8_t    API_START   = 0x7E;
-    static const uint8_t    ESCAPE      = 0x7D;
-    static const uint8_t    XON         = 0x11;
-    static const uint8_t    XOFF        = 0x12;
+static const uint8_t    API_START   = 0x7E;
+static const uint8_t    ESCAPE      = 0x7D;
+static const uint8_t    XON         = 0x11;
+static const uint8_t    XOFF        = 0x12;
 
-    typedef struct __attribute__ ((__packed__)) {
-        uint8_t     byte[8];
-    } Addr64; // use an array to overcome endianness
+typedef struct __attribute__ ((__packed__)) {
+    uint8_t     byte[8];
+} Addr64; // use an array to overcome endianness
 
-    typedef struct __attribute__ ((__packed__)) {
-        uint8_t     byte[2];
-    } Addr16; // use an array to overcome endianness
+typedef struct __attribute__ ((__packed__)) {
+    uint8_t     byte[2];
+} Addr16; // use an array to overcome endianness
 
-    public:
-    static const uint8_t AT_COMMAND       = 0x08;
-    struct __attribute__ ((__packed__)) ATCommand {
-        uint8_t     frameType;
-        uint8_t     frameID;
-        char        command[2];
+static const uint8_t AT_COMMAND       = 0x08;
+struct __attribute__ ((__packed__)) ATCommand {
+    uint8_t     frameType;
+    uint8_t     frameID;
+    char        command[2];
 
 //        ATCommand(char c1, char c2) {
 //            _frameType = AT_COMMAND;
@@ -56,52 +53,56 @@ class SimpleZigBee {
 //            _command[0] = c1;
 //            _command[1] = c2;
 //        }
-    };
-   
-    static const uint8_t TRANSMIT_REQUEST = 0x10;
-    struct __attribute__ ((__packed__)) TransmitRequest {
-        uint8_t     frameType;
-        uint8_t     frameID;
-        Addr64      destinationAddress64;
-        Addr16      destinationAddress16;
-        uint8_t     broadcastRadius;
-        uint8_t     options;
+};
+
+static const uint8_t TRANSMIT_REQUEST = 0x10;
+struct __attribute__ ((__packed__)) TransmitRequest {
+    uint8_t     frameType;
+    uint8_t     frameID;
+    Addr64      destinationAddress64;
+    Addr16      destinationAddress16;
+    uint8_t     broadcastRadius;
+    uint8_t     options;
 
 //        TransmitRequest(void) {
 //            _frameType = TRANSMIT_REQUEST;
 //            memset(&_frameID, 0, sizeof(*this)-1);
 //        }
-    };
+};
 
-    static const uint8_t RECEIVE_PACKET = 0x90;
-    struct __attribute__ ((__packed__)) ReceivePacket {
-        uint8_t     frameType;
-        Addr64      destinationAddress64;
-        Addr16      destinationAddress16;
-        uint8_t     options;
-        uint8_t     data[0];
-    };
+static const uint8_t RECEIVE_PACKET = 0x90;
+struct __attribute__ ((__packed__)) ReceivePacket {
+    uint8_t     frameType;
+    Addr64      destinationAddress64;
+    Addr16      destinationAddress16;
+    uint8_t     options;
+    uint8_t     data[0];
+};
 
-    static const uint8_t AT_COMMAND_RESPONSE = 0x88;
-    struct __attribute__ ((__packed__)) ATCommandResponse {
-        uint8_t     frameType;
-        uint8_t     frameID;
-        char        atCommand[2];
-        uint8_t     commandStatus;
-        uint8_t     commandData[0];
-    };
+static const uint8_t AT_COMMAND_RESPONSE = 0x88;
+struct __attribute__ ((__packed__)) ATCommandResponse {
+    uint8_t     frameType;
+    uint8_t     frameID;
+    char        atCommand[2];
+    uint8_t     commandStatus;
+    uint8_t     commandData[0];
+};
 
-    struct __attribute__ ((__packed__)) APIFrame {
-        union __attribute__ ((__packed__)) {
-            TransmitRequest         transmitRequest;
-            ATCommand               atCommand;
-            ATCommandResponse       atCommandResponse;
-            ReceivePacket           receivePacket;
+struct __attribute__ ((__packed__)) APIFrame {
+    union __attribute__ ((__packed__)) {
+        TransmitRequest         transmitRequest;
+        ATCommand               atCommand;
+        ATCommandResponse       atCommandResponse;
+        ReceivePacket           receivePacket;
 
-            uint8_t                 frameType;
-            uint8_t                 raw[0];
-        };
+        uint8_t                 frameType;
+        uint8_t                 raw[0];
     };
+};
+
+template <class UART>
+class SimpleZigBee {
+    public:
    
 
     static void sendFrame(uint16_t hLen, const void* header,
@@ -141,158 +142,6 @@ class SimpleZigBee {
 
         sendFrame(request, 0, NULL);
     }
-
-    class SimpleReader {
-        public:
-        static bool has_frame() {
-            return (count != 0);
-        }
-
-        static uint8_t frame_length() {
-            return buffer[top+1];
-        }
-
-        static uint8_t frame_type() {
-            return buffer[top+2];
-        }
-
-        static const void* frame() {
-            return &buffer[top+2];
-        }
-
-        static void next() {
-            ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-            {
-                if (count != 0) {
-                
-                    top = top + 2
-                              + buffer[top+1]
-                              + 1;
-
-                    --count;
-                }
-            }
-        }
-
-        static uint8_t readNext(void* dest, uint8_t maxLength) {
-            // Read up to maxLength bytes. Skip to next frame.
-            uint8_t length = frame_length();
-            if (maxLength < length)
-                length = maxLength;
-
-            uint8_t s_idx = top+2;
-            for(uint8_t i = 0; i < length; ++i) {
-                ((uint8_t*)dest)[i] = buffer[s_idx++];
-            }
-
-            next();
-            return length;
-        }
-
-        protected:
-        static void abort() {
-            tail = end = start;
-            cs = 0;
-            mode = SYNC;
-        }
-
-        static void begin() {
-            tail = end = start;
-            cs = 0;
-            mode = LOOK_HI_LENGTH;
-        }
-
-        public:
-        static void append(uint8_t byte) {
-            if ((tail == top) && (count != 0)) {
-                // collision. Discard the current frame since it
-                // can't fit into the buffer
-                abort();
-                return;
-            }
-
-            // at least one byte available in the buffer
-            switch (byte) {
-                case API_START: 
-                        // New frame.
-                        begin();
-                        break;
-                case ESCAPE:    
-                        escaping = true;
-                        break;
-                default:        
-                        if (escaping) {
-                            byte ^= 0x20;
-                            escaping = false;
-                        }
-                        switch(mode) {
-                            case LOOK_HI_LENGTH:
-                                    if (byte != 0) {
-                                        // only support data up to 254
-                                        // bytes
-                                        abort();
-                                    }
-                                    else {
-                                        buffer[tail++] = byte;
-                                        mode = LOOK_LO_LENGTH;
-                                    }
-                                    break;
-                            case LOOK_LO_LENGTH:
-                                    if (byte < 255) {
-                                        // only support data up to 254
-                                        // bytes
-                                        abort();
-                                    }
-                                    else {
-                                        buffer[tail++] = byte;
-                                        end = start + byte + 2 + 1;
-                                        mode = LOOK_DATA;;
-                                    }
-                                    break;
-                            case LOOK_DATA:
-                                    buffer[tail++] = byte;
-                                    cs += byte;
-                                    if (tail == end) {
-                                        if (cs == 0xFF) {
-                                            // frame completed & cs ok
-                                            if (count++ == 0) {
-                                                top = start;
-                                            }
-                                            start = tail;
-                                            mode = SYNC;
-                                        }
-                                        else {
-                                            // bad cs
-                                            abort();
-                                        }
-                                    }
-                        }
-            }
-            
-        }
-
-        private:
-        static volatile uint8_t buffer[256];
-        static volatile uint8_t tail;   // current position
-
-        static volatile uint8_t top;    // start of the first *complete* frame
-        static volatile uint8_t count;  // number of *complete* frame in
-                                        // the buffer
-
-        static volatile uint8_t start;  // start of the current frame
-        static volatile uint8_t end;    // *expected* end of the current frame
-
-        static uint8_t escaping;
-        static uint8_t cs;
-        enum Mode {
-            LOOK_HI_LENGTH,
-            LOOK_LO_LENGTH,
-            LOOK_DATA,
-            OK,
-            SYNC,
-        };
-        static Mode mode;
-    };
 
     protected:
     class OutputFrame {
@@ -337,26 +186,123 @@ class SimpleZigBee {
     };
 };
 
-template <class UART>
-volatile uint8_t SimpleZigBee<UART>::SimpleReader::buffer[256];
-template <class UART>
-volatile uint8_t SimpleZigBee<UART>::SimpleReader::tail;
-template <class UART>
-volatile uint8_t SimpleZigBee<UART>::SimpleReader::top;
-template <class UART>
-volatile uint8_t SimpleZigBee<UART>::SimpleReader::count;
-template <class UART>
-volatile uint8_t SimpleZigBee<UART>::SimpleReader::start;
-template <class UART>
-volatile uint8_t SimpleZigBee<UART>::SimpleReader::end;
-template <class UART>
-uint8_t SimpleZigBee<UART>::SimpleReader::escaping;
-template <class UART>
-uint8_t SimpleZigBee<UART>::SimpleReader::cs;
-template <class UART>
-typename SimpleZigBee<UART>::SimpleReader::Mode
-         SimpleZigBee<UART>::SimpleReader::mode;
+class ZBReader {
+    public:
+    ZBReader() {
+        reset();
+    }
 
+    const APIFrame* frame() volatile const {
+        const void * result;
+
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+        {
+            result = _q.first();
+            if ((!result) || (result == _frame))
+                result = NULL;
+        }
+
+        return (APIFrame*)result;
+    }
+
+    const uint8_t frame_size(const void* frame) const {
+        return _q.size(frame);
+    }
+
+    void next() volatile {
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+        {
+            _q.next();
+        }
+    }
+
+    void append(uint8_t byte) {
+        switch (byte) {
+            case API_START: 
+                    // New frame.
+                    reset();
+                    _mode = LOOK_HI_LENGTH;
+                    break;
+            case ESCAPE:    
+                    _escaping = true;
+                    break;
+            default:        
+                    if (_escaping) {
+                        byte ^= 0x20;
+                        _escaping = false;
+                    }
+                    switch(_mode) {
+                        case LOOK_HI_LENGTH:
+                                if (byte != 0) {
+                                    // only support data up to 254
+                                    // bytes
+                                    reset();
+                                }
+                                else {
+                                    _mode = LOOK_LO_LENGTH;
+                                }
+                                break;
+                        case LOOK_LO_LENGTH:
+                                byte = byte+1; // incl. checksum
+                                if ((!byte) || 
+                                    ((_frame=(uint8_t*)_q.alloc(byte)) == NULL)) {
+                                    reset();
+                                }
+                                else {
+                                    _end = byte;
+                                    _mode = LOOK_DATA;;
+                                }
+                                break;
+                        case LOOK_DATA:
+                                _frame[_idx++] = byte;
+                                _cs += byte;
+                                if (_idx == _end) {
+                                    if (_cs != 0xFF) {
+                                        reset();
+                                    }
+                                    else {
+                                        /* ready for next frame */
+                                        _frame = NULL;
+                                        _mode = SYNC;
+                                    }
+                                }
+                    }
+        }
+        
+    }
+
+    protected:
+    void reset() {
+        /** ready for next incomming frame */
+        if (_frame)
+            _q.discard(_frame);
+
+        _escaping = false;
+        _mode = SYNC;
+        _frame = NULL;
+        _idx = 0;
+        _end = 0;
+        _cs = 0;
+    }
+
+    private:
+    enum Mode {
+        LOOK_HI_LENGTH,
+        LOOK_LO_LENGTH,
+        LOOK_DATA,
+        OK,
+        SYNC,
+    };
+
+    Queue               _q;
+
+    bool                _escaping;
+    Mode                _mode;
+    uint8_t             *_frame; // ptr to the current frame
+    uint8_t             _idx;    // current position
+    uint8_t             _end;    // assumed end of the current frame
+    uint8_t             _cs;   // checksum of the *current* frame.
+};
 
 template <class UART>
 class ZigBee {
