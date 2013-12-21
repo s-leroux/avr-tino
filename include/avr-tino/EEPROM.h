@@ -19,6 +19,8 @@
 #if !defined AVR_TINO_EEPROM_H
 #define AVR_TINO_EEPROM_H
 
+#include <util/atomic.h>
+
 /*
 template<uint8_t EECR, uint8_t EEMPE, uint8_t EEPE, uint8_t EERE,
 		       uint8_t EEPM0, uint8_t EEPM1,
@@ -28,28 +30,52 @@ template<uint8_t EECR, uint8_t EEMPE, uint8_t EEPE, uint8_t EERE,
 class EEPROM {
     public:
     static void write(uint8_t addr, uint8_t data) {
-	while(/*_SFR_IO8*/(EECR) & (1<<EEPE)) {
-	    // do nothing
-	}
+        _wait();
 	
-	/*_SFR_IO8*/(EECR) = (0<<EEPM0)|(0<<EEPM1);
-	/*_SFR_IO8*/(EEAR) = addr;
-	/*_SFR_IO8*/(EEDR) = data;
-	/*_SFR_IO8*/(EECR) |= (1<<EEMPE);
-	/*_SFR_IO8*/(EECR) |= (1<<EEPE);
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+        {
+            _write(addr,data);
+        }
     }
 
     static uint8_t read(uint8_t addr) {
+        _wait();
+
+        uint8_t result;
+        ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+        {
+            result = _read(addr);
+        }
+
+        return result;
+    }
+
+    static void read(uint8_t baseAddr, uint8_t len, void* dest) {
+        for(uint8_t i = 0; i < len; ++i) {
+            ((uint8_t*)dest)[i] = read(baseAddr+i);
+        }
+    }
+
+    static void _wait() {
 	while(/*_SFR_IO8*/(EECR) & (1<<EEPE)) {
 	    // do nothing
 	}
-	
-	/*_SFR_IO8*/(EEAR) = addr;
-	/*_SFR_IO8*/(EECR) |= (1<<EERE);
-
-	return /*_SFR_IO8*/(EEDR);
     }
 
+    static void _write(uint8_t addr, uint8_t data) {
+        /*_SFR_IO8*/(EECR) = (0<<EEPM0)|(0<<EEPM1);
+        /*_SFR_IO8*/(EEAR) = addr;
+        /*_SFR_IO8*/(EEDR) = data;
+        /*_SFR_IO8*/(EECR) |= (1<<EEMPE);
+        /*_SFR_IO8*/(EECR) |= (1<<EEPE);
+    }
+
+    static uint8_t _read(uint8_t addr) {
+        /*_SFR_IO8*/(EEAR) = addr;
+        /*_SFR_IO8*/(EECR) |= (1<<EERE);
+
+        return /*_SFR_IO8*/(EEDR);
+    }
 };
 
 #endif
