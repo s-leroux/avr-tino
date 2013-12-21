@@ -90,9 +90,12 @@ SIZE=$(PROGRAM_PREFIX)size$(PROGRAM_SUFFIX)
 # be compiled and linked by a single command-line
 # call to avr-gcc
 #
-CPPFLAGS=-I./$(BUILDDIR)include -I./include 
+CPPFLAGS=-I./$(BUILDDIR)include -I./include -I./$(BASEDIR)
 ifdef F_CPU
     CPPFLAGS+= -DF_CPU=$(F_CPU)
+endif
+ifdef FW_VERSION
+    CPPFLAGS+= -DFW_VERSION='$(FW_VERSION)'
 endif
 
 CXXFLAGS=-mmcu=$(GCC_MMCU) \
