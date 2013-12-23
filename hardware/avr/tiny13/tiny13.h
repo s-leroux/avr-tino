@@ -49,46 +49,6 @@ enum /* ADMUX constants */ {
     ADCInternalVoltageReference = 1 << REFS0,
 };
 
-enum {
-    
-};
-
-class ADConv {
-    public:
-    static void select(uint8_t mux_selection) {
-        ADMUX = mux_selection;
-    }
-
-    static void startConversion() {
-        ADCSRA |= (1<<ADSC)|(1<<ADEN);
-    }
-
-    static int conversionPending() {
-        return ADCSRA & (1<<ADSC);
-    }
-
-    static void waitForConversion() {
-        while(conversionPending()) {
-            // do nothing
-        }
-    }
-
-    static uint8_t read() {
-        return ADCH;
-    }
-
-    static uint8_t convert() {
-        startConversion();
-        waitForConversion();
-        return read();
-    }
-
-    static uint8_t convert(uint8_t mux_selection) {
-        select(mux_selection);
-        return convert();
-    }
-};
-
 
 #endif
 
