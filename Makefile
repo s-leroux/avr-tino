@@ -95,7 +95,7 @@ ifdef F_CPU
     CPPFLAGS+= -DF_CPU=$(F_CPU)
 endif
 ifdef FW_VERSION
-    CPPFLAGS+= -DFW_VERSION='$(FW_VERSION)'
+    CPPFLAGS+= -DFW_VERSION='"$(FW_VERSION)"'
 endif
 
 CXXFLAGS=-mmcu=$(GCC_MMCU) \
