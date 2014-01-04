@@ -47,12 +47,7 @@ struct __attribute__ ((__packed__)) ATCommand {
     uint8_t     frameID;
     char        command[2];
 
-//        ATCommand(char c1, char c2) {
-//            _frameType = AT_COMMAND;
-//            _frameID = 'R';
-//            _command[0] = c1;
-//            _command[1] = c2;
-//        }
+
 };
 
 static const uint8_t TRANSMIT_REQUEST = 0x10;
@@ -70,15 +65,6 @@ struct __attribute__ ((__packed__)) TransmitRequest {
 //        }
 };
 
-static const uint8_t RECEIVE_PACKET = 0x90;
-struct __attribute__ ((__packed__)) ReceivePacket {
-    uint8_t     frameType;
-    Addr64      destinationAddress64;
-    Addr16      destinationAddress16;
-    uint8_t     options;
-    uint8_t     data[0];
-};
-
 static const uint8_t AT_COMMAND_RESPONSE = 0x88;
 struct __attribute__ ((__packed__)) ATCommandResponse {
     uint8_t     frameType;
@@ -88,11 +74,78 @@ struct __attribute__ ((__packed__)) ATCommandResponse {
     uint8_t     commandData[0];
 };
 
+static const uint8_t MODEM_STATUS = 0x8A;
+struct __attribute__ ((__packed__)) ModemStatus {
+    uint8_t     frameType;
+    uint8_t     status;
+
+    enum __attribute__ ((__packed__)) {
+        stHardwareReset             = 0x00,
+        stWatchdogTimerReset        = 0x01,
+        stJoinedNetwork             = 0x02,
+        stDisassociated             = 0x03,
+        stCoordinatorStarted        = 0x06,
+        stSecurityKeyUpdated        = 0x07,
+        stConfigChangeWhileJoined   = 0x11,
+    };
+};
+
+static const uint8_t TRANSMIT_STATUS = 0x8B;
+struct __attribute__ ((__packed__)) TransmitStatus {
+    uint8_t     frameType;
+    uint8_t     frameID;
+    Addr16      destinationAddress16;
+    uint8_t     transmitRetryCount;
+    uint8_t     deliveryStatus;
+    uint8_t     discoveryStatus;
+
+    enum __attribute__ ((__packed__)) DeliveryStatus {
+        stSuccess                   = 0x00,
+        stMACACKFailure             = 0x01,
+        stCCAFailure                = 0x02,
+        stInvalidDestinationEndpoint= 0x15,
+        stNetworkACKFailure         = 0x21,
+        stNotJoined                 = 0x22,
+        stSelfAddressied            = 0x23,
+        stAddressNotFound           = 0x24,
+        stRouteNotFound             = 0x25,
+        stBroadcastNoNeighborRelay  = 0x26,
+        stInvalidBindingTableIndex  = 0x2B,
+        stResourceError             = 0x2C,
+        stBraodcastWithAPS          = 0x2D,
+        stUnicastAPSWithEE0         = 0x2E,
+        stResourceError2            = 0x32,
+        stDataPayloadTooLarge       = 0x74,
+        stIndirectMessageUnrequested= 0x75,
+    };
+
+    enum __attribute__ ((__packed__)) DiscoveryStatus {
+        /* those are *probably* bit mask but I can't find it in the
+           datasheet */
+        stNoDiscoveryOverhead       = 0x00,
+        stAddressDicovery           = 0x01,
+        stRouteDicovery             = 0x02,
+        stAddressAndRouteDicovery   = 0x03,
+        stExtendedTimeoutDicovery   = 0x40,
+    };
+};
+
+static const uint8_t RECEIVE_PACKET = 0x90;
+struct __attribute__ ((__packed__)) ReceivePacket {
+    uint8_t     frameType;
+    Addr64      destinationAddress64;
+    Addr16      destinationAddress16;
+    uint8_t     options;
+    uint8_t     data[0];
+};
+
 struct __attribute__ ((__packed__)) APIFrame {
     union __attribute__ ((__packed__)) {
         TransmitRequest         transmitRequest;
         ATCommand               atCommand;
         ATCommandResponse       atCommandResponse;
+        ModemStatus             modemStatus;
+        TransmitStatus          transmitStatus;
         ReceivePacket           receivePacket;
 
         uint8_t                 frameType;
@@ -139,6 +192,16 @@ class SimpleZigBee {
         request.frameType = AT_COMMAND;
         request.command[0] = c1;
         request.command[1] = c2;
+
+        sendFrame(request, 0, NULL);
+    }
+
+    static void sendATCommand(uint16_t cmd) {
+        ATCommand request;
+
+        request.frameType = AT_COMMAND;
+        request.command[0] = cmd>>8;
+        request.command[1] = cmd;
 
         sendFrame(request, 0, NULL);
     }

@@ -99,6 +99,7 @@ ifdef FW_VERSION
 endif
 
 CXXFLAGS=-mmcu=$(GCC_MMCU) \
+        -Wno-multichar \
 	-Os \
 	-fipa-cp \
 	-ffunction-sections -fdata-sections \
