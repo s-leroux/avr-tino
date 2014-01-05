@@ -160,10 +160,18 @@ class SimpleZigBee {
 
     static void sendFrame(uint16_t hLen, const void* header,
                             uint16_t dLen, const void* data) {
+//        PORTC &= _BV(0);
+//        delay(500);
         OutputFrame of(hLen+dLen);
 
+//        PORTC ^= _BV(0);
+//        delay(500);
         of.send(hLen, header);
+//        PORTC ^= _BV(0);
+//        delay(500);
         of.send(dLen, data);
+//        PORTC ^= _BV(0);
+//        delay(500);
     }
 
     template <class F>
@@ -172,18 +180,36 @@ class SimpleZigBee {
         sendFrame(sizeof(F), &frame, length, data);
     }
 
-    static void sendTransmitRequest(Addr64 addr64, Addr16 addr16,
+    static void sendTransmitRequest(
+                    uint8_t frameID,
+                    Addr64 addr64, 
+                    Addr16 addr16,
+                    uint8_t broadcastRadius,
+                    uint8_t options,
                     uint16_t length, const void *data) {
         TransmitRequest request;
 
         request.frameType = TRANSMIT_REQUEST;
-        request.frameID = 0x01;
+        request.frameID = frameID;
         request.destinationAddress64 = addr64;
         request.destinationAddress16 = addr16;
-        request.broadcastRadius = 0;
-        request.options = 0;
+        request.broadcastRadius = broadcastRadius;
+        request.options = options;
 
         sendFrame(request, length, data);
+    }
+
+    static void sendTransmitRequest(Addr64 addr64, Addr16 addr16,
+                                    uint16_t length, const void *data) {
+        sendTransmitRequest(0x00, addr64, addr16, 0, 0,
+                            length, data);
+    }
+
+    static void sendTransmitRequest(uint8_t frameID,
+                                    Addr64 addr64, Addr16 addr16,
+                                    uint16_t length, const void *data) {
+        sendTransmitRequest(frameID, addr64, addr16, 0, 0,
+                            length, data);
     }
 
     static void sendATCommand(char c1, char c2) {
@@ -202,8 +228,11 @@ class SimpleZigBee {
         request.frameType = AT_COMMAND;
         request.command[0] = cmd>>8;
         request.command[1] = cmd;
-
+//        PORTC |= _BV(1);
+//        delay(500);
         sendFrame(request, 0, NULL);
+//        PORTC ^= _BV(1);
+//        delay(500);
     }
 
     protected:
