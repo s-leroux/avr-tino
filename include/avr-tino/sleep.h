@@ -50,17 +50,34 @@ __asm__ __volatile__ (  \
 
 #endif
 
-#define _power_down(value) do { \
+#define _power_down_opt(value, adcmode, bodmode) do { \
     set_sleep_mode(SLEEP_MODE_PWR_DOWN); \
     cli(); \
+    adcmode; \
     wdt_reset(); \
     wdt_enable_it(value); \
     sleep_enable(); \
+    bodmode; \
     sei(); \
     sleep_cpu(); \
     sleep_disable(); \
     wdt_disable(); \
 } while(0)
+
+/**
+    Turn off browout detector during deep sleep
+*/
+#define SL_BODOFF   sleep_bod_disable()
+#define SL_BODKEEP 
+
+/**
+    Turn off ACD before sleep
+*/
+#define SL_ADCOFF   PRR |= (1<<PRADC); ADCSRA &= ~(1<<ADEN)
+#define SL_ADCKEEP
+
+
+#define _power_down(value) _power_down_opt(value, SL_ADCOFF, SL_BODOFF)
 
 static void power_down_s(uint16_t duration) {
     while(duration) {

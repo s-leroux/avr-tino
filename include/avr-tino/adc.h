@@ -27,11 +27,13 @@ class ADConv {
     }
 
     static void start8BitsConversion() {
+        PRR &= ~(1<<PRADC);
         ADMUX |= (1<<ADLAR);
         ADCSRA |= (1<<ADSC)|(1<<ADEN);
     }
 
     static void start10BitsConversion() {
+        PRR &= ~(1<<PRADC);
         ADMUX &= ~(1<<ADLAR);
         ADCSRA |= (1<<ADSC)|(1<<ADEN);
     }
