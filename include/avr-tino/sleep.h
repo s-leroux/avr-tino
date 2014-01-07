@@ -27,8 +27,17 @@
 
 #if 1
 static void wdt_enable_it(uint8_t value) {
-    _WD_CONTROL_REG |= (1<<_WD_CHANGE_BIT)|(1<<WDE);
-    _WD_CONTROL_REG = (1<<WDIE)|((value & 0x08) ? _WD_PS3_MASK : 0)|(value & 0x07);
+    asm volatile (
+        "sts %0,%1" "\n\t"
+        "sts %0,%2" "\n\t"
+        : /* no output */
+        : "M" (_SFR_MEM_ADDR(_WD_CONTROL_REG)),
+          "r" (_BV(_WD_CHANGE_BIT) | _BV(WDE)),
+          "r" ((uint8_t)(1<<WDIE)|((value & 0x08) ? _WD_PS3_MASK :
+          0)|(value & 0x07))
+    );
+//    _WD_CONTROL_REG |= (1<<_WD_CHANGE_BIT)|(1<<WDE);
+//    _WD_CONTROL_REG = (1<<WDIE)|((value & 0x08) ? _WD_PS3_MASK : 0)|(value & 0x07);
 }
 #else
 
@@ -55,6 +64,7 @@ __asm__ __volatile__ (  \
     adcmode; \
     wdt_reset(); \
     wdt_enable_it(value); \
+    asm volatile("": : :"memory"); \
     sleep_enable(); \
     bodmode; \
     sei(); \
@@ -78,6 +88,10 @@ __asm__ __volatile__ (  \
 
 #define _power_down(value) \
             set_sleep_mode(SLEEP_MODE_PWR_DOWN); \
+            _sleep_with_opt(value, SL_ADCOFF, SL_BODOFF)
+
+#define _idle(value) \
+            set_sleep_mode(SLEEP_MODE_IDLE); \
             _sleep_with_opt(value, SL_ADCOFF, SL_BODOFF)
 
 static void power_down_s(uint16_t duration) {
