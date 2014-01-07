@@ -50,8 +50,7 @@ __asm__ __volatile__ (  \
 
 #endif
 
-#define _power_down_opt(value, adcmode, bodmode) do { \
-    set_sleep_mode(SLEEP_MODE_PWR_DOWN); \
+#define _sleep_with_opt(value, adcmode, bodmode) do { \
     cli(); \
     adcmode; \
     wdt_reset(); \
@@ -77,7 +76,9 @@ __asm__ __volatile__ (  \
 #define SL_ADCKEEP
 
 
-#define _power_down(value) _power_down_opt(value, SL_ADCOFF, SL_BODOFF)
+#define _power_down(value) \
+            set_sleep_mode(SLEEP_MODE_PWR_DOWN); \
+            _sleep_with_opt(value, SL_ADCOFF, SL_BODOFF)
 
 static void power_down_s(uint16_t duration) {
     while(duration) {
