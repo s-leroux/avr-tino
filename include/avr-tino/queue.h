@@ -9,7 +9,7 @@
 #include <stdio.h>
 class Log {
     public:
-    Log(const char* txt, uint8_t *a, uint8_t *b) : start(a), end(b) {
+    Log(const char* txt, volatile uint8_t *a, volatile uint8_t *b) : start(a), end(b) {
         printf("%10s start = %3d, end = %3d\n", txt, *start, *end);
     }
 
@@ -18,8 +18,8 @@ class Log {
     }
 
     private:
-    uint8_t *start;
-    uint8_t *end;
+    volatile uint8_t *start;
+    volatile uint8_t *end;
 };
 #endif
 
@@ -195,12 +195,12 @@ int main() {
     printf("1\n");
     append(reader, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
     append(reader, "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB");
+    append(reader, "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
     printf("2\n");
     printf("%s\n", reader.first());
     reader.next();
     printf("%s\n", reader.first());
     reader.next();
-    append(reader, "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC");
     append(reader, "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
     append(reader, "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
     append(reader, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
