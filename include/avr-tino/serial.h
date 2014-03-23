@@ -47,7 +47,12 @@ enum {
     f_RXC	    = 7,
 };
 
-template <uint8_t mode, uint16_t _baud>
+class NoFlowControl {
+    public:
+    static bool readyToSend() { return true; }
+};
+
+template <uint8_t mode, uint16_t _baud, class FlowControl>
 class SerialMode {
     /** Asynchronous serial communication */
 
@@ -55,14 +60,11 @@ class SerialMode {
     static const uint8_t protocol = mode;
     static const uint16_t baud = _baud;
     static const bool   hasU2X = ! (mode & _BV(6));
+
+    static bool readyToSend() { return FlowControl::readyToSend(); }
 };
 
-class NoFlowControl {
-    public:
-    static bool readyToSend() { return true; }
-};
-
-template<class USART, class Protocol, class FlowControl>
+template<class USART, class Protocol>
 class NSerial {
     /** The new "Serial" class. Protocol based.
     
@@ -88,7 +90,7 @@ class NSerial {
 	    // do nothing
 	}
 
-	while ( ! FlowControl::readyToSend() ) {
+	while ( ! Protocol::readyToSend() ) {
 	    // do nothing
 	}
 
