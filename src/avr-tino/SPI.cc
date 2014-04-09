@@ -19,25 +19,30 @@
 #include "avr-tino/pin.h"
 #include "avr-tino/SPI.h"
 
-template <uint8_t CR, uint8_t SR, uint8_t DR, uint8_t IF, uint8_t CRFLAGS>
-void SPIMaster<CR,SR,DR,IF,CRFLAGS>::begin() {
-    pinToOutput(MISO); // Stupid naming scheme for attn2313 where miSO is *always* output...
-    pinToOutput(SCK);
-    pinToInput(MOSI);  // Stupid naming scheme for attn2313 where moSI is *always* input...
+template <class SPI>
+void SPIMaster<SPI>::begin() {
+    SPI::MISO::toInput(); // Stupid naming scheme for attn2313 where 
+                           // miSO is *always* output...
+    SPI::SCK::toOutput();
+    SPI::MOSI::toOutput(); // Stupid naming scheme for attn2313 where 
+                           // moSI is *always* input...
+
+    _SFR_IO8(SPI::CR) = _BV(SPE) | _BV(MSTR) | _BV(SPR0); /* clk /16 */
+    _SFR_IO8(SPI::SR) |= _BV(SPI2X); /* clk 2/16 */
 }
 
-template <uint8_t CR, uint8_t SR, uint8_t DR, uint8_t IF, uint8_t CRFLAGS>
-uint8_t SPIMaster<CR,SR,DR,IF,CRFLAGS>::transfert(uint8_t byte) {
-    _SFR_IO8(DR) = byte;
+template <class SPI>
+uint8_t SPIMaster<SPI>::transfert(uint8_t byte) {
+    _SFR_IO8(SPI::DR) = byte;
 
-    _SFR_IO8(SR) = _BV(IF);
+    _SFR_IO8(SPI::SR) = _BV(SPI::IF);
 
     do {
-	if (CRFLAGS) { _SFR_IO8(CR) = CRFLAGS; }
+	if (SPI::CRFLAGS) { _SFR_IO8(SPI::CR) = SPI::CRFLAGS; }
 	//_BV(USIWM0) | _BV(USITC) | _BV(USICS1) | _BV(USICLK) ;
-    } while (! (_SFR_IO8(SR) & _BV(IF)) );
+    } while (! (_SFR_IO8(SPI::SR) & _BV(SPI::IF)) );
 
-    return _SFR_IO8(DR);
+    return _SFR_IO8(SPI::DR);
 }
 
 

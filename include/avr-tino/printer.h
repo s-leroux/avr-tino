@@ -66,6 +66,17 @@ class Printer {
 	print((int16_t)i, base);
     }
 
+    static void hexdump(uint8_t byte) {
+        static const char *digits = "0123456789ABCDEF";
+        print(digits[byte>>4]);
+        print(digits[byte&0x0F]);
+    }
+
+    static void hexdump(uint16_t value) {
+        hexdump(uint8_t(value>>8));
+        hexdump(uint8_t(value));
+    }
+
     static void bindump(uint8_t len, const void* data) {
 	const uint8_t *src = (const uint8_t*)data;
 	while(len--) {

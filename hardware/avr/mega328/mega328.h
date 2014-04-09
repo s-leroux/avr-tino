@@ -60,11 +60,6 @@ enum __attribute__ ((__packed__)) pin_t {
     PIN_PD7,
 };
 
-/* SPI interface */
-static const pin_t MOSI = PIN_PB3;
-static const pin_t MISO = PIN_PB4;
-static const pin_t SCK	= PIN_PB5;
-
 /*
  I/O Port abstraction layer
 */
@@ -133,9 +128,28 @@ typedef Port<0x09>	    PortD;
 #include "avr-tino/serial.h"
 #include "avr-tino/TWI.h"
 
-typedef SPIMaster<0x2C,0x2D,0x2E,SPIF>			SPI;
 typedef Serial<0xC6, 0xC0, 0xC1, 0xC2, 0xC4, 0xC5>	USART;
 
+
+/* SPI interface */
+static const pin_t MOSI = PIN_PB3;
+static const pin_t MISO = PIN_PB4;
+static const pin_t SCK	= PIN_PB5;
+class SPI0 {
+    public:
+    static const uint8_t    CR          = 0x2C;
+    static const uint8_t    SR          = 0x2D;
+    static const uint8_t    DR          = 0x2E;
+    static const uint8_t    IF          = SPIF;
+    static const uint8_t    CRFLAGS     = 0x00;
+
+    typedef Pin<PortB,3>    MOSI;
+    typedef Pin<PortB,4>    MISO;
+    typedef Pin<PortB,5>    SCK;
+};
+typedef SPIMaster<SPI0>			SPI;
+
+/* USART */
 class USART0 {
     public:
     static const uint8_t    DR = 0xC6;

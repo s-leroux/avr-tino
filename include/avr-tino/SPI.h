@@ -19,7 +19,7 @@
 #if !defined AVR_TINO_SPI_H
 #define AVR_TINO_SPI_H
 
-template <uint8_t CR, uint8_t SR, uint8_t DR, uint8_t IF, uint8_t CRFLAGS = 0x00>
+template <class SPI>
 class SPIMaster {
     public:
     static void begin();

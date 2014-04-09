@@ -98,6 +98,10 @@ class NSerial {
     }
 
 
+    /**
+        Output a nul terminated string by sending each character
+        on the serial port (not including the \0)
+    */
     static void write(const char* str) {
 	while(*str) { send(*str++); }
     }
