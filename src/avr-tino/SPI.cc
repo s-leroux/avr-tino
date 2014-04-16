@@ -33,14 +33,23 @@ void SPIMaster<SPI>::begin() {
 
 template <class SPI>
 uint8_t SPIMaster<SPI>::transfert(uint8_t byte) {
-    _SFR_IO8(SPI::DR) = byte;
+    if (SPI::CRFLAGS) 
+    {
+        _SFR_IO8(SPI::CR) = SPI::CRFLAGS;
+    }
 
+    _SFR_IO8(SPI::DR) = byte;
+#if 0
     _SFR_IO8(SPI::SR) = _BV(SPI::IF);
 
     do {
-	if (SPI::CRFLAGS) { _SFR_IO8(SPI::CR) = SPI::CRFLAGS; }
 	//_BV(USIWM0) | _BV(USITC) | _BV(USICS1) | _BV(USICLK) ;
     } while (! (_SFR_IO8(SPI::SR) & _BV(SPI::IF)) );
+#else
+    while(! (_SFR_IO8(SPI::SR) & _BV(SPI::IF)) ) {
+        // do nothing
+    }
+#endif
 
     return _SFR_IO8(SPI::DR);
 }

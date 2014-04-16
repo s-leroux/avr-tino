@@ -51,6 +51,16 @@ class Printer {
 	T::write(str);
     }
 
+    static void print(uint8_t len, const char* str) {
+        while(len--) {
+            char c = *str++;
+            if ((c < '\x20') || (c >= 127)) {
+                c = '.';
+            }
+            print(c); // this is highly inefficient...
+        }
+    }
+
     static void print(char c) {
 	char s[2] = { c, 0 }; 
 
@@ -75,6 +85,13 @@ class Printer {
     static void hexdump(uint16_t value) {
         hexdump(uint8_t(value>>8));
         hexdump(uint8_t(value));
+    }
+
+    static void hexdump(uint8_t len, const void* data) {
+	const uint8_t *src = (const uint8_t*)data;
+        while(len--) {
+            hexdump(*src++);
+        }
     }
 
     static void bindump(uint8_t len, const void* data) {
